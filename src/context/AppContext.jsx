@@ -1,5 +1,13 @@
 import React from 'react'
 
+export const Constants= Object.freeze({
+  BUILTIN_ATTRIBUTES: {
+    void: "null",
+    type: "type",
+    name: "name"
+  }
+})
+
 export const Globals= React.createContext(null)
 
 const AppContext= ReactComponent=>{

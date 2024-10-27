@@ -1,0 +1,95 @@
+:root {
+
+  --tb-title-fontsize: 14px;
+
+  --mb-fontsize: 12px;
+
+  --mb-title-col: #777;
+  --mb-title-col-hover: #aaa;
+  --mb-title-bgcol: #222;
+  --mb-title-bgcol-hover: #444;
+}
+
+#title-bar {
+
+  user-select: none;
+
+  font-family: monospace;
+  font-size: var(--tb-title-fontsize);
+
+  position: fixed;
+  z-index: 8192;
+  background: #222;
+  width: 100vw;
+  max-height: 1.5em;
+
+  display: flex;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #333;
+
+  & .app-tb-title {
+    width: 6.5em;
+    
+    font-weight: 900;
+    background: #2a2a2a;
+    color: #aaa;
+    text-align: center;
+  }
+
+  & .app-tb-separator {
+    min-width: 2px;
+    min-height: 100%;
+    background: #111;
+  }
+
+  & .app-menu-section {
+    display: flex
+  }
+
+  & button {
+    background: var(--mb-title-bgcol);
+    border: none;
+    height: calc(100% + 1px);
+    border-bottom: 1px solid #333;
+    margin-bottom: -1px;
+
+    
+    color: var(--mb-title-col);
+
+    transition: background-color .075s linear;
+
+    &:hover {
+      color: var(--mb-title-col-hover);
+      background: var(--mb-title-bgcol-hover);
+      border-color: var(--mb-title-bordercol-hover);
+    }
+  }
+
+  & .app-dragger {
+    flex: 1;
+  }
+
+  & .app-menu-bar {
+
+    color: #777;
+    font-size: var(--mb-fontsize);
+
+    & button {
+      font-size: inherit;
+      padding: 0 .75em;
+    }
+  }
+
+  & .app-buttons-win {
+
+    width: min-content;
+    color: #777;
+
+    & button > img {
+      pointer-events: none;
+      width: 2em;
+      height: inherit;
+    }
+  }
+}

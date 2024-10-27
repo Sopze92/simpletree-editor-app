@@ -1,14 +1,12 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 
-import Layout from "./Layout.jsx"
+import Layout from "./renderer/Layout.jsx"
 
-import 'overlayscrollbars/overlayscrollbars.css';
+import '../resource/themes/app.css'
+import 'overlayscrollbars/overlayscrollbars.css'
 
-Number.prototype.clamp = function(min, max) { return this < min ? min : this > max ? max : this }
-Number.prototype.clamp01 = function() { return this < 0 ? 0 : this > 1 ? 1 : this }
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('react-root')).render(
   <React.StrictMode>
     <Layout />
   </React.StrictMode>

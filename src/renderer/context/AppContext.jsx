@@ -1,10 +1,25 @@
 import React from 'react'
 
 export const Constants= Object.freeze({
+  APP_TITLE: "sTrevee",
+
+  IPC_EVENTS: {
+    onTitleBarAction: "titlebar-event",
+    onMenuBarAction: "menubar-event"
+  },
+
   BUILTIN_ATTRIBUTES: {
     void: "null",
     type: "type",
     name: "name"
+  }
+})
+
+export const Functions= Object.freeze({
+
+  cancelEvent: (e)=> {
+    e.preventDefault()
+    e.stopPropagation()
   }
 })
 
@@ -41,7 +56,7 @@ const AppContext= ReactComponent=>{
 
 		return (
 			<Globals.Provider value={globals}>
-        <div id="app"><ReactComponent/></div>
+        <ReactComponent/>
 			</Globals.Provider>
 		)
   }

@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core'
 import React from 'react'
 
 export const Constants= Object.freeze({
@@ -115,11 +116,23 @@ const globalsState= ({ actions, get, set, replace })=>{
         document.body.classList.add("app-theme-dark")
       },
 
-      store: {
+      tauri: {
 
-        getMenuByID: (id)=>{
-
+        windowAction: (action)=>{
+          invoke("exec_window_action", { action })
         },
+
+        windowPosition: (coords)=>{
+          invoke("set_window_position", { coords })
+        },
+
+        openMenu: (mid, coords)=>{
+          invoke("open_window_menu", {mid, coords})
+        }
+
+      },
+
+      store: {
 
         createContextMenu: (e, items)=>{
           set.stamp({ contextmenu:Date.now() })

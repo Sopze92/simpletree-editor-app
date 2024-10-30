@@ -1,6 +1,6 @@
 import React from "react"
 
-import { Constants, AppMenus, MENUITEM_ID } from '../context/AppContext.jsx'
+import { Constants, AppMenus, MENUITEM_ID, Functions, Globals } from '../context/AppContext.jsx'
 
 const MENUSIDE_CLASS= Object.freeze([
   "side-top",
@@ -126,6 +126,49 @@ export const MenuBar= ({ menuid=-1, sides=[Constants.MENU_SIDES.down], handler=(
           return <li key={`mi${i}`} className="strevee-error" >missingno</li>
         })
       }
+    </div>
+  )
+}
+
+/** Renders the title menu bar of that triggers native menus */
+export const MenuNative= ({ menuid=null, title=null, side=Constants.MENU_SIDES.down, className, ...rest })=>{
+
+  const 
+    { actions }= React.useContext(Globals),
+    [ openState, set_openState ]= React.useState(false),
+    self= React.useRef(null)
+
+  React.useEffect(()=>{
+    if(openState){
+      window.addEventListener('click', closeMenu)
+    }
+  },[openState])
+
+  function openMenu(e){
+    if(menuid && e.target){
+      Functions.cancelEvent(e)
+      set_openState(true)
+
+      const 
+        bbox= e.target.getBoundingClientRect(),
+        coords=[
+          (bbox.x + bbox.width * (side == Constants.MENU_SIDES.right ? .95 : .05)) >>> 0,
+          (bbox.y + bbox.height * (side == Constants.MENU_SIDES.down ? .90 : .10)) >>> 0,
+        ]
+
+      actions.tauri.openMenu(menuid, coords)
+    }
+
+  }
+
+  function closeMenu(e){
+    Functions.cancelEvent(e)
+    set_openState(false)
+  }
+
+  return (
+    <div ref={self} className={`${className}${openState?" active": ""}`} {...rest} onClick={(e)=>{openMenu(e)}}>
+      <span>{title??"missingno"}</span>
     </div>
   )
 }

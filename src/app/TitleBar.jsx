@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Globals, Constants, Functions } from '../context/AppContext.jsx'
 
-import { MenuBar } from './Menu.jsx'
+import { MenuBar, MenuNative } from './Menu.jsx'
 
 import SVG_icon_minimize from "../res/icon/app-minimize.svg"
 import SVG_icon_maximize from "../res/icon/app-maximize.svg"
@@ -14,9 +14,9 @@ const TitleBar= ()=>{
 
   const { actions, settings }= React.useContext(Globals)
 
-  function handleWindowAction(e, idx){
+  function handleWindowAction(e, action){
     Functions.cancelEvent(e)
-    window.ipcHandler.sendEvent(Constants.IPC_EVENTS.onTitleBarAction, {idx})
+    actions.tauri.windowAction(action)
   }
 
   function handleDragWindow(e){
@@ -32,7 +32,7 @@ const TitleBar= ()=>{
 
   function dragWindow_mousemove(e){
     if(_dragOrigin){
-      window.ipcHandler.sendEvent(Constants.IPC_EVENTS.onTitleBarAction, {idx: 3, pos:[_dragOrigin[0] + e.screenX, _dragOrigin[1] + e.screenY]})
+      actions.tauri.windowPosition([_dragOrigin[0] + e.screenX, _dragOrigin[1] + e.screenY])
     }
   }
 
@@ -51,17 +51,22 @@ const TitleBar= ()=>{
         { settings.showTitleMenu &&
         <>
           <div className="app-tb-separator"/>
-          <MenuBar className="app-tb-mb" menuid={Constants.MENU_ID.titlebar} zindex="1980"/>
+          <div className="app-tb-mb">
+            <MenuNative className="streeve-cb-mi-item" menuid="ml_file" title="File"/>
+            <MenuNative className="streeve-cb-mi-item" menuid="ml_edit" title="Edit"/>
+            <MenuNative className="streeve-cb-mi-item" menuid="ml_view" title="View"/>
+            <MenuNative className="streeve-cb-mi-item" menuid="ml_help" title="Help"/>
+          </div>
         </>
         }
         <div className="app-tb-separator"/>
       </div>
-      <div className="app-tb-section app-tb-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e,1)}}/>
+      <div className="app-tb-section app-tb-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, "maximize")}}/>
       <div className="app-tb-section app-tb-wincontrol">
         <div className="app-tb-separator"/>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, 0)}}id="win-btn-minimize"><SVG_icon_minimize/></button>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, 1)}}id="win-btn-maximize"><SVG_icon_maximize/></button>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, 2)}}id="win-btn-close"><SVG_icon_close/></button>
+        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "minimize")}}id="win-btn-minimize"><SVG_icon_minimize/></button>
+        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "maximize")}}id="win-btn-maximize"><SVG_icon_maximize/></button>
+        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "close")}}id="win-btn-close"><SVG_icon_close/></button>
       </div>
     </div>
   )

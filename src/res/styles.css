@@ -1,0 +1,310 @@
+/* GLOBAL */
+
+html, body, body > #react-root {
+  font-family: monospace;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  backdrop-filter: blur(2px);
+}
+
+#react-root {
+  display: fleX;
+  flex-direction: column;
+}
+
+body {
+  background: #111;
+  margin: 0;
+  border: 1px solid #444;
+}
+
+.strevee-error{
+  color: #f0f !important;
+}
+
+/* TITLEBAR */
+
+#app-tb {
+
+  user-select: none;
+
+  font-family: inherit;
+  font-size: var(--tb-title-fontsize);
+
+  position: relative;
+  z-index: 1920;
+  background: var(--mb-bgcol);
+  width: 100vw;
+  height: 1.5em;
+
+  display: flex;
+  flex: 0;
+  justify-content: space-between;
+
+  border-bottom: 1px solid var(--mb-bordercol);
+
+  & + div {
+    flex: 1
+  }
+
+  & .app-tb-title {
+    width: 6.5em;
+    
+    font-weight: 900;
+    background: var(--tb-title-bgcol);
+    color:  var(--tb-title-col);
+    text-align: center;
+    line-height: 1.5em;
+  }
+
+  & .app-tb-separator {
+    min-width: 2px;
+    min-height: 100%;
+    background: var(--mb-bordercol);
+  }
+
+  & .app-tb-section {
+    display: flex
+  }
+
+  & button, .app-tb-mb > .streeve-cb-mi-item {
+    background: var(--mb-bgcol);
+    border: none;
+    height: calc(100% + 1px);
+    border-bottom: 1px solid var(--mb-bordercol);
+    margin-bottom: -1px;
+
+    color: var(--mb-col);
+
+    transition: background-color .075s linear;
+
+    &:hover,&.active {
+      color: var(--mi-col-hover);
+      background: var(--mi-bgcol-hover);
+      border-color: var(--mi-bordercol-hover);
+    }
+  }
+
+  & .app-tb-dragger {
+    flex: 1;
+  }
+
+  & .app-tb-mb {
+
+    display: flex;
+
+    color: #777;
+    font-size: var(--mb-fontsize);
+
+    & > .streeve-cb-mi-item {
+      position: relative;
+      display: flex;
+      font-size: inherit;
+      padding: 0 .75em;
+
+      & > span:first-child { margin: auto; }
+      & > span:nth-child(2) { display: none }
+    }
+  }
+
+  & .app-tb-wincontrol {
+
+    width: min-content;
+
+    & button > svg {
+      stroke: var(--mb-col);
+      pointer-events: none;
+      width: 2em;
+      height: inherit;
+    }
+
+    & button:hover > svg {
+      stroke: var(--mi-col-hover);
+    }
+
+    & button#win-btn-close > svg {
+      stroke: var(--mi-win_btn_close);
+    }
+
+    & button#win-btn-close:hover > svg {
+      stroke: var(--mi-win_btn_close-hover);
+    }
+  }
+}
+
+/* MENUS */
+
+.strevee-menu.side-down {
+  position: absolute;
+  top: 100%;
+  left: -.5em;
+  min-width: 16em;
+  width: auto;
+}
+
+.strevee-menu.side-right {
+  position: absolute;
+  margin-top: -1.8em;
+  left: 100%;
+  min-width: 16em;
+  width: auto;
+}
+
+#strevee-contextmenu {
+  position: fixed;
+}
+
+#strevee-contextmenu, .strevee-menu {
+
+  user-select: none;
+
+  display:flex;
+  flex-direction: column;
+
+  font-size: var(--mb-fontsize);
+  font-family: monospace;
+
+  color: var(--mb-col);
+  background: var(--mb-bgcol);
+
+  margin: 0;
+  padding: .25em .25em;
+  border: 1px solid var(--mb-bordercol);
+
+  list-style-type: none;
+
+  & .streeve-cb-mi-item {
+    width: auto;
+    display: flex;
+    justify-content: space-between;
+    height: 1.5em;
+    padding: 0 .5em;
+    line-height: 1.5em;
+
+    text-wrap: nowrap;
+
+    &:hover,&.active {
+      color: var(--mi-col-hover);
+      background: var(--mi-bgcol-hover);
+    }
+    
+  }
+
+  & .streeve-cb-mi-separator {
+    width: 100%;
+    height: 1px;
+    background: var(--mb-bordercol);
+    margin: .25em 0;
+  }
+}
+
+/* APP */
+
+#app {
+  padding: 0;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+
+#editor { 
+  box-sizing: border-box;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+#fileview {
+  font-size: 12px;
+  color: var(--var-text-color);
+  white-space: nowrap; 
+  background-color:#222;
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+  margin: 0 auto;
+  padding: 1em;
+  gap: 1em 0;
+}
+
+/* OVERLAYSCROLLBARS */
+
+.os-theme-streeve > .os-scrollbar {
+  padding: 0;
+}
+.os-theme-streeve > .os-scrollbar-horizontal {
+  right: 20px;
+  height: 20px;
+}
+.os-theme-streeve > .os-scrollbar-vertical {
+  bottom: 20px;
+  width: 20px;
+}
+.os-theme-streeve.os-host-rtl > .os-scrollbar-horizontal {
+  left: 20px;
+  right: 0;
+}
+.os-theme-streeve > .os-scrollbar-corner {
+  height: 20px;
+  width: 20px;
+  background-color: transparent;
+}
+.os-theme-streeve > .os-scrollbar > .os-scrollbar-track {
+  background: transparent;
+}
+.os-theme-streeve > .os-scrollbar-horizontal > .os-scrollbar-track:before,
+.os-theme-streeve > .os-scrollbar-vertical > .os-scrollbar-track:before {
+  content: '';
+  display: block;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.15);
+}
+.os-theme-streeve > .os-scrollbar-horizontal > .os-scrollbar-track:before {
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  top: 50%;
+  margin-top: -1px;
+}
+.os-theme-streeve > .os-scrollbar-vertical > .os-scrollbar-track:before {
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  left: 50%;
+  margin-left: -1px;
+}
+.os-theme-streeve > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle {
+  background: transparent;
+}
+.os-theme-streeve > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:before {
+  content: '';
+  display: block;
+  position: absolute;
+  background: #000;
+  border-radius: 100%;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  transform: scale(1);
+}
+.os-theme-streeve > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:hover:before,
+.os-theme-streeve > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle.active:before {
+  transform: scale(1.3);
+}
+.os-theme-streeve > .os-scrollbar-horizontal > .os-scrollbar-track > .os-scrollbar-handle {
+  height: 100%;
+  min-width: 20px;
+  max-width: 20px;
+}
+.os-theme-streeve > .os-scrollbar-vertical > .os-scrollbar-track > .os-scrollbar-handle {
+  width: 100%;
+  min-height: 20px;
+  max-height: 20px;
+}
+.os-theme-streeve.os-host-transition > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:before {
+  transition: transform 0.3s;
+}

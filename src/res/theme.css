@@ -1,0 +1,56 @@
+.app-theme-light {
+
+  --body-bgcol: #e7e7e7;
+
+  /* titlebar */
+
+  --tb-title-fontsize: 14px;
+  --tb-title-col: #222;
+  --tb-title-bgcol: #bbb;
+
+  /* menubar */
+
+  --mb-fontsize: 12px;
+
+  --mb-col: #222;
+  --mb-bgcol: #ddd;
+  --mb-bordercol: #999;
+
+  --mi-col-hover: #ddd;
+  --mi-bgcol-hover: #888;
+  --mi-bordercol-hover: #eee;
+
+  --mi-win_btn_close: #c55;
+  --mi-win_btn_close-hover: #faa;
+
+  --os-handle-bg: #f0f !important;
+}
+
+.app-theme-dark {
+
+  --body-bgcol: #111;
+
+  /* titlebar */
+
+  --tb-title-fontsize: 14px;
+
+  --tb-title-col: #aaa;
+  --tb-title-bgcol: #2a2a2a;
+
+  /* menubar */
+
+  --mb-fontsize: 12px;
+
+  --mb-col: #777;
+  --mb-bgcol: #222;
+  --mb-bordercol: #333;
+
+  --mi-col-hover: #aaa;
+  --mi-bgcol-hover: #444;
+  --mi-bordercol-hover: #aaa;
+
+  --mi-win_btn_close: #866;
+  --mi-win_btn_close-hover: #e88;
+
+  --os-handle-bg: #f0f !important;
+}

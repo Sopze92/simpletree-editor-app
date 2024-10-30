@@ -1,0 +1,32 @@
+
+body, #react-root{
+  user-select: none;
+  pointer-events: none; 
+  overflow: hidden;
+}
+
+#animator {
+  user-select: none;
+  pointer-events: none; 
+  width: 100vw; 
+  height: 100vh;
+
+  display: flex;
+
+  animation: splash-anim 3s forwards;
+
+  & img {
+    user-select: none;
+    pointer-events: none; 
+    max-width: 90vw;
+    transform-origin: center;
+    margin: auto;
+  }
+}
+
+@keyframes splash-anim {
+  000% { opacity: 0.0; transform: scale(0.7); }
+  080% { opacity: 1.0; }
+  095% { opacity: 1.0; transform: scale(1.0); }
+  100% { opacity: 0.0; }
+}

@@ -1,50 +1,76 @@
 
-use tauri::{ menu::*, window::Window, AppHandle };
-use tauri_plugin_dialog::{ DialogExt };
+use std::{borrow::Borrow, fs::File};
+
+use tauri::{ menu::*, window::Window, AppHandle, Emitter };
+use tauri_plugin_dialog::{ DialogExt, FilePath };
 
 pub(crate) fn handle_menu_event(window:&Window, event:MenuEvent) {
   println!("item: {}", event.id().as_ref());
 
-  match event.id.as_ref() {
-    "mi_file_open" => show_dialog_open(window, 0),
-    "mi_file_saveas" => show_dialog_save(window, 0),
-    "mi_file_import" => show_dialog_open(window, 1),
-    "mi_file_export" => show_dialog_save(window, 1),
-    _ => return
-  }
+  let itemid= event.id.as_ref();
 
+  if itemid.starts_with(&"mido_") {
+    let result: String;
+    match itemid {
+      "mido_file_open" => result= show_dialog_open(window, 0).to_string(),
+      "mido_file_import" => result= show_dialog_open(window, 1).to_string(),
+      _ => {
+        println!("no such dialog with id: {}", itemid);
+        return;
+      }
+    }
+    window.emit("menu-dialog-open", (itemid, result)).unwrap();
+  }
+  else if itemid.starts_with(&"mids_") {
+    // TODO: save result
+    let result= "placeholder";
+    match itemid {
+      "mids_file_saveas" => show_dialog_save(window, 0),
+      "mids_file_export" => show_dialog_save(window, 1),
+      _ => {
+        println!("no such dialog with id: {}", itemid);
+        return;
+      }
+    }
+    window.emit("menu-dialog-save", (itemid, result)).unwrap();
+  }
+  else {
+    window.emit("menu-item-click", itemid).unwrap();
+  }
 }
 
-fn show_dialog_open(window:&Window, mode:i32) {
+fn show_dialog_open(window:&Window, mode:i32) -> String {
 
   // no way to use a singlematch or if/else here, dialog is not mutable nor implements Copy trait
   // pd: thanks Rust, you're with no doubt the worst language ever made
 
+  let mut path= String::from("");
+
   match mode {
     0=> {
-      window.dialog().file()
+      path= window.dialog().file()
         .set_title("Open File")
         .add_filter("sTrevee Files", &["tre"] )
         .add_filter("All Files", &["*"] )
-        .blocking_pick_file();
+        .blocking_pick_file().unwrap().to_string();
     }
     1=> {
-      window.dialog().file()
+      path= window.dialog().file()
         .set_title("Import File")
         .add_filter("Extensible Markup Language", &["xml"] )
         .add_filter("HyperText Markup Language", &["htm","html"] )
         .add_filter("JavaScript Object Notation", &["json"] )
         .add_filter("Windows hierarchycal definition file", &["reg", "ini"] )
         .add_filter("Text File", &["txt"] )
-        .blocking_pick_file();
+        .blocking_pick_file().unwrap().to_string();
     }
     _=> {
       println!("invalid open dialog mode {}", mode);
-      return;
     }
   }
   
   println!("open dialog {}", mode);
+  return path;
 }
 
 fn show_dialog_save(window:&Window, mode:i32) {
@@ -88,14 +114,14 @@ pub(crate) fn build(handle: &AppHandle) -> Menu<tauri::Wry> {
       &SubmenuBuilder::with_id(handle, "ml_file","File")
         .items(&[
           &MenuItem::with_id(handle, "mi_file_new","New", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(handle, "mi_file_open", "Open", true, None::<&str>).unwrap(),
+          &MenuItem::with_id(handle, "mido_file_open", "Open", true, None::<&str>).unwrap(),
           &MenuItem::with_id(handle, "mi_file_reload", "Reload", false, None::<&str>).unwrap(),
         ]).separator().items(&[
           &MenuItem::with_id(handle, "mi_file_save","Save", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(handle, "mi_file_saveas", "Save As", true, None::<&str>).unwrap(),
+          &MenuItem::with_id(handle, "mids_file_saveas", "Save As", true, None::<&str>).unwrap(),
         ]).separator().items(&[
-          &MenuItem::with_id(handle, "mi_file_import", "Import", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(handle, "mi_file_export", "Export", true, None::<&str>).unwrap(),
+          &MenuItem::with_id(handle, "mido_file_import", "Import", true, None::<&str>).unwrap(),
+          &MenuItem::with_id(handle, "mids_file_export", "Export", true, None::<&str>).unwrap(),
         ]).separator()
         .item(&MenuItem::with_id(handle, "mi_file_exit","Exit", true, None::<&str>).unwrap())
         .build().unwrap(),

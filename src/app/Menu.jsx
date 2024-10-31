@@ -156,7 +156,7 @@ export const MenuNative= ({ menuid=null, title=null, side=Constants.MENU_SIDES.d
           (bbox.y + bbox.height * (side == Constants.MENU_SIDES.down ? .90 : .10)) >>> 0,
         ]
 
-      actions.tauri.openMenu(menuid, coords)
+      actions.backend.openMenu(menuid, coords)
     }
 
   }
@@ -167,9 +167,9 @@ export const MenuNative= ({ menuid=null, title=null, side=Constants.MENU_SIDES.d
   }
 
   return (
-    <div ref={self} className={`${className}${openState?" active": ""}`} {...rest} onClick={(e)=>{openMenu(e)}}>
+    <button ref={self} className={openState?" active": ""} {...rest} onClick={(e)=>{openMenu(e)}}>
       <span>{title??"missingno"}</span>
-    </div>
+    </button>
   )
 }
 

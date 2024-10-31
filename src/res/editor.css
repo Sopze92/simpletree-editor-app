@@ -1,0 +1,41 @@
+
+[stv-view-editor] { 
+  box-sizing: border-box;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* TOOLBAR */
+
+.__stv-editor-toolbar {
+  border-bottom: 1px solid var(--mb-bordercol);
+  height: 2.25em; min-height: 2.25em;
+}
+
+/* SIDEPANEL */
+
+.__stv-statusbar {
+  border-top: 1px solid var(--mb-bordercol);
+  height: 1.5em; min-height: 1.5em;
+}
+
+/* VIEW */
+
+.editor-icon > svg {
+  margin: auto;
+}
+
+[data-editor-draggable] {
+  position: absolute;
+  
+  width: 1.4em;
+  height: 1.4em;
+  max-width: 1.4em;
+  max-height: 1.4em;
+
+  padding: .1em;
+  fill: #999;
+
+  background-color: #333;
+}
+

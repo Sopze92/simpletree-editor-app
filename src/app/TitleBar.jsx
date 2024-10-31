@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Globals, Constants, Functions } from '../context/AppContext.jsx'
 
-import { MenuBar, MenuNative } from './Menu.jsx'
+import { MenuNative } from './Menu.jsx'
 
 import SVG_icon_minimize from "../res/icon/app-minimize.svg"
 import SVG_icon_maximize from "../res/icon/app-maximize.svg"
@@ -16,7 +16,7 @@ const TitleBar= ()=>{
 
   function handleWindowAction(e, action){
     Functions.cancelEvent(e)
-    actions.tauri.windowAction(action)
+    actions.backend.windowAction(action)
   }
 
   function handleDragWindow(e){
@@ -32,7 +32,7 @@ const TitleBar= ()=>{
 
   function dragWindow_mousemove(e){
     if(_dragOrigin){
-      actions.tauri.windowPosition([_dragOrigin[0] + e.screenX, _dragOrigin[1] + e.screenY])
+      actions.backend.windowPosition([_dragOrigin[0] + e.screenX, _dragOrigin[1] + e.screenY])
     }
   }
 
@@ -45,29 +45,35 @@ const TitleBar= ()=>{
   }
 
   return (
-    <div id="app-tb">
-      <div className="app-tb-section">
-        <div className="app-tb-title">{Constants.APP_TITLE}</div>
-        { settings.showTitleMenu &&
+    <div stv-toolbar={""} className="__stv-titlebar">
+      <div stv-toolbar-section={""}>
+        { !settings.nativeDecorated &&
+          <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
+        }
+        { !settings.nativeMenu &&
         <>
-          <div className="app-tb-separator"/>
-          <div className="app-tb-mb">
-            <MenuNative className="streeve-cb-mi-item" menuid="ml_file" title="File"/>
-            <MenuNative className="streeve-cb-mi-item" menuid="ml_edit" title="Edit"/>
-            <MenuNative className="streeve-cb-mi-item" menuid="ml_view" title="View"/>
-            <MenuNative className="streeve-cb-mi-item" menuid="ml_help" title="Help"/>
+          <div stv-toolbar-separator={""}/>
+          <div className="__stv_titlebar-menu">
+            <MenuNative menuid="ml_file" title="File"/>
+            <MenuNative menuid="ml_edit" title="Edit"/>
+            <MenuNative menuid="ml_view" title="View"/>
+            <MenuNative menuid="ml_help" title="Help"/>
           </div>
         </>
         }
-        <div className="app-tb-separator"/>
       </div>
-      <div className="app-tb-section app-tb-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, "maximize")}}/>
-      <div className="app-tb-section app-tb-wincontrol">
-        <div className="app-tb-separator"/>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "minimize")}}id="win-btn-minimize"><SVG_icon_minimize/></button>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "maximize")}}id="win-btn-maximize"><SVG_icon_maximize/></button>
-        <button className="app-button" onClick={(e)=>{handleWindowAction(e, "close")}}id="win-btn-close"><SVG_icon_close/></button>
-      </div>
+      { !settings.nativeDecorated &&
+      <>
+        <div stv-toolbar-separator={""}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, "maximize")}}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-wincontrol">
+          <div stv-toolbar-separator={""}/>
+          <button onClick={(e)=>{handleWindowAction(e, "minimize")}}id="win-btn-minimize"><SVG_icon_minimize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, "maximize")}}id="win-btn-maximize"><SVG_icon_maximize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, "close")}}id="win-btn-close"><SVG_icon_close/></button>
+        </div>
+      </>
+      }
     </div>
   )
 }

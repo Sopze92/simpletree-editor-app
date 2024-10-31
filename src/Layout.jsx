@@ -21,7 +21,7 @@ const Layout= ()=>{
       <Routes>
         <Route path="*" element={<Editor />}/>
       </Routes>
-      { settings.view.statusbar &&
+      { settings.view_statusbar &&
         <Statusbar />
       }
       <GlobalListener/>

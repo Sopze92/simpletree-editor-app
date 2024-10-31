@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import API, { initialize as backend_init } from './BackendApi.js'
+import API, { initialize as backend_init } from './BackendApi.jsx'
 
 export const Constants= Object.freeze({
   APP_TITLE: "sTrevee",
@@ -46,22 +46,21 @@ export const Globals= React.createContext(null)
 const DEFAULTS= Object.freeze({
   ready:    { app:false, contexmenu:false, file:false },
   stamp:    { general:0 },
-  settings: { 
-    nativeMenu: false, 
-    nativeDecorated: true,
-    view : {
-      statusbar: true
-    },
-    editor : {
-      sidePanelRight: true
-    }
+  settings: { // snake case for later parsing ease
+    app_menu_native: false,
+    view_menu: false, 
+    view_decorated: true,
+    view_statusbar: true,
+    editor_sidepanel_right: true
   },
   store:    { contextmenu:null },
   file:     {},
 })
 
 const AppContext= ReactComponent=>{
+
   const GlobalsWrapper= ()=>{
+    const [ backendResponse, set_backendResponse]= React.useState(null)
     const 
       [ globals, setGlobals ]= React.useState(
         globalsState({
@@ -94,14 +93,46 @@ const AppContext= ReactComponent=>{
 			const 
         newGlobals= {},
         newData= Object.keys(data)
-      for(let [k,v] of Object.entries(globals)) newGlobals[k]= newData.includes[k] ? newData[k] : v
+      for(let [k,v] of Object.entries(globals)) newGlobals[k]= newData.includes(k) ? data[k] : v
 			setGlobals(newGlobals)
     }
 
     React.useEffect(()=>{
+      if(backendResponse) {
+
+        const {id, event, payload}= backendResponse
+        if(!id) return
+
+        const _en= Constants.BACKEND_EVENTS
+        switch(event){
+          case _en.menu_item_click: // titlebar menu clicked
+            switch(payload.id){
+              case 'mi_view_menubar': {
+                  const result= globals.actions.settings.toggleSetting('view_menu')
+                  console.log("donetes", result)
+                  if(result.ok) API.send("exec_window_action", {action:"menubar"})
+                } break
+              case 'mi_view_decorated': {
+                  const result= globals.actions.settings.toggleSetting('view_decorated')
+                  if(result.ok) API.send("exec_window_action", {action:"decorated"})
+                } break
+              case 'mi_view_statusbar': globals.actions.settings.toggleSetting('view_statusbar'); break
+            }
+            break;
+        }
+      }
+    },[backendResponse])
+
+    React.useEffect(()=>{
       globals.actions._initialize()
       window.globals= globals
-    },[globals])
+    },[])
+
+    React.useEffect(()=>{
+      for(const v of Object.values(Constants.BACKEND_EVENTS)){
+        globals.actions.backend.listenEvent(v, set_backendResponse)
+      }
+    },[globals.ready.app])
 
 		return (
 			<Globals.Provider value={globals}>
@@ -116,6 +147,7 @@ const AppContext= ReactComponent=>{
 export default AppContext
 
 const globalsState= ({ actions, get, set, replace })=>{
+
   return {
     ...DEFAULTS,
 
@@ -123,15 +155,14 @@ const globalsState= ({ actions, get, set, replace })=>{
 
       _initialize: ()=>{
         
-        backend_init(Constants.BACKEND_EVENTS, contextCallback)
+        backend_init(Constants.BACKEND_EVENTS)
+        
 
         // TODO: load config
 
         document.body.classList.add("app-theme-dark")
 
-        function contextCallback(e){
-          console.log(e)
-        }
+        set.ready({app: true})
       },
 
       backend: {
@@ -144,6 +175,44 @@ const globalsState= ({ actions, get, set, replace })=>{
 
         listenEvent: (event, callback)=> API.listen(event, callback),
         unlistenEvent: (event, callback)=> API.unlisten(event, callback),
+      },
+
+      settings: {
+
+        getSetting: (property)=>{
+          if(!property) console.error("no settings property given, unable to check setting")
+          else {
+            let obj= get.settings()
+            if(Object.keys(obj).includes(property))
+            return {ok:true, value: obj[property]}
+          }
+          return {ok:false}
+        },
+
+        setSetting: (property, value)=>{
+          if(!property) console.error("no settings property given, unable to set setting")
+          else {
+            const _settings= structuredClone(get.settings()) 
+            if(!Object.keys(_settings).includes(property)) console.warn("storing NEW value in settings, given property didn't existed before:", property )
+            _settings[property]= value
+            set.settings(_settings)
+            return true
+          }
+          return false
+        },
+
+        toggleSetting: (property)=>{
+          const result= actions().settings.getSetting(property)
+          if(result.ok) {
+            if(typeof(result.value) !== 'boolean') console.error("cannot toggle non-boolean setting:", property)
+            else {
+              actions().settings.setSetting(property, !result.value)
+              return {ok:true, value: !result.value}
+            }
+          }
+          return {ok:false}
+        }
+
       },
 
       store: {

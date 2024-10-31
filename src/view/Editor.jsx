@@ -14,12 +14,14 @@ const View= ()=>{
   const { store, actions, settings } = React.useContext(Globals)
 
   return (
-    <div stv-view-editor={""} className="__stv-flex-size">
+    <div stv-view-editor={""}>
       <Toolbar />
-      <div className={settings.editor.sidePanelRight ? "__stv-row" : "__stv-row-inv"}>
-        <Scrollable stv-editor={""} options={{overflow:{x:'hidden'}}}>
-          <FileView />
-        </Scrollable>
+      <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
+        <div stv-editor={""} className="viewport-container">
+          <Scrollable options={{overflow:{x:'hidden'}}}>
+            <FileView />
+          </Scrollable>
+        </div>
         <SidePanel />
       </div>
     </div>

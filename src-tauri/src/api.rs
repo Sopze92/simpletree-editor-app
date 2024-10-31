@@ -24,9 +24,11 @@ pub fn open_window_menu(handle: AppHandle, mid: &str, coords:Vec<i32>) {
 #[tauri::command]
 pub fn exec_window_action(handle: AppHandle, action: &str) {
 
-  let _window:Window = handle.get_focused_window().unwrap();
+  let _window:Window = match handle.get_focused_window() { Some(value) => value, None => return };
 
   match action {
+    "menubar" => { if _window.is_menu_visible().unwrap() { _window.hide_menu() } else { _window.show_menu() }; }
+    "decorated" => { _window.set_decorations( if _window.is_decorated().unwrap() { false } else { true } ); }
     "minimize" => { if _window.is_minimizable().unwrap() && !_window.is_minimized().unwrap() { _window.minimize(); } }
     "maximize" => { if _window.is_maximizable().unwrap() { if _window.is_maximized().unwrap() { _window.unmaximize(); } else { _window.maximize(); } } }
     "close" => { handle.exit(0); }

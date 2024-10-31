@@ -47,12 +47,14 @@ const TitleBar= ()=>{
   return (
     <div stv-toolbar={""} className="__stv-titlebar">
       <div stv-toolbar-section={""}>
-        { !settings.nativeDecorated &&
-          <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
-        }
-        { !settings.nativeMenu &&
+        { !settings.view_decorated &&
         <>
+          <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
           <div stv-toolbar-separator={""}/>
+        </>
+        }
+        { !settings.view_menu && !settings.app_menu_native &&
+        <>
           <div className="__stv_titlebar-menu">
             <MenuNative menuid="ml_file" title="File"/>
             <MenuNative menuid="ml_edit" title="Edit"/>
@@ -62,7 +64,7 @@ const TitleBar= ()=>{
         </>
         }
       </div>
-      { !settings.nativeDecorated &&
+      { !settings.view_decorated &&
       <>
         <div stv-toolbar-separator={""}/>
         <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, "maximize")}}/>

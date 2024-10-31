@@ -1,11 +1,13 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 
+// this file doesn't contain JSX but imports do, .JSX extension required to prevent Vite crying
+
 const events= {}
 
-export async function initialize(events_, baseListener) {
+export async function initialize(events_) {
 
-  for(const e of Object.values(events_)) events[e]= Object.freeze([baseListener])
+  for(const e of Object.values(events_)) events[e]= []
 
   // register listener handlers for all backend events
 
@@ -25,17 +27,19 @@ const API= Object.freeze({
 
   listen: (event, callback)=>{
     if(events[event]) {
-      events[event].push(callback)
-      console.log("registered event listener:", event, callback)
+      if(!events[event].includes(callback)) {
+        events[event].push(callback)
+        console.log("registered event listener:", event, callback.name)
+      }
     }
     else console.log("no such event:", event)
   },
 
   unlisten: (event, callback)=>{
     const el= events[event]
-    if(el && (idx = el.indexOf(callback)) != 0) {
+    if(el && (idx = el.indexOf(callback)) != -1) {
       el.splice(idx, 1);
-      console.log("unregistered event listener:", event, callback)
+      console.log("unregistered event listener:", event, callback.name)
     }
     else console.log("no such event or callback registered:", event, callback)
   }

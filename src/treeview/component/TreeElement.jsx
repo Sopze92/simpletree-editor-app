@@ -1,10 +1,12 @@
 import React from "react"
 
-export const Attr= ({ type, value })=> <div className={`attr ${type}`}>{value}</div>
-export const AttrImg= ({ type, value })=> <div className={`attr ${type}`}><img src={value}/></div>
+import SVG_dragger from '../../res/editor/dragger.svg'
+
+export const Attr= ({ type, value })=> <div stv-editor-attr={""} className={type}>{value}</div>
+export const AttrImg= ({ type, value })=> <div stv-editor-attr={""} className={type}><img src={value}/></div>
 
 const
-  AttrVoid= ({value})=><Attr {...{type: "void", value}}/>,
+  AttrVoid= ({value})=><Attr {...{type: "void", value}}/>, // null, general fallback for errors
   AttrType= ({value})=><Attr {...{type: "type", value}}/>,
   AttrName= ({value})=><Attr {...{type: "name", value}}/>,
   AttrThumb= ({value})=><AttrImg {...{type: "thumb", value}}/>,
@@ -38,9 +40,9 @@ export const TreeElement= ({ attrs=[], params={}, children, ...rest })=>{
   _params.propsBody= Object.assign(_params.propsBody??{}, {className: _params.propsBody?.className??"" + " __body"} )
 
   return (
-    <div {...Object.assign(rest, {className: rest.className??"" + (_params.inline? " __inline" : "") })}>
+    <div stv-fv-element={""} {...Object.assign(rest, {className: rest.className??"" + (_params.inline? " __inline" : "") })}>
       { attrs.length > 0 &&
-        <div {..._params.propsHead}>
+        <div stv-fv-head={""} {..._params.propsHead}>
           { 
             attrs.map((e,i)=>{
               if(e){
@@ -53,7 +55,8 @@ export const TreeElement= ({ attrs=[], params={}, children, ...rest })=>{
         </div>
       }
       { children &&
-        <div {..._params.propsBody}>
+        <div stv-fv-body={""} {..._params.propsBody}>
+{/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
           {children}
         </div>
       }

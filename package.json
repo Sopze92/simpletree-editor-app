@@ -1,5 +1,5 @@
 {
-  "name": "my-project",
+  "name": "strevee-editor",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -10,24 +10,25 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.0.1",
+    "@tauri-apps/plugin-shell": "^2",
+    "overlayscrollbars": "^2.10.0",
+    "overlayscrollbars-react": "^0.5.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^6.27.0",
-    "react-router-dom": "^6.27.0",
-    "overlayscrollbars": "^2.10.0",
-    "overlayscrollbars-react": "^0.5.6",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-shell": "^2"
+    "react-router-dom": "^6.27.0"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.2.1",
     "vite": "^5.3.1",
-    "vite-plugin-svgr": "^4.2.0",
-    "@tauri-apps/cli": "^2"
+    "vite-plugin-svgr": "^4.2.0"
   },
   "author": {
     "name": "sopze92"

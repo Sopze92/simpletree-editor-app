@@ -1,9 +1,10 @@
 import React from "react"
 
+import { Functions, Globals } from '../../context/AppContext.jsx'
 import SVG_dragger from '../../res/editor/dragger.svg'
 
-export const Attr= ({ type, value })=> <div stv-editor-attr={""} className={type}>{value}</div>
-export const AttrImg= ({ type, value })=> <div stv-editor-attr={""} className={type}><img src={value}/></div>
+export const Attr= ({ type, value })=> <div te-attr={type}>{value}</div>
+export const AttrImg= ({ type, value })=> <div te-attr={type}><img src={value}/></div>
 
 const
   AttrVoid= ({value})=><Attr {...{type: "void", value}}/>, // null, general fallback for errors
@@ -28,21 +29,23 @@ const BUILTIN_ATTRIBUTES= Object.freeze([
 
 const DEFAULT_PARAMS= Object.freeze({
   type: "nul",
-  propsHead:{},
-  propsBody:{}
+  head:{},
+  body:{}
 })
 
 export const TreeElement= ({ attrs=[], params={}, children, ...rest })=>{
 
-  const _params= Object.assign({...DEFAULT_PARAMS}, params)
+  const
+    { actions }= React.useContext(Globals),
+    [ _id, set__id]= React.useState(-1),
+    _params= Object.assign({...DEFAULT_PARAMS}, params)
 
-  _params.propsHead= Object.assign(_params.propsHead??{}, {className: _params.propsHead?.className??"" + " __head"} )
-  _params.propsBody= Object.assign(_params.propsBody??{}, {className: _params.propsBody?.className??"" + " __body"} )
+  React.useEffect(()=>{set__id(actions.file.get_TEID())},[])
 
   return (
-    <div stv-fv-element={""} {...Object.assign(rest, {className: rest.className??"" + (_params.inline? " __inline" : "") })}>
+    <div te-id={_id} te-base={""} {...rest}>
       { attrs.length > 0 &&
-        <div stv-fv-head={""} {..._params.propsHead}>
+        <div te-head={""} {..._params.head}>
           { 
             attrs.map((e,i)=>{
               if(e){
@@ -55,7 +58,7 @@ export const TreeElement= ({ attrs=[], params={}, children, ...rest })=>{
         </div>
       }
       { children &&
-        <div stv-fv-body={""} {..._params.propsBody}>
+        <div te-body={""} {..._params.body}>
 {/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
           {children}
         </div>
@@ -70,9 +73,9 @@ export const BaseElement= ({ attrs=[], params={}, children, ...rest })=>{
 
   return (
     <TreeElement
-      {...rest}
       attrs={[ {id:BUILTIN_ATTR_IDS.type, params:{value:_params.type}}, ...attrs]}
       params= {_params}
+      {...rest}
     >
       {children}
     </TreeElement>
@@ -81,13 +84,15 @@ export const BaseElement= ({ attrs=[], params={}, children, ...rest })=>{
 
 export const BaseElementGroup= ({ attrs=[], params={}, children, ...rest })=>{
   
-  const _params= Object.assign({ type:"grp", indent:true }, params)
+  const
+    _params= Object.assign({ type:"grp", indent:true }, params)
 
   return (
     <TreeElement
-      {...Object.assign(rest, {className: rest.className??"" + (_params.indent? " __indent" : "") + " __container __group" })}
+      te-container={""} te-group={""}
       attrs={[ {id:BUILTIN_ATTR_IDS.type, params:{value:_params.type}}, ...attrs]}
       params={_params}
+      {...rest}
     >
       {children}
     </TreeElement>
@@ -100,14 +105,16 @@ export const BaseElementBlock= ({ attrs, params={}, children, ...rest })=>{
     _params= Object.assign({ type:"blk", indent:true, open:false }, params),
     [openState, set_openState]= React.useState(_params.open && children)
 
-  _params.propsHead= Object.assign(_params.propsHead??{}, { onClick: ()=>{set_openState(!openState && children)} })
+  _params.head= Functions.assignProps(_params.head, { onClick: ()=>{set_openState(!openState && children)} })
 
   return (
     <TreeElement
-      {...Object.assign(rest, {className: rest.className??"" + " __container __block" + (_params.indent? " __indent" : "") + (openState? " __open" : "")})}
-      {...(openState? {["data-open"]:true}:null)}
+      te-container={""} te-block={""}
+      {...(openState? {["te-open"]:"1"} : {["te-open"]:"0"} )}
+      {...Functions.assignClasses(rest, openState? null : "__closed") }
       attrs={[ {id:BUILTIN_ATTR_IDS.type, params:{value:_params.type}}, ...attrs]}
       params={_params}
+      {...rest}
     >
       {children}
     </TreeElement>
@@ -120,12 +127,12 @@ export const BuiltInObject= ({ attrs, params={}, children, ...rest })=>{
 
   return (
     <BaseElementBlock 
-      {...rest} 
       attrs={[
         _params.thumbnail ?  {id:BUILTIN_ATTR_IDS.thumb, params:{value:_params.thumbnail}} : null, 
         {id:BUILTIN_ATTR_IDS.name, params:{value:_params.name}}
       ]}
       params={_params}
+      {...rest} 
     >
       {children}
     </BaseElementBlock>

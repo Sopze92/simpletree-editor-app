@@ -28,6 +28,11 @@ export const Constants= Object.freeze({
     menu_item_click: "menu-item-click",
     menu_dialog_open: "menu-dialog-open",
     menu_dialog_save: "menu-dialog-save"
+  },
+
+  STATUSBAR_ITEM_TYPE: {
+    tool: 0,
+    element: 1
   }
 })
 
@@ -38,22 +43,154 @@ export const Functions= Object.freeze({
   cancelEvent: (e)=> {
     e.preventDefault()
     e.stopPropagation()
-  }
+  },
+
+  /* TreeElements helpers */
+
+  resolveClasses: (...c)=>{
+    if(!c) return null
+    c= c.filter(e>e)
+    if(c.length==0) return null;
+    return {className: c.join(" ")}
+  },
+
+  assignClasses: (props, ...c)=>{
+    if(c==null && c=="") return props??{}
+    if(!props) return { className: c }
+    else if(!props.className) return Object.assign(props, {className: c} )
+    props.className= Functions.resolveClasses(props.className, ...c)
+    return props
+  },
+
+  assignProps: (props, c)=>{
+    if(!c && c!={}) return props??{}
+    if(!props) return { ...c }
+    return Object.assign(props, c)
+  },
+
+  findTEHierarchyData(element){
+    
+    if(!element) return null
+    
+    const 
+      data= {},
+      self= {},
+      tree= []
+
+    let 
+      _element= element,
+      i=0
+ 
+    let attrname=_element.getAttribute("te-attr")
+    if(attrname) {
+
+      const 
+        parent= _element.parentElement,
+        attr= {}
+
+      attr.name= attrname
+      if(parent) attr.index= Array.from(parent.children).indexOf(_element)
+
+      data.attr= attr
+
+      _element= parent // te-head from attr
+      i++
+    }
+
+    if(_element && _element.hasAttribute("te-head")){
+      const 
+        children= Array.from(_element.children),
+        attrtype= children.find(e=>e.matches("[te-attr='type']")),
+        attrname= children.find(e=>e.matches("[te-attr='name']"))
+
+      if(attrtype) self.type= attrtype.innerText
+      if(attrname) self.name= attrname.innerText
+      self.attrcount= children.length
+
+      _element= _element.parentElement // te-base from head
+      i++
+    }
+
+    if(_element) {
+
+      self.id= _element.getAttribute("te-id")
+
+      if(_element.hasAttribute("te-container")){
+
+        const 
+          body= _element.children[1],
+          childrens= body? body.children.length : -1,
+          container= {}
+
+        if(childrens > -1) container.children= childrens
+
+        if(_element.hasAttribute("te-block")) {
+          container.type= "block"
+          container.open= !_element.classList.contains("__closed")
+        }
+        else container.type= "group"
+
+        data.container= container
+      }
+    }
+
+    data.depth= i
+    self.element= _element
+
+    _element= _element.parentElement?? null // te-base from head
+    let j= 1
+
+    while(_element!=null && !_element.hasAttribute("stv-fileview")){
+      if (_element.hasAttribute("te-container")) {
+
+        const 
+          children= Array.from(_element.children[0]?.children),
+          attrtype= children.find(e=>e.matches("[te-attr='type']")),
+          attrname= children.find(e=>e.matches("[te-attr='name']")),
+          treeElement= { element: _element, id: _element.getAttribute("te-id") }
+
+        if(attrtype) treeElement.type= attrtype.innerText
+        if(attrname) treeElement.name= attrname.innerText
+
+        if(_element.hasAttribute("te-block")) {
+          treeElement.containerType= "block"
+          treeElement.open= !_element.classList.contains("__closed")
+        }
+        else treeElement.containerType= "group"
+
+        tree.push(treeElement)
+        j++
+      }
+      _element= _element.parentElement 
+    }
+
+    data.self= self
+    if(tree.length > 0) data.tree= tree
+    
+    return data
+  },
 })
+
+//#region -------------------------------------------------------- GLOBAL STORE
 
 export const Globals= React.createContext(null)
 
 const DEFAULTS= Object.freeze({
   ready:    { app:false, contexmenu:false, file:false },
   stamp:    { general:0 },
-  settings: { // snake case for later parsing ease
+  settings: { // snake case for ease of parsing
     app_menu_native: false,
     view_menu: false, 
     view_decorated: true,
     view_statusbar: true,
     editor_sidepanel_right: true
   },
-  store:    { contextmenu:null },
+  store:    {
+    TEID: 0,
+    contextmenu:null,
+    activeElementData: null,
+    hoverElementData: null
+  },
   file:     {},
 })
 
@@ -93,7 +230,8 @@ const AppContext= ReactComponent=>{
 			const 
         newGlobals= {},
         newData= Object.keys(data)
-      for(let [k,v] of Object.entries(globals)) newGlobals[k]= newData.includes(k) ? data[k] : v
+      for(let [k,v] of Object.entries(globals)) if(!newData.includes(k)) newGlobals[k]= v
+      for(let [k,v] of Object.entries(data)) newGlobals[k]= v
 			setGlobals(newGlobals)
     }
 
@@ -109,7 +247,6 @@ const AppContext= ReactComponent=>{
             switch(payload.id){
               case 'mi_view_menubar': {
                   const result= globals.actions.settings.toggleSetting('view_menu')
-                  console.log("donetes", result)
                   if(result.ok) API.send("exec_window_action", {action:"menubar"})
                 } break
               case 'mi_view_decorated': {
@@ -217,27 +354,27 @@ const globalsState= ({ actions, get, set, replace })=>{
 
       store: {
 
-        createContextMenu: (e, items)=>{
-          set.stamp({ contextmenu:Date.now() })
-          set.store({ contextmenu:{pos:[e.clientX, e.clientY], items} })
-        },
-
-        destroyContextMenu: ()=>{
-          set.ready({contextmenu:false})
-          set.store({contextmenu:{}})
-        }
+        set_hoverElementData: (data)=> { set.store({ hoverElementData: data }) }
 
       },
 
       file: {
 
-
+        get_TEID: ()=> {
+          const id= get.store().TEID +1
+          set.store({TEID: id})
+          return id
+        }
 
       }
 
     }
   }
 }
+
+//#endregion
+
+//#region -------------------------------------------------------- MENU DEFINITIONS (unused)
 
 export const MENUITEM_ID= Object.freeze({
   menu: 0,
@@ -325,3 +462,5 @@ export const AppMenus= Object.freeze([
   MENU_TITLEBAR_VIEW,
   MENU_TITLEBAR_HELP
 ])
+
+//#endregion

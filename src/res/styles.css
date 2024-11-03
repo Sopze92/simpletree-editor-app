@@ -188,10 +188,36 @@ body {
 
 /* STATUSBAR */
 
-.__stv-statusbar {
+[stv-statusbar] {
   border-top: 1px solid var(--mb-bordercol);
-  height: 1.5em; min-height: 1.5em;
+  min-height: 1.5em;
   flex: 0;
+  
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: start;
+
+  & [stv-toolbar-section] {
+    display: flex;
+    margin-left: 0;
+    gap: 0 1em;
+    padding: 0 2em;
+  
+  }
+
+  & [stv-statusbar-item] {
+    display: flex;
+    gap: 0 .25em;
+    flex-wrap: nowrap;
+  }
+
+  & span:first-child {
+    color: var(--mi-col-hover)
+  }
+
+  & span {
+    text-wrap: nowrap;
+  }
 }
 
 /* MENUS */

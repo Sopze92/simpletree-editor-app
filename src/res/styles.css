@@ -70,7 +70,6 @@ body {
   background: var(--tb-bgcol);
 
   display: flex;
-  justify-content: space-between;
   flex: 0;
 
   & [stv-toolbar-section] {
@@ -86,6 +85,71 @@ body {
     min-width: 2px;
     min-height: 100%;
     background: var(--mb-bordercol);
+  }
+
+  & [stv-toolbar-button] {
+    display: flex;
+    min-width: 24px;
+    height: 24px;
+
+    background: var(--ti-bgcol);
+    border: 1px solid var(--ti-bordercol);
+
+    border-radius: 4px;
+
+    &:not(:active) {
+
+      &[stv-toolbar-disabled] {
+        background: var(--ti-bgcol-disabled);
+        color: var(--ti-col-disabled);
+      }
+  
+      &:not([stv-toolbar-disabled]){
+  
+        &:hover {
+          background: var(--ti-bgcol-hover);
+          color: var(--ti-col-hover);
+        }
+        
+        &[stv-toolbar-pressed] {
+          background: var(--ti-bgcol-pressed);
+          color: var(--ti-col-pressed);
+        }
+        
+        &[stv-toolbar-pressed]:hover {
+          background: var(--ti-bgcol-pressed-hover);
+          color: var(--ti-col-pressed-hover);
+        }
+      }
+    }
+
+    &:active {
+      background: var(--ti-bgcol-active);
+      color: var(--ti-col-active);
+    }
+
+    & > span {
+      margin: auto;
+      width: min-content;
+      padding: .25em;
+    }
+  }
+  
+  & [stv-toolbar-multibutton] {
+    display: flex;
+    height: 24px;
+    border: 1px solid var(--ti-bordercol);
+    background: var(--tmi-bordercol);
+
+    border-radius: 4px;
+    gap: 1px 1px;
+
+    overflow: hidden;
+
+    & > [stv-toolbar-button] {
+      border: none;
+      border-radius: 0;
+    }
   }
   
   & button {
@@ -202,7 +266,6 @@ body {
     margin-left: 0;
     gap: 0 1em;
     padding: 0 2em;
-  
   }
 
   & [stv-statusbar-item] {

@@ -33,6 +33,28 @@ export const Constants= Object.freeze({
   STATUSBAR_ITEM_TYPE: {
     tool: 0,
     element: 1
+  },
+  
+  FILEVIEW_COMMAND: {
+    expand_all: 0,
+    expand_sel: 1,
+    expand_sel_tree: 2,
+    collapse_all: 3,
+    collapse_sel: 4,
+    collapse_sel_tree: 5,
+  },
+
+  TREOBJ_CLASS: {
+    basic: 0,
+    group: 1,
+    block: 2
+  },
+
+  ATTR_CLASS: {
+    default: 0,
+    simple: 1,
+    paragraph: 2,
+    image: 3
   }
 })
 
@@ -100,11 +122,9 @@ export const Functions= Object.freeze({
     if(_element && _element.hasAttribute("te-head")){
       const 
         children= Array.from(_element.children),
-        attrtype= children.find(e=>e.matches("[te-attr='type']")),
-        attrname= children.find(e=>e.matches("[te-attr='name']"))
+        attrtype= children.find(e=>e.matches("[te-attr='type']"))
 
       if(attrtype) self.type= attrtype.innerText
-      if(attrname) self.name= attrname.innerText
       self.attrcount= children.length
 
       _element= _element.parentElement // te-base from head
@@ -146,11 +166,9 @@ export const Functions= Object.freeze({
         const 
           children= Array.from(_element.children[0]?.children),
           attrtype= children.find(e=>e.matches("[te-attr='type']")),
-          attrname= children.find(e=>e.matches("[te-attr='name']")),
           treeElement= { element: _element, id: _element.getAttribute("te-id") }
 
         if(attrtype) treeElement.type= attrtype.innerText
-        if(attrname) treeElement.name= attrname.innerText
 
         if(_element.hasAttribute("te-block")) {
           treeElement.containerType= "block"
@@ -171,6 +189,16 @@ export const Functions= Object.freeze({
   },
 })
 
+const BASEFILE= {
+  metadata: {
+    file: false,
+    dirty: false,
+    name: null,
+    fullpath: null
+  },
+  tree: []
+}
+
 //#region -------------------------------------------------------- GLOBAL STORE
 
 export const Globals= React.createContext(null)
@@ -185,13 +213,23 @@ const DEFAULTS= Object.freeze({
     view_statusbar: true,
     editor_sidepanel_right: true
   },
-  store:    {
+  editor: {
+    vis_hover: false,
+    vis_dev: false,
+    mode_select: false
+  },
+  store: {
     TEID: 0,
+    //activefile: -1,
+    activeFile: 0,
+    history:[],
     contextmenu:null,
     activeElementData: null,
-    hoverElementData: null
+    hoverElementData: null,
   },
-  file:     {},
+  file:[
+    BASEFILE
+  ],
 })
 
 const AppContext= ReactComponent=>{
@@ -206,22 +244,25 @@ const AppContext= ReactComponent=>{
             ready:    ()=> globals.ready,
             stamp:    ()=> globals.stamp,
             settings: ()=> globals.settings,
+            editor:   ()=> globals.editor,
             store:    ()=> globals.store,
-            file:     ()=> globals.file
+            file:     (idx=-1)=> idx==-1 ? globals.file : globals.file[idx]??null
           },
           set: {
             ready:    (data)=> _setGlobal({ ready: Object.assign(globals.ready, data )}),
             stamp:    (data)=> _setGlobal({ stamp: Object.assign(globals.stamp, data )}),
             settings: (data)=> _setGlobal({ settings: Object.assign(globals.settings, data )}),
+            editor:   (data)=> _setGlobal({ editor: Object.assign(globals.editor, data )}),
             store:    (data)=> _setGlobal({ store: Object.assign(globals.store, data )}),
-            file:     (data)=> _setGlobal({ file: Object.assign(globals.file, data )})
+            file:     (idx, data)=> _setFile(idx, Object.assign(globals.file[idx]??{}, data ))
           },
           replace: {
             ready:    (data)=> _setGlobal({ ready: data?? DEFAULTS.ready }),
             stamp:    (data)=> _setGlobal({ stamp: data?? DEFAULTS.stamp }),
             settings: (data)=> _setGlobal({ settings: data?? DEFAULTS.settings }),
+            editor:   (data)=> _setGlobal({ editor: data?? DEFAULTS.editor }),
             store:    (data)=> _setGlobal({ store: data?? DEFAULTS.store }),
-            file:     (data)=> _setGlobal({ file: data?? {}})
+            file:     (idx, data)=> _setFile(idx, data??{} )
 				  }
         })
     )
@@ -233,6 +274,21 @@ const AppContext= ReactComponent=>{
       for(let [k,v] of Object.entries(globals)) if(!newData.includes(k)) newGlobals[k]= v
       for(let [k,v] of Object.entries(data)) newGlobals[k]= v
 			setGlobals(newGlobals)
+    }
+
+    const _setFile= (idx, data)=> {
+      const 
+        files= [...globals.file],
+        filecount= files.length
+
+      if(filecount >= idx){
+        
+        if(idx == filecount) files.push(data)
+        else files[i]= data
+
+        _setGlobal({ file: files })
+      }
+      else console.warn(`unable to set file data with index ${idx}: range out of bounds`)
     }
 
     React.useEffect(()=>{
@@ -352,7 +408,51 @@ const globalsState= ({ actions, get, set, replace })=>{
 
       },
 
+      editor: {
+
+        getSetting: (property)=>{
+          if(!property) console.error("no editor property given, unable to check setting")
+          else {
+            let obj= get.editor()
+            if(Object.keys(obj).includes(property))
+            return {ok:true, value: obj[property]}
+          }
+          return {ok:false}
+        },
+
+        setSetting: (property, value)=>{
+          if(!property) console.error("no editor property given, unable to set setting")
+          else {
+            const _settings= structuredClone(get.editor())
+            if(!Object.keys(_settings).includes(property)) console.warn("storing NEW value in editor, given property didn't existed before:", property )
+            _settings[property]= value
+            set.editor(_settings)
+            return true
+          }
+          return false
+        },
+
+        toggleSetting: (property)=>{
+          const result= actions().editor.getSetting(property)
+          if(result.ok) {
+            if(typeof(result.value) !== 'boolean') console.error("cannot toggle non-boolean setting:", property)
+            else {
+              actions().editor.setSetting(property, !result.value)
+              return {ok:true, value: !result.value}
+            }
+          }
+          return {ok:false}
+        }
+
+      },
+
       store: {
+
+        fileviewCommand: (cmd)=> {
+          const history= get.store().history
+          history.push(cmd)
+          set.store({history})
+        },
 
         set_hoverElementData: (data)=> { set.store({ hoverElementData: data }) }
 

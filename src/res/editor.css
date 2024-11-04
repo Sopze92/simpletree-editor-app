@@ -28,17 +28,32 @@
   flex-direction: column;
   box-sizing: border-box;
   font-size: 11px;
-  padding: 1em 3em 1em 1em;
   white-space: nowrap;
   min-height: 100%;
   height: fit-content;
+}
+
+[stv-fileview]:not(:has([stv-fileview-empty])) {
+  padding: 1em 3em 1em 1em;
 }
 
 /* TOOLBAR */
 
 [stv-editor-toolbar] {
   border-bottom: 1px solid var(--mb-bordercol);
-  height: 2.25em; min-height: 2.25em;
+  min-height: 32px;
+  height: auto;
+
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: start;
+
+  & [stv-toolbar-section] {
+    display: flex;
+    margin-left: 0;
+    gap: 0 4px;
+    padding: 0 4px;
+  }
 }
 
 /* SIDEPANEL */
@@ -49,6 +64,49 @@
   min-width: 256px;
   max-width: 256px;
   flex: 0;
+}
+
+/* VIS MODES */
+
+/* -- vis_dev */
+
+[stv-view-editor]:not([stv-editor-vis-dev]) {
+  
+  & [te-attr='_id'] {
+    display:none
+  }
+}
+
+/* -- vis_hover */
+
+[stv-editor-vis-hover] {
+  --hover-1-col: #46d782;
+  --hover-2-col: #56b2c9;
+  --hover-3-col: #368c4b;
+  --hover-4-col: #764d3d;
+}
+
+[stv-editor-vis-hover] [te-base]:hover > [te-head] {
+  outline: 1px solid var(--hover-4-col);
+}
+
+[stv-editor-vis-hover] [te-head]:hover:has([te-attr]:hover) {
+  outline: 1px solid var(--hover-3-col);
+}
+
+[stv-editor-vis-hover] [te-base]:hover > [te-body]:not(:has( > [te-base]:hover)){
+  outline: 1px solid var(--hover-2-col);
+}
+
+/* tail te-base hovered's head */
+[stv-editor-vis-hover] [te-base]:hover > [te-head]:not(:has([te-attr]:hover)):not(:has( + [te-body] > [te-base]:hover)) {
+  outline: 1px solid var(--hover-1-col);
+  z-index: 512;
+}
+
+[stv-editor-vis-hover] [te-head]:hover, [stv-editor-vis-hover] [te-attr]:hover {
+  outline: 1px solid var(--hover-1-col);
+  z-index: 512;
 }
 
 /* VIEW */
@@ -70,4 +128,3 @@
 
   background-color: #333;
 }
-

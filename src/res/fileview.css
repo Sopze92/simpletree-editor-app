@@ -30,9 +30,14 @@
   }
 }
 
+[te-attr] * {
+  pointer-events: none;
+}
+
 [te-head] {
   display: flex;
-  height: var(--___-head-height);
+  min-height: var(--___-head-height);
+  max-height: unset;
 }
 
 [te-base], [te-body] {

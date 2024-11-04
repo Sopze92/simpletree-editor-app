@@ -6,6 +6,17 @@
 
   --tb-col: #222;
   --tb-bgcol: #ddd;
+  
+  --ti-bordercol: #999;
+
+  --ti-col-hover: #ddd;
+  --ti-bgcol-hover: #888;
+
+  --ti-col-active: #ddd;
+  --ti-bgcol-active: #171717;
+  
+  --ti-col-disabled: #373737;
+  --ti-bgcol-disabled: #272727;
 
   /* titlebar */
 
@@ -42,8 +53,29 @@
 
   --body-bgcol: #111;
 
+  /* toolbar */
+
   --tb-col: #777;
   --tb-bgcol: #222;
+  
+  --ti-bgcol: #272727;
+  --ti-bordercol: #202020;
+  
+  --ti-col-disabled: #474747;
+  --ti-bgcol-disabled: #303030;
+
+  --ti-col-pressed: #999;
+  --ti-bgcol-pressed: #1a1a1a;
+
+  --ti-col-active: #ddd;
+  --ti-bgcol-active: #171717;
+
+  --ti-col-hover: #aaa;
+  --ti-bgcol-hover: #444;
+  --ti-col-pressed-hover: #bbb;
+  --ti-bgcol-pressed-hover: #202020;
+  
+  --tmi-bordercol: #303030;
 
   /* titlebar */
 
@@ -65,6 +97,8 @@
 
   --fv-col: #aaa;
   --fv-bgcol: #1a1a1a;
+
+  --fv-emptybgcol: #141414;
 
   /* scrollbars */
 

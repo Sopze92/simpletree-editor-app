@@ -4,11 +4,11 @@ use tauri::{menu::*, window::*, AppHandle, Position, PhysicalPosition, Manager};
 #[tauri::command]
 pub fn splash_end(handle: AppHandle){
   handle.get_window("splash").unwrap().destroy();
-  let _main_window= handle.get_window("main").unwrap();
+  let _main_window= handle.get_webview_window("main").unwrap();
   
   _main_window.show();
   _main_window.set_focus();
-  _main_window.get_webview("main_wv").unwrap().open_devtools();
+  _main_window.open_devtools();
 }
 
 #[tauri::command]

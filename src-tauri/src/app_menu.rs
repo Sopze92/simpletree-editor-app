@@ -140,10 +140,11 @@ pub(crate) fn build(handle: &AppHandle) -> Menu<tauri::Wry> {
         ]).separator().items(&[
           &MenuItem::with_id(handle, "mi_file_save","Save", true, Some(&"cmdorctrl+s")).unwrap(),
           &MenuItem::with_id(handle, "mids_file_saveas", "Save As", true, Some(&"cmdorctrl+shift+s")).unwrap(),
-        ]).separator().items(&[
-          &MenuItem::with_id(handle, "mido_file_import", "Import", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(handle, "mids_file_export", "Export", true, None::<&str>).unwrap(),
         ]).separator()
+        //.items(&[
+        //  &MenuItem::with_id(handle, "mido_file_import", "Import", true, None::<&str>).unwrap(),
+        //  &MenuItem::with_id(handle, "mids_file_export", "Export", true, None::<&str>).unwrap(),
+        //]).separator()
         .item(&MenuItem::with_id(handle, "mi_file_exit","Exit", true, None::<&str>).unwrap())
         .build().unwrap(),
 
@@ -177,9 +178,9 @@ pub(crate) fn build(handle: &AppHandle) -> Menu<tauri::Wry> {
       /* VIEW MENU */
       &SubmenuBuilder::with_id(handle, "ml_view","View")
         .items(&[
-          &MenuItem::with_id(handle, "mi_view_menubar", "Menu bar", true, Some(&"f2")).unwrap(),
+          //&MenuItem::with_id(handle, "mi_view_menubar", "Menu bar", true, Some(&"f2")).unwrap(),
           &MenuItem::with_id(handle, "mi_view_statusbar", "Status bar", true, None::<&str>).unwrap(),
-          &MenuItem::with_id(handle, "mi_view_decorated", "Decorated", true, Some(&"f10")).unwrap(),
+          //&MenuItem::with_id(handle, "mi_view_decorated", "Decorated", true, Some(&"f10")).unwrap(),
         ]).separator().items(&[
           &MenuItem::with_id(handle, "mi_view_language", "Language", true, None::<&str>).unwrap(),
           &MenuItem::with_id(handle, "mi_view_appearance", "Appearance", true, None::<&str>).unwrap(),

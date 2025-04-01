@@ -1,0 +1,6 @@
+.test {
+  display: flex;
+  flex-direction: column;
+  color: #eee;
+  background: none;
+}

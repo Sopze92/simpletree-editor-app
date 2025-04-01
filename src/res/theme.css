@@ -100,6 +100,14 @@
 
   --fv-emptybgcol: #141414;
 
+  /* fileview default theme */
+
+  --attr-_id-col: #a03030;
+  --attr-_id-bg: none;
+
+  --attr-_type-col: #606060;
+  --attr-_type-bg: none;
+
   /* scrollbars */
 
   & .os-theme-strevee {

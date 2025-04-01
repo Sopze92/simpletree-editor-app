@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event'
+import { listen, TauriEvent } from '@tauri-apps/api/event'
 
 // this file doesn't contain JSX but imports do, .JSX extension required to prevent Vite crying
 
@@ -13,7 +13,11 @@ export async function initialize(events_) {
 
   const bel= {}
   for(const [k,v] of Object.entries(events)){
-    bel[k]= await listen(k, (e)=>{ for(const cb of v) cb(e) })
+    const 
+      tauri= k.startsWith("te:"),
+      kn= tauri ? TauriEvent[k.substring(3)] : k,
+      eid= tauri ? k : kn
+    bel[k]= await listen(kn, (e)=>{ for(const cb of v) cb({...e, eid}) })
   }
 
   window.backendListeners= bel

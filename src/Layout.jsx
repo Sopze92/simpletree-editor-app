@@ -9,13 +9,12 @@ import Statusbar from './module/editor/Statusbar.jsx'
 import { Redirector, GlobalListener } from "./app/Internal.jsx"
 
 import Editor from "./view/Editor.jsx"
-import Test from "./view/Test.jsx"
 
 const Layout= ()=>{
 
   const { settings }= React.useContext(Globals)
 
-  return (Globals && (
+  return (Globals != null && (
     <BrowserRouter>
       <ContextMenu/>
       <TitleBar/>

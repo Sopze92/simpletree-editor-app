@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import API, { initialize as backend_init } from './BackendApi.jsx'
+//import API, { initialize as backend_init } from './BackendApi.jsx'
 import { BaseElement, BaseElementGroup, BaseElementBlock } from '../treeview/component/TreeElement.jsx'
 
 export const Constants= Object.freeze({
@@ -203,10 +203,19 @@ export const Functions= Object.freeze({
   },
 })
 
-const BASEPARSER= {
-  parser: {
+// DEV_TEMP: this is what the parser must return after load a file
+
+const NEW_FILE_TEMPLATE= {
+  metadata: {
+    modified: true,
+    ondisk: false,
+    name: "new file",
+    author: "not provided",
+    fullpath: null
+  },
+  table: {
     types:[
-    // name,      class,                  attrs
+    // name,      class,                            attrs
       ["obj",     Constants.TREOBJ_CLASS.block,     [10,0]    ],  // 0
       ["blk",     Constants.TREOBJ_CLASS.block,     [0,1,2]   ],  // 1
       ["grp",     Constants.TREOBJ_CLASS.group,     [0,1,2]   ],  // 2
@@ -217,7 +226,7 @@ const BASEPARSER= {
       ["var",     Constants.TREOBJ_CLASS.item,      [7,0,9,1] ]   // 7
     ],
     attrs: [
-    // name,      class,                  richtext
+    // name,      class,                            richtext
       ["name",    Constants.ATTR_CLASS.simple,      true],        // 0
       ["desc",    Constants.ATTR_CLASS.simple,      true],        // 1
       ["info",    Constants.ATTR_CLASS.simple,      true],        // 2
@@ -230,25 +239,27 @@ const BASEPARSER= {
       ["value",   Constants.ATTR_CLASS.simple,      false],       // 9
       ["thumb",   Constants.ATTR_CLASS.image,       false]        // 10
     ],
-  }
+  },
+  tree: []
 }
 
-const BASEFILE= {
+const BASE_DATA= {
   metadata: {
-    dirty: true,
-    name: "untitled",
+    modified: false,
+    ondisk: false,
+    name: "dev_file_example",
+    author: "sopze",
     fullpath: null
   },
-}
-
-const BASEDATA= {
-  data: [
-    [0,["","Test object"],[1,2,3]],
-    [3,["name","desc text","info text"]],
-    [3,["name only",null,null]],
-    [5,["this is just a text\nin two lines"]],
-    [6,["my key","the value"]],
-    [7,["class","name","value","desc"]]
+  table: {...NEW_FILE_TEMPLATE.table},
+  tree: [
+    [0, 0,["","Test object"],[1,2,3,4]],
+    [1, 3,["name","desc text","info text"]],
+    [2, 3,["name only",null,null]],
+    [3, 4,["this is just basic text line"]],
+    [4, 5,["this is just a text\nin two lines"]],
+    [5, 6,["my key","the value"]],
+    [6, 7,["class","name","value","desc"]]
   ]
 }
 
@@ -257,13 +268,17 @@ const BASEDATA= {
 export const Globals= React.createContext(null)
 
 const DEFAULTS= Object.freeze({
-  ready:    { app:false, contexmenu:false, file:false, parser:false },
+  ready:    { app:false, contexmenu:false, file:false },
   stamp:    { general:0, file:0 },
   settings: { // snake case for ease of parsing
+    active_theme: "app-theme-dark",
     app_menu_native: true,
+    app_multiFile_support: false,
     view_menu: false, 
     view_decorated: true,
     view_statusbar: true,
+    editor_toolbar: true,
+    editor_sidepanel: true,
     editor_sidepanel_right: true
   },
   store: {
@@ -275,9 +290,9 @@ const DEFAULTS= Object.freeze({
     hoverElementData: null,
     dragElement: null
   },
-  file:[],
-  parser: {},
-  editor: {
+  files:[],
+  editor: { // snake case for ease of parsing
+    last_file: null,
     vis_hover: false,
     vis_dev: false,
     mode_select: false
@@ -297,7 +312,7 @@ const AppContext= ReactComponent=>{
             stamp:    ()=> globals.stamp,     // control timestamps
             settings: ()=> globals.settings,  // app settigns
             store:    ()=> globals.store,     // app things
-            file:     ()=> globals.file,      // open file(s) data
+            files:    ()=> globals.files,      // open file(s) data
             parser:   ()=> globals.parser,    // data computing things
             editor:   ()=> globals.editor     // editor things
           },
@@ -306,7 +321,7 @@ const AppContext= ReactComponent=>{
             stamp:    (data)=> _setGlobal({ stamp: Object.assign(globals.stamp, data) }),
             settings: (data)=> _setGlobal({ settings: Object.assign(globals.settings, data) }),
             store:    (data)=> _setGlobal({ store: Object.assign(globals.store, data) }),
-            file:     (data)=> setGlobals( Object.assign(globals, { file: data } )),
+            files:    (data)=> setGlobals( Object.assign(globals, { files: data } )),
             parser:   (data)=> _setGlobal({ parser: Object.assign(globals.parser, data) }),
             editor:   (data)=> _setGlobal({ editor: Object.assign(globals.editor, data) })
           }
@@ -344,14 +359,14 @@ const AppContext= ReactComponent=>{
                   console.log("save file!")
                 } break
               case 'mi_view_menubar': {
-                  const result= globals.actions.settings.toggleSetting('view_menu')
-                  if(result.ok) API.send("exec_window_action", {action:"menubar"})
+                  globals.actions.settings.toggleSetting('view_menu')
                 } break
               case 'mi_view_decorated': {
-                  const result= globals.actions.settings.toggleSetting('view_decorated')
-                  if(result.ok) API.send("exec_window_action", {action:"decorated"})
+                  globals.actions.settings.toggleSetting('view_decorated')
                 } break
               case 'mi_view_statusbar': globals.actions.settings.toggleSetting('view_statusbar'); break
+              case 'mi_view_tools': globals.actions.settings.toggleSetting('editor_toolbar'); break
+              case 'mi_view_panel': globals.actions.settings.toggleSetting('editor_sidepanel'); break
             }
             break;
         }
@@ -364,9 +379,18 @@ const AppContext= ReactComponent=>{
     },[])
 
     React.useEffect(()=>{
-      for(const v of Object.values(Constants.BACKEND_EVENTS)){
-        globals.actions.backend.listenEvent(v, set_backendResponse)
-      }
+      const 
+        prevThemes= Array.from(document.body.classList).filter(e => e.startsWith("app-theme-")),
+        theme= globals.settings.active_theme
+        
+      prevThemes.forEach(e => document.body.classList.remove(e))
+      document.body.classList.toggle(theme, true)
+    },[globals.settings.active_theme])
+
+    React.useEffect(()=>{
+      //for(const v of Object.values(Constants.BACKEND_EVENTS)){
+      //  globals.actions.backend.listenEvent(v, set_backendResponse)
+      //}
     },[globals.ready.app])
 
 		return (
@@ -394,11 +418,9 @@ const globalsState= ({ actions, get, set })=>{
 
       _initialize: ()=>{
         
-        backend_init(Constants.BACKEND_EVENTS)
+        //backend_init(Constants.BACKEND_EVENTS)
         
         // TODO: load config
-
-        document.body.classList.add("app-theme-dark")
 
         set.ready({app: true})
       },
@@ -407,12 +429,12 @@ const globalsState= ({ actions, get, set })=>{
 
         // bridging here to make the store backend-independent
 
-        windowAction: (action)=> API.send("exec_window_action", { action }),
-        windowPosition: (coords)=> API.send("set_window_position", { coords }),
-        openMenu: (mid, coords)=> API.send("open_window_menu", { mid, coords }),
-
-        listenEvent: (event, callback)=> API.listen(event, callback),
-        unlistenEvent: (event, callback)=> API.unlisten(event, callback),
+        //windowAction: (action)=> API.send("exec_window_action", { action }),
+        //windowPosition: (coords)=> API.send("set_window_position", { coords }),
+        //openMenu: (mid, coords)=> API.send("open_window_menu", { mid, coords }),
+//
+        //listenEvent: (event, callback)=> API.listen(event, callback),
+        //unlistenEvent: (event, callback)=> API.unlisten(event, callback),
       },
 
       layout: {
@@ -456,7 +478,6 @@ const globalsState= ({ actions, get, set })=>{
           }
           return {ok:false}
         }
-
       },
 
       store: { // ---------------------------------------------------------------------------------------------------------------- STORE
@@ -469,59 +490,93 @@ const globalsState= ({ actions, get, set })=>{
 
         set_hoverElementData: (data)=> { set.store({ hoverElementData: data }) },
 
-        set_dragElement: (idx, hid)=> { set.store({ dragElement: idx != -1 ? actions().parser.parseDataElement(idx, hid, { body:false }) : null }) }
+        set_dragElement: (idx, hid)=> { set.store({ dragElement: idx != -1 ? actions().parser.parseDataElement(idx, hid, { body:false }) : null }) },
+
+        tree_findElementByHid: (tree, hid)=> {
+
+          const _hid= hid.map(e=> Number(e)-1)
+          let object= {container:tree.elements, index:_hid[0]}
+
+          if(_hid.length > 1){
+            for(let i=0; i< _hid.length-1; i++) {
+              object= {container:object.container[_hid[i]].props.children, index:_hid[i+1]}
+            }
+          }
+
+          return object
+        },
+
+        // move an element in the hierarchy
+        tree_moveElement: (tree, origin_hid, target_hid)=> {
+
+          const 
+            findObjectByHid= actions().store.tree_findElementByHid,
+            hierarchyDrop= target_hid[target_hid.length-1] == 'H'
+
+          if(hierarchyDrop) target_hid= target_hid.slice(0, target_hid.indexOf('H'))
+
+          // get object and target current containers and their index on the container
+
+          let origin= findObjectByHid(tree, origin_hid)
+          let target= findObjectByHid(tree, target_hid)
+          
+          if(!hierarchyDrop) {
+            let children= target.container[target.index].props.children
+            target= {container:children, index:children.lenght}
+          }
+
+          // first add, then remove (easy to implement in case origin container is same as target container)
+          // add as last child if !hierarchyDrop
+
+          const originAffected= target.container == origin.container && target.index <= origin.index
+
+          target.container.splice(target.index, 0, origin.container[origin.index])
+          origin.container.splice(originAffected ? origin.index+1: origin.index, 1)
+
+          return {
+            hids: tree.elements.map(e=>e.props.hid),
+            elements: tree.elements, 
+            length: tree.elements.length}
+        }
       },
 
       file: { // ---------------------------------------------------------------------------------------------------------------- FILE
 
-        create: (focus)=>{
-          set.ready({ file:false, parser:focus ? false : get.ready().parser })
+        _addFile: (data, focus=true)=>{
           const 
-            files= Constants.APP_MULTIFILE ? get.file(): [],
-            data= {...BASEFILE, ...BASEPARSER, ...BASEDATA}
+            multiFile= get.settings().app_multiFile_support,
+            files= multiFile ? get.files(): []
           
           files.push(data)
-          
-          set.file(files)
-          set.ready({file:true})
 
-          if(focus){
-            actions().parser.set(data.parser)
+          set.files(files)
+          set.ready({ file:true })
+
+          if(!multiFile || focus){
             set.store({ activeFile: files.length-1 })
           }
+
+          return files.length-1
+        },
+
+        create: (focus)=>{
+          return actions().file._addFile({...NEW_FILE_TEMPLATE}, focus)
         },
 
         load: (path, focus)=>{
-          set.ready({ file:false, parser:focus ? false : get.ready().parser })
-          const 
-            files= Constants.APP_MULTIFILE ? get.file(): [],
-            data= {}
 
-          // TODO: load the actual file data
-
-          files.push(data)
-
-          set.file(files)
-          set.ready({file:true})
-
-          if(focus){
-            actions().parser.set(data.parser)
-            set.store({ activeFile: files.length-1 })
-          }
+          // TODO: load the actual file
+          //   determine the parser based on extension or header
+          //   parse and compose something with like NEW_FILE_TEMPLATE and BASE_DATA
+          const data= BASE_DATA
+          return actions().file._addFile(data, focus)
         },
 
-        focus: (idx)=>{
-          if(idx == get.store().activeFile) {
-            console.log(`file ${idx} already has focus`)
-            return
-          }
-          set.ready({ parser:false })
-          const file= get.file()[idx]
-          if(file){
-            actions().parser.set(data.parser)
-            set.store({activeFile:idx})
-          }
-          else console.log(`unable to focus on file ${idx}: index is out of bounds`)
+        save: (path, filename, format)=>{
+
+          // TODO: save the file
+          //   determine the proper parser based format
+          //   write file bytes through the parser
         }
       },
 

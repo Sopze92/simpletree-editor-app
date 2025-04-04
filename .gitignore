@@ -17,6 +17,7 @@ dist-ssr
 # Editor directories and files
 .cache/
 .vscode/
+build
 .idea
 .DS_Store
 *.suo
@@ -28,3 +29,4 @@ dist-ssr
 
 #custom dev
 .dev/
+_pyenv

@@ -2,23 +2,23 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react"
 import svgr from 'vite-plugin-svgr'
 
-const host = process.env.TAURI_DEV_HOST
+const host = "127.0.0.1"
 
 export default defineConfig(async () => ({
   clearScreen: false,
   server: {
-    port: 1420,
+    port: 5350,
     strictPort: true,
     host: host || false,
     hmr: host
       ? {
           protocol: "ws",
           host,
-          port: 1421,
+          port: 5351,
         }
       : undefined,
     watch: {
-      ignored: ["**/src-tauri/**"]
+      ignored: ["srcpy/**", "_pyenv/**"]
     }
   },
   plugins: [

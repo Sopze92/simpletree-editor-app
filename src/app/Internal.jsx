@@ -49,14 +49,15 @@ import { Globals } from "../context/AppContext"
 // silent global event listener
 export const GlobalListener=()=>{
 
-  const { actions, file }= React.useContext(Globals)
+  const { actions, files }= React.useContext(Globals)
 
   React.useEffect(()=>{
-    if(file.length == 0) {
+    if(files.length == 0) {
       console.info("no file data, creating one")
-      actions.file.create(true)
+      //actions.file.create(true)
+      actions.file.load("UNUSED", true)
     }
-  },[file.length])
+  },[files.length])
 
   return null
 }

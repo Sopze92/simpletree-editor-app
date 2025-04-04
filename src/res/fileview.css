@@ -193,6 +193,18 @@
   }
 }
 
+[stv-drag-element] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 1px;
+}
+
+[stv-drop-element][stv-drop-active] {
+  background: #3d793d;
+  outline: 1px solid #81c781;
+}
+
 [stv-editor-vis-dev] [stv-drop-hierarchy]:not([stv-drop-active]) > div {
   border-color: #707;
 }

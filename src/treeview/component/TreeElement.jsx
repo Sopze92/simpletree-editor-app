@@ -28,17 +28,17 @@ const DEFAULT_PARAMS= Object.freeze({
 export const TreeElement= ({ index, hid, attrs=[], params={}, children, ...rest })=>{
 
   const 
-    hid_= hid.join(':'),
+    hid_str= hid.join(':'),
     { attributes, listeners, isDragging, setNodeRef: dragRef } = useDraggable({ 
-      id: hid_, 
+      id: hid_str, 
       data: { 
         index, 
         hid, 
-        type:"element" 
+        type:"element"
       } 
     }),
     { setNodeRef: dropRef, isOver } = useDroppable({ 
-      id: hid_,
+      id: hid_str,
       data: {
         type: "head",
         accepts: ["element", "template" ]
@@ -49,42 +49,45 @@ export const TreeElement= ({ index, hid, attrs=[], params={}, children, ...rest 
 
   return (
     <>
-      <div ref={dragRef} te-id={hid_} te-type={_params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
+      <Droppable hid={[...hid, "H"]} />
+      <div te-id={hid_str} te-type={_params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
         {...rest} {...attributes} {...listeners}
         >
         { attrs.length > 0 &&
-          <div ref={dropRef} stv-drop-active={isOver?"":null} te-head={""} {..._params.head}>
-            <AttrId text={hid_}/>
-            <AttrType text={_params.type}/>
-            { 
-              attrs.map((e,i)=>{
-                try {
-                  switch(e[1]){
-                    case Constants.ATTR_CLASS.default:
-                      return <Attr key={i} type={e[0]}/>
-                    case Constants.ATTR_CLASS.simple:
-                      return <AttrSimple key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
-                    case Constants.ATTR_CLASS.paragraph:
-                      return <AttrParagraph key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
-                    case Constants.ATTR_CLASS.image:
-                      return <AttrImage key={i} type={e[0]} src={e[3]}/>
-                    default: throw e
+          <>
+            <div ref={dragRef} stv-drag-element={""}></div>
+            <div ref={dropRef} stv-drop-element={""} stv-drop-active={isOver?"":null} te-head={""} {..._params.head}>
+              <AttrId text={hid_str}/>
+              <AttrType text={_params.type}/>
+              { 
+                attrs.map((e,i)=>{
+                  try {
+                    switch(e[1]){
+                      case Constants.ATTR_CLASS.default:
+                        return <Attr key={i} type={e[0]}/>
+                      case Constants.ATTR_CLASS.simple:
+                        return <AttrSimple key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
+                      case Constants.ATTR_CLASS.paragraph:
+                        return <AttrParagraph key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
+                      case Constants.ATTR_CLASS.image:
+                        return <AttrImage key={i} type={e[0]} src={e[3]}/>
+                      default: throw e
+                    }
                   }
-                }
-                catch(e) { return <AttrVoid key={i}/> }
-              })
-            }
-          </div>
+                  catch(e) { return <AttrVoid key={i}/> }
+                })
+              }
+            </div>
+          </>
         }
         { children &&
           <div te-body={""} {..._params.body}>
-            <Droppable hid={[...hid, 1, 'H']} />
   {/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
             {children}
+            <Droppable hid={[...hid, children.length+1, 'H']} />
           </div>
         }
       </div>
-      <Droppable hid={[...hid, "H"]} />
     </>
   )
 }

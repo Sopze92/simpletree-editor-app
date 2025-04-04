@@ -1,0 +1,2 @@
+nuitka==2.6.9
+pywebview==5.4

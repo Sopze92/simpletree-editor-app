@@ -1,8 +1,6 @@
 import React from "react"
 import ReactDOM from "react-dom/client"
 
-import { invoke } from '@tauri-apps/api/core'
-
 import './res/splash.css'
 import img_splash from './res/splash.webp'
 
@@ -13,7 +11,7 @@ const Splash= ()=>{
   },[])
 
   return (
-    <div id="animator" onAnimationEnd={()=>{invoke("splash_end")}}>
+    <div id="animator" onAnimationEnd={()=>{pywebview.api.destroy_splash()}}>
       <img src={img_splash}/>
     </div>
   )

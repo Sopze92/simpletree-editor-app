@@ -8,6 +8,12 @@ export const Constants= Object.freeze({
   APP_TITLE: "sTrevee",
   APP_MULTIFILE: false,
 
+  WINDOW_ACTION: {
+    close: 0,
+    maximize: 1,
+    minimize: 2,
+  },
+
   BACKEND_EVENTS: {
     //window_resized: "te:WINDOW_RESIZED",
     dnd_enter: "te:DRAG_ENTER",
@@ -414,6 +420,14 @@ const globalsState= ({ actions, get, set })=>{
 
       backend: { // ---------------------------------------------------------------------------------------------------------------- BACKEND
 
+        windowAction: (action)=> pywebview.api.window_action(action),
+
+        toggleFrameless: ()=>{
+          const state= !actions().settings.getSetting('view_decorated')
+          pywebview.api.set_decorated(state)
+          actions().settings.toggleSetting('view_decorated')
+        },
+
         checkUpdates: ()=>{
           console.log("TODO: update system + check for updates")
         },
@@ -548,6 +562,11 @@ const globalsState= ({ actions, get, set })=>{
           }
 
           return files.length-1
+        },
+
+        isActiveFileOnDisk: ()=>{
+          const activeFile= get.store().activeFile
+          return activeFile != -1 && get.files()[activeFile].ondisk
         },
 
         create: (focus)=>{

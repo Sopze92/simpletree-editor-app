@@ -9,6 +9,12 @@ ROOT_DEFAULT=     0x00
 ROOT_FOLDER=      0x01
 ROOT_LOCALHOST=   0x02
 
+# window actions
+
+WINDOW_ACTION_CLOSE=      0x00
+WINDOW_ACTION_MAXIMIZE=   0x01
+WINDOW_ACTION_MINIMIZE=   0x02
+
 # menubar
 
 M_FILE=           0x00

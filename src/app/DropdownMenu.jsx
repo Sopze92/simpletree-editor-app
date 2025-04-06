@@ -2,12 +2,13 @@ import React from "react"
 
 import { Constants, Functions, Globals } from '../context/AppContext.jsx'
 import { Constants as MenuConstants, Functions as MenuFunctions, AppMenus } from '../context/AppMenus.jsx'
+import useMenuItems from "../hooks/UseMenuItems.jsx"
 
-export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_SIDES.right, openState, onMenu, onItem, getValue, getState, ...rest })=>{
+export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_SIDES.right, openState, onMenuHover, onMenu, onItem, getValue, getState, ...rest })=>{
 
   const 
     [ openMenuClasses, set_openMenuClasses ]= React.useState(""),
-    [openMenu, set_openMenu]= React.useState(-1),
+    [openMenu, set_openMenu, menuProps]= useMenuItems(-1),
     menu= AppMenus.menu.find(e=>e.id== menuid),
     self= React.useRef(null),
     selfMenu= React.useRef(null)
@@ -52,9 +53,9 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
                   case MenuConstants.MENU_ITEM.menu:
                     return <Menu key={i} role="menu" className="__stv-menu-item" data-type="menu" zindex={zindex+1}
                       menuid={e.id} openDir={menu.open} openState={openMenu==e}
-                      onMenu={(ev, inbounds)=>onMenuClick(ev, inbounds, e)}
                       onItem={onItem}
                       getValue={getValue} getState={getState}
+                      {...menuProps.get(e)}
                     />
                   case MenuConstants.MENU_ITEM.item:
                     {
@@ -78,13 +79,20 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
                     )
                   case MenuConstants.MENU_ITEM.boolean:
                     {
-                      const enabled= getState(menuid, e.id)
+                      const 
+                        enabled= getState(menuid, e.id),
+                        value= getValue(menuid, e.id)
                       return (
                         <li key={k} className={`__stv-menu-item ${enabled ? "":"__stv-menu-item-disabled"}`} role="checkbox" data-type="boolean"
                           onClick={enabled ? (ev)=>{onItem(ev, menuid, e.id)} : _e=>{}}
                         >
-                          <span>{e.label??"missingno"}</span>
-                          <span>{getValue(menuid, e.id)?"(#)":"( )"}</span>
+                          <div className="__stv-menu-boolean">
+                            <span>{value?"▣ ":"▢ "}</span>
+                            <span>{e.label??"missingno"}</span>
+                          </div>
+                          { e.pnemonic &&
+                            <span>{e.pnemonic}</span>
+                          }
                         </li>
                       )
                     }
@@ -97,11 +105,6 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
       }
     </div>
   )
-
-  function onMenuClick(e, inbounds, menu=-1){
-    Functions.cancelEvent(e)
-    set_openMenu(inbounds ? menu : -1)
-  }
 
   function testCloseMenu(e){
     const _self= self.current
@@ -144,12 +147,7 @@ export const MenuBar= ({ menuid=-1, zindex=4096, onItemClick=(event, menuid, ite
 
   const 
     menubar= AppMenus.menubar.find(e=>e.id== menuid),
-    [openMenu, set_openMenu]= React.useState(-1)
-
-  function onMenuClick(e, inbounds, menu){
-    Functions.cancelEvent(e)
-    set_openMenu(inbounds ? menu : -1)
-  }
+    [openMenu, set_openMenu, menuProps]= useMenuItems(false, 250)
 
   return (
     <div {...rest}>
@@ -158,9 +156,9 @@ export const MenuBar= ({ menuid=-1, zindex=4096, onItemClick=(event, menuid, ite
             const k= `mi${i}`
             return <Menu key={k} className="__stv-menu-item" role="menu" data-type="menu" zindex={zindex+1}
                 menuid={e} openDir={menubar.open} openState={openMenu==e} 
-                onMenu={(ev, inbounds)=>onMenuClick(ev, inbounds, e)} 
                 onItem={(e,m,i)=>{set_openMenu(-1); onItemClick(e,m,i)}}
                 getValue={getValue} getState={getState}
+                {...menuProps.get(e)}
               />
           }
           return <li key={`mi${i}`} className="strevee-error" >missingno</li>

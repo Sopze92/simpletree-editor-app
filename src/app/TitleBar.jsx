@@ -55,6 +55,7 @@ const TitleBar= ()=>{
           case MenuConstants.MENU_ITEM_ID.menu_file_reload: console.log("reload file from disk"); break
           case MenuConstants.MENU_ITEM_ID.menu_file_save: console.log("save file"); break
           case MenuConstants.MENU_ITEM_ID.menu_file_saveas: console.log("save file as"); break
+          // unused
           case MenuConstants.MENU_ITEM_ID.menu_file_saveall: console.log("save all files"); break
         }
       case MenuConstants.MENU_ID.menu_edit:
@@ -73,7 +74,7 @@ const TitleBar= ()=>{
           case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: actions.settings.toggleSetting('editor_sidepanel'); break
           case MenuConstants.MENU_ITEM_ID.menu_view_appearance: console.log("appearance"); break
           case MenuConstants.MENU_ITEM_ID.menu_view_presets: console.log("presets"); break
-          case MenuConstants.MENU_ITEM_ID.menu_view_frameless: actions.settings.toggleSetting('view_decorated'); break
+          case MenuConstants.MENU_ITEM_ID.menu_view_frameless: actions.backend.toggleFrameless(); break
           case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: actions.settings.toggleSetting('view_statusbar'); break
         }
       case MenuConstants.MENU_ID.menu_help:
@@ -91,31 +92,18 @@ const TitleBar= ()=>{
     }
   }
 
-  function getValue(menuid, itemid){
-    if(itemid!= -1)
-      switch(menuid){
-        case MenuConstants.MENU_ID.menu_view:
-          switch(itemid){
-            case MenuConstants.MENU_ITEM_ID.menu_view_menubar: return actions.settings.getSetting('view_menu')
-            case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: return actions.settings.getSetting('editor_toolbar')
-            case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: return actions.settings.getSetting('editor_sidepanel')
-            case MenuConstants.MENU_ITEM_ID.menu_view_frameless: return actions.settings.getSetting('view_decorated')
-            case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: return actions.settings.getSetting('view_statusbar')
-          }
-      }
-    throw(itemid)
-  }
-
   function getState(menuid, itemid){
     if(itemid== -1) return true
     switch(menuid){
+      case MenuConstants.MENU_ID.menu_file:
+        switch(itemid){
+          case MenuConstants.MENU_ITEM_ID.menu_file_reload: return actions.file.isActiveFileOnDisk()
+          case MenuConstants.MENU_ITEM_ID.menu_file_save: return actions.file.isActiveFileOnDisk()
+        }
       case MenuConstants.MENU_ID.menu_view:
         switch(itemid){
-          case MenuConstants.MENU_ITEM_ID.menu_view_menubar: return actions.settings.getSetting('view_menu')
-          case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: return actions.settings.getSetting('editor_toolbar')
-          case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: return actions.settings.getSetting('editor_sidepanel')
-          case MenuConstants.MENU_ITEM_ID.menu_view_frameless: return actions.settings.getSetting('view_decorated')
-          case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: return actions.settings.getSetting('view_statusbar')
+          case MenuConstants.MENU_ITEM_ID.menu_view_menubar: return false
+          case MenuConstants.MENU_ITEM_ID.menu_view_frameless: return false
         }
       case MenuConstants.MENU_ID.menu_file_recent:
         switch(itemid){
@@ -125,10 +113,40 @@ const TitleBar= ()=>{
     return true
   }
 
+  function getValue(menuid, itemid){
+    if(itemid!= -1)
+      switch(menuid){
+        case MenuConstants.MENU_ID.menu_view:
+          switch(itemid){
+            case MenuConstants.MENU_ITEM_ID.menu_view_menubar: {
+              const value= actions.settings.getSetting('view_menu')
+              return value.ok && value.value
+            }
+            case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: {
+              const value= actions.settings.getSetting('editor_toolbar')
+              return value.ok && value.value
+            }
+            case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: {
+              const value= actions.settings.getSetting('editor_sidepanel')
+              return value.ok && value.value
+            }
+            case MenuConstants.MENU_ITEM_ID.menu_view_frameless: {
+              const value= actions.settings.getSetting('view_decorated')
+              return value.ok && value.value
+            }
+            case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: {
+              const value= actions.settings.getSetting('view_statusbar')
+              return value.ok && value.value
+            }
+          }
+      }
+    throw(itemid)
+  }
+
   return (
     <div stv-toolbar={""} className="__stv-titlebar">
       <div stv-toolbar-section={""}>
-        { !settings.view_decorated &&
+        { (true || !settings.view_decorated) &&
         <>
           <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
           <div stv-toolbar-separator={""}/>
@@ -142,15 +160,15 @@ const TitleBar= ()=>{
           />
         }
       </div>
-      { !settings.view_decorated &&
+      { false && !settings.view_decorated &&
       <>
         <div stv-toolbar-separator={""}/>
-        <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, "maximize")}}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}}/>
         <div stv-toolbar-section={""} className="__stv-titlebar-wincontrol">
           <div stv-toolbar-separator={""}/>
-          <button onClick={(e)=>{handleWindowAction(e, "minimize")}}id="win-btn-minimize"><SVG_icon_minimize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, "maximize")}}id="win-btn-maximize"><SVG_icon_maximize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, "close")}}id="win-btn-close"><SVG_icon_close/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.minimize)}}id="win-btn-minimize"><SVG_icon_minimize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}}id="win-btn-maximize"><SVG_icon_maximize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.close)}}id="win-btn-close"><SVG_icon_close/></button>
         </div>
       </>
       }

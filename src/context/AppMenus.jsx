@@ -121,7 +121,7 @@ const MENU_TITLEBAR_FILE= Object.freeze({
     { type:MENU_ITEM.separator },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_save, label:"Save", pnemonic:"Ctrl+S" },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveas, label:"Save as" },
-    { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveall, label:"Save all" },
+    //{ type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveall, label:"Save all" },
     { type:MENU_ITEM.separator },
     { type:MENU_ITEM.menu, id: MENU_ID.menu_file_import},
     { type:MENU_ITEM.menu, id: MENU_ID.menu_file_export},

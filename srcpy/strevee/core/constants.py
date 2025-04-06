@@ -6,7 +6,7 @@ def void_with_kwargs(**kwargs): ...
 # root modes
 
 ROOT_DEFAULT=     0x00
-ROOT_CUSTOM=      0x01
+ROOT_FOLDER=      0x01
 ROOT_LOCALHOST=   0x02
 
 # menubar

@@ -18,15 +18,15 @@ if __name__ == "__main__":
 
   for e in args:
     if e == '--devmode': dev_mode= True
-    if e == '--nosplash': show_splash= False
+    elif e == '--nosplash': show_splash= False
 
     if root_mode== __CONST__.ROOT_DEFAULT:
 
-      if e.startswith('--root='): 
-        root= f"{e.split('=', 1)[1]}"
-        root_mode= __CONST__.ROOT_CUSTOM
+      if e == '--folder': 
+        root= os.abspath("..")
+        root_mode= __CONST__.ROOT_FOLDER
 
-      if e.startswith('--localhost='): 
+      elif e == '--localhost': 
         root= ""
         use_dist= False
         root_mode= __CONST__.ROOT_LOCALHOST

@@ -4,11 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "f": "vite",
-    "b": "python srcpy\\main.py --devmode --localhost=5350",
-    "fb": "vite build",
-    "test": "vite build && python srcpy\\main.py --devmode --root=F:\\Development\\MindsideGames\\_Tools\\strevee-python",
-    "build": "python -m nuitka --mode=app --follow-imports --include-package-data=dist --main=srcpy/main.py --output-dir=build --output-filename=strevee"
+    "vite": "vite",
+    "py": "python srcpy\\main.py --devmode --nosplash --localhost",
+    "test": "vite build && python srcpy\\main.py --devmode --nosplash --folder",
+    "build": "vite build && python -m nuitka --mode=app --follow-imports --include-package-data=dist --main=srcpy/main.py --output-dir=build --output-filename=strevee"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

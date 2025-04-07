@@ -73,3 +73,12 @@
 .__stv-ps-5em     { padding-left: 5em }
 .__stv-ps-7x5em   { padding-left: 7.5em }
 .__stv-ps-10em    { padding-left: 10em }
+
+.__stv-row { display: flex; flex-direction: row; }
+.__stv-row-inv { display: flex; flex-direction: row-reverse; }
+.__stv-col { display: flex; flex-direction: column; }
+.__stv-col-inv { display: flex; flex-direction: column-reverse; }
+.__stv-flex-size { flex: 1; }
+
+.__stv-w100 { width: 100%; }
+.__stv-h100 { height: 100%; }

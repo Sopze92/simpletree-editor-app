@@ -31,9 +31,16 @@ export const Constants= Object.freeze({
     contributing: 2
   },
 
-  STATUSBAR_ITEM_TYPE: {
+  LAYOUT_MODE: {
+    welcome: 0,
+    settings: 1,
+    editor: 2
+  },
+
+  APP_ELEMENT_TYPE: {
     tool: 0,
-    element: 1
+    element: 1,
+    setting: 2
   },
   
   FILEVIEW_COMMAND: {
@@ -265,14 +272,17 @@ const DEFAULTS= Object.freeze({
   ready:    { app:false, contexmenu:false, file:false },
   stamp:    { general:0, file:0 },
   settings: { // snake case for ease of parsing
-    active_theme: "app-theme-dark",
+    active_layout: Constants.LAYOUT_MODE.editor,
     app_multiFile_support: false,
     view_menu: true, 
     view_decorated: true,
+    // .ini
+    active_theme: "app-theme-dark",
     view_statusbar: true,
     editor_toolbar: true,
     editor_sidepanel: true,
-    editor_sidepanel_right: true
+    editor_sidepanel_right: true,
+    recents_size: 7
   },
   store: {
     activeFile: -1,
@@ -292,6 +302,10 @@ const DEFAULTS= Object.freeze({
   }
 })
 
+const disabledKeys= [
+  'F3', '__F5', 'F7', 'F12'
+]
+
 const AppContext= ReactComponent=>{
 
   const GlobalsWrapper= ()=>{
@@ -305,7 +319,7 @@ const AppContext= ReactComponent=>{
             stamp:    ()=> globals.stamp,     // control timestamps
             settings: ()=> globals.settings,  // app settigns
             store:    ()=> globals.store,     // app things
-            files:    ()=> globals.files,      // open file(s) data
+            files:    ()=> globals.files,     // open file(s) data
             parser:   ()=> globals.parser,    // data computing things
             editor:   ()=> globals.editor     // editor things
           },
@@ -330,6 +344,7 @@ const AppContext= ReactComponent=>{
 			setGlobals(newGlobals)
     }
 
+    // DEPRECATED
     React.useEffect(()=>{
       if(backendResponse) {
 
@@ -343,34 +358,27 @@ const AppContext= ReactComponent=>{
           case _en.dnd_enter:
             console.log("dnd_enter!")
             break;
-          case _en.menu_item_click:
-            switch(payload.id){
-              case 'mi_file_new': {
-                  globals.actions.file.create(true)
-                } break
-              case 'mi_file_save': {
-                  console.log("save file!")
-                } break
-              case 'mi_view_menubar': {
-                  globals.actions.settings.toggleSetting('view_menu')
-                } break
-              case 'mi_view_decorated': {
-                  globals.actions.settings.toggleSetting('view_decorated')
-                } break
-              case 'mi_view_statusbar': globals.actions.settings.toggleSetting('view_statusbar'); break
-              case 'mi_view_tools': globals.actions.settings.toggleSetting('editor_toolbar'); break
-              case 'mi_view_panel': globals.actions.settings.toggleSetting('editor_sidepanel'); break
-            }
-            break;
         }
       }
     },[backendResponse])
 
+    function _keyHandler(e){
+      if (disabledKeys.includes(e.key)) e.preventDefault()
+      else globals.actions._onKeyPressedEvent(e)
+    }
+
+    // app initialize
     React.useEffect(()=>{
-      globals.actions._initialize()
-      window.globals= globals
+      window.addEventListener('pywebviewready', ()=>{
+        document.addEventListener('keydown', _keyHandler)
+        globals.actions._initialize()
+  
+        // DEV: dev stage only
+        window.globals= globals
+      })
     },[])
 
+    // update theme class
     React.useEffect(()=>{
       const 
         prevThemes= Array.from(document.body.classList).filter(e => e.startsWith("app-theme-")),
@@ -380,6 +388,7 @@ const AppContext= ReactComponent=>{
       document.body.classList.toggle(theme, true)
     },[globals.settings.active_theme])
 
+    // DEPRECATED
     React.useEffect(()=>{
       //for(const v of Object.values(Constants.BACKEND_EVENTS)){
       //  globals.actions.backend.listenEvent(v, set_backendResponse)
@@ -409,11 +418,17 @@ const globalsState= ({ actions, get, set })=>{
 
     actions: { // ---------------------------------------------------------------------------------------------------------------- GENERAL
 
-      _initialize: ()=>{
-        
-        //backend_init(Constants.BACKEND_EVENTS)
-        
-        // TODO: load config
+      _initialize: async()=>{
+
+        const 
+          py= pywebview.api,
+          settings= await py.load_settings(".\\settings.ini")
+
+        if(settings.status == 200){
+          for(const [k, v] of Object.entries(settings.data)){
+            actions().settings.setSetting(k, v)
+          }
+        }
 
         set.ready({app: true})
       },
@@ -438,15 +453,12 @@ const globalsState= ({ actions, get, set })=>{
             case Constants.BUILTIN_LINK.feedback: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app/issues"); break;
             case Constants.BUILTIN_LINK.contributing: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app/blob/nuitka/contributing.md"); break;
           }
+        },
+
+        toggleSettingsWindow: ()=>{
+          pywebview.api.toggle_settings_window()
         }
         
-      },
-
-      layout: {
-
-        setBounds: (x,y)=>{
-
-        }
       },
 
       settings: { // ---------------------------------------------------------------------------------------------------------------- SETTINGS
@@ -501,6 +513,22 @@ const globalsState= ({ actions, get, set })=>{
         }
       },
 
+      layout: { // ---------------------------------------------------------------------------------------------------------------- LAYOUT
+
+        toggleSettingsLayout: ()=>{
+          const 
+            layout= get.settings().active_layout,
+            newlayout= layout == Constants.LAYOUT_MODE.settings ? Constants.LAYOUT_MODE.editor : Constants.LAYOUT_MODE.settings
+
+            actions().layout.setLayoutMode(newlayout)
+        },
+
+        setLayoutMode: (mode)=>{
+          actions().settings.setSetting("active_layout", mode)
+        }
+
+      },
+
       store: { // ---------------------------------------------------------------------------------------------------------------- STORE
 
         fileviewCommand: (cmd)=> {
@@ -509,7 +537,7 @@ const globalsState= ({ actions, get, set })=>{
           set.store({history})
         },
 
-        set_hoverElementData: (data)=> { set.store({ hoverElementData: data }) },
+        set_hoverElementData: (type, data)=> { set.store({ hoverElementData: {type, data} }) },
 
         set_dragElement: (idx, hid)=> { set.store({ dragElement: idx != -1 ? actions().parser.parseDataElement(idx, hid, { body:false }) : null }) },
 

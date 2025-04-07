@@ -44,6 +44,7 @@ const MENU_ITEM_ID= Object.freeze({
   menu_view_menubar:               0x17,
   menu_view_toolbar:               0x18,
   menu_view_sidepanel:             0x19,
+  menu_view_sidepanel_right:       0x24,
   menu_view_presets:               0x1A,
   menu_view_appearance:            0x1B,
   menu_view_language:              0x1C,
@@ -140,21 +141,25 @@ const MENU_TITLEBAR_FILE_RECENT= Object.freeze({
 
 const MENU_TITLEBAR_FILE_IMPORT= Object.freeze({
   id: MENU_ID.menu_file_import, label:"Import", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
-    { type:MENU_ITEM.item, id: 0, label:"Extensible Markup Language (.xml)" },
-    { type:MENU_ITEM.item, id: 1, label:"HyperText Markup Language (.htm / .html)" },
-    { type:MENU_ITEM.item, id: 2, label:"JavaScript Object Notation (.json)" },
-    { type:MENU_ITEM.item, id: 3, label:"Windows Registry/Configuration File (.reg / .ini)" },
-    { type:MENU_ITEM.item, id: 4, label:"Plain Text File (.txt)" },
+    { type:MENU_ITEM.item, id: 0, label:"sTreeve Library (.tre, .trl)" },
+    { type:MENU_ITEM.separator },
+    { type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
+    { type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
+    { type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
+    { type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
+    { type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
   ]
 })
 
 const MENU_TITLEBAR_FILE_EXPORT= Object.freeze({
   id: MENU_ID.menu_file_export, label:"Export", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
-    { type:MENU_ITEM.item, id: 0, label:"Extensible Markup Language (.xml)" },
-    { type:MENU_ITEM.item, id: 1, label:"HyperText Markup Language (.htm / .html)" },
-    { type:MENU_ITEM.item, id: 2, label:"JavaScript Object Notation (.json)" },
-    { type:MENU_ITEM.item, id: 3, label:"Windows Registry/Configuration File (.reg / .ini)" },
-    { type:MENU_ITEM.item, id: 4, label:"Plain Text File (.txt)" },
+    { type:MENU_ITEM.item, id: 0, label:"sTreeve Library (.tre, .trl)" },
+    { type:MENU_ITEM.separator },
+    { type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
+    { type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
+    { type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
+    { type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
+    { type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
   ]
 })
 
@@ -190,6 +195,7 @@ const MENU_TITLEBAR_VIEW= Object.freeze({
     { type:MENU_ITEM.boolean, id: MENU_ITEM_ID.menu_view_menubar, label:"Menubar" },
     { type:MENU_ITEM.boolean, id: MENU_ITEM_ID.menu_view_toolbar, label:"Toolbar", pnemonic:"T" },
     { type:MENU_ITEM.boolean, id: MENU_ITEM_ID.menu_view_sidepanel, label:"Sidepanel", pnemonic:"N" },
+    { type:MENU_ITEM.boolean, id: MENU_ITEM_ID.menu_view_sidepanel_right, label:"Sidepanel on Right" },
     { type:MENU_ITEM.separator },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_view_presets, label:"Presets", pnemonic:"Ctrl+P" },
     { type:MENU_ITEM.separator },

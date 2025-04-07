@@ -14,7 +14,6 @@ if __name__ == "__main__":
   root_mode= __CONST__.ROOT_DEFAULT
   dev_mode= False
   show_splash= True
-  use_dist= True
 
   for e in args:
     if e == '--devmode': dev_mode= True
@@ -28,8 +27,9 @@ if __name__ == "__main__":
 
       elif e == '--localhost': 
         root= ""
-        use_dist= False
         root_mode= __CONST__.ROOT_LOCALHOST
+
+  use_dist= root_mode != __CONST__.ROOT_LOCALHOST
 
   url_splash= os.path.join(root, *(("dist", "splash.html") if use_dist else ("splash.html",)))
   url_index= os.path.join(root, *(("dist", "index.html") if use_dist else ("index.html",)))

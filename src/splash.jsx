@@ -5,9 +5,12 @@ import './res/splash.css'
 import img_splash from './res/splash.webp'
 
 const Splash= ()=>{
-
   React.useEffect(()=>{
-    document.addEventListener('contextmenu', (e)=>{e.preventDefault(); e.stopPropagation()})
+    window.addEventListener('pywebviewready', ()=>{
+      const events= ['keydown', 'mousedown', 'contextmenu']
+      for(let i=0; i< events.length; i++) document.addEventListener(events[i], _nullifyBehaviour)
+      function _nullifyBehaviour(e){ e.preventDefault(); e.stopPropagation() }
+    })
   },[])
 
   return (
@@ -17,8 +20,8 @@ const Splash= ()=>{
   )
 }
 
-ReactDOM.createRoot(document.getElementById("react-root")).render(
-  <React.StrictMode>
-    <Splash/>
-  </React.StrictMode>,
-);
+function main(){
+  ReactDOM.createRoot(document.getElementById("react-root")).render(<Splash/>)
+}
+
+main()

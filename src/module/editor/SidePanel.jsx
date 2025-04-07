@@ -27,7 +27,7 @@ const Module= ()=>{
         <div stv-sidepanel-row={""}>
           <span>Type:</span>
           <select defaultValue={0} onChange={(e)=>{merge_libraryData({type:e.target.value})}}>
-            { parser.types.length > 0 &&
+            { parser && parser.types.length > 0 &&
               parser.types.map((e,i)=>
                 <option key={i} value={i}>{e[0]}</option>
               )
@@ -38,7 +38,7 @@ const Module= ()=>{
         <div stv-toolbar-separator={""}/>
         <span>Attributes</span>
         <div stv-sidepanel-row={""}>
-          { parser.types[libraryData.type][2].map((e,i)=>
+          { parser && parser.types[libraryData.type][2].map((e,i)=>
               <select key={i}defaultValue={e} onChange={(e)=>{return;merge_libraryData({type:e.target.value})}}>
                 { parser.attrs.length > 0 &&
                   parser.attrs.map((e2,i2)=>

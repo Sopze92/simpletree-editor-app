@@ -7,4 +7,5 @@ dev_mode:bool= False
 show_splash:bool= True
 
 win_splash:Window= None
+win_settings:Window= None
 win_main:Window= None

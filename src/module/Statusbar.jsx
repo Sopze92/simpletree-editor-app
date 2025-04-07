@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Globals, Constants } from '../../context/AppContext.jsx'
+import { Globals, Constants } from '../context/AppContext.jsx'
 
 const StatusbarChunkBase= ({ data })=>{
   return (
@@ -62,6 +62,25 @@ const StatusbarChunkTree= ({ data })=>{
   )
 }
 
+const StatusbarChunkSetting= ({ data })=>{
+  return (
+    <div stv-toolbar-section={""}>
+      <div stv-statusbar-item={""} className="__stv-statusbar-item-base __stv-statusbar-setting-type">
+        <span>{data.type}</span>
+      </div>
+      <div stv-statusbar-item={""} className="__stv-statusbar-item-base">
+        <span>{data.name}</span>
+      </div>
+      <div stv-statusbar-item={""} className="__stv-statusbar-item-base">
+        <span>{data.value}</span>
+      </div>
+      <div stv-statusbar-item={""} className="__stv-statusbar-item-grow">
+        <span>{data.description}</span>
+      </div>
+    </div>
+  )
+}
+
 const Module= ()=>{
 
   const 
@@ -69,7 +88,7 @@ const Module= ()=>{
     [ localData, set_localData ]= React.useState(null)
 
   React.useEffect(()=>{
-    if(store.hoverElementData != null) set_localData({ type: Constants.STATUSBAR_ITEM_TYPE.element, data: store.hoverElementData})
+    if(store.hoverElementData != null) set_localData(store.hoverElementData)
     else set_localData(null)
   },[store.hoverElementData])
 
@@ -77,7 +96,7 @@ const Module= ()=>{
     <div stv-toolbar={""} stv-statusbar={""}>
       { localData && 
       <>
-        { localData.type== Constants.STATUSBAR_ITEM_TYPE.element &&
+        { localData.type== Constants.APP_ELEMENT_TYPE.element &&
         <>
           <StatusbarChunkBase data={localData.data}/>
           { localData.data.container &&
@@ -94,6 +113,11 @@ const Module= ()=>{
           }
           <div stv-toolbar-separator={""}/>
           <StatusbarChunkTree data={localData.data}/>
+        </>
+        }
+        { localData.type== Constants.APP_ELEMENT_TYPE.setting &&
+        <>
+          <StatusbarChunkSetting data={localData.data}/>
         </>
         }
       </>

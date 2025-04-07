@@ -68,13 +68,14 @@ const TitleBar= ()=>{
           case MenuConstants.MENU_ITEM_ID.menu_edit_select_all: console.log("select all"); break
           case MenuConstants.MENU_ITEM_ID.menu_edit_select_none: console.log("select none"); break
           case MenuConstants.MENU_ITEM_ID.menu_edit_select_invert: console.log("invert selection"); break
-          case MenuConstants.MENU_ITEM_ID.menu_edit_settings: console.log("open preferences window"); break
+          case MenuConstants.MENU_ITEM_ID.menu_edit_settings: actions.layout.toggleSettingsLayout(); break
         }
       case MenuConstants.MENU_ID.menu_view:
         switch(itemid){
           case MenuConstants.MENU_ITEM_ID.menu_view_menubar: console.log("menubar"); break
           case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: actions.settings.toggleSetting('editor_toolbar'); break
           case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: actions.settings.toggleSetting('editor_sidepanel'); break
+          case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel_right: actions.settings.toggleSetting('editor_sidepanel_right'); break
           case MenuConstants.MENU_ITEM_ID.menu_view_appearance: console.log("appearance"); break
           case MenuConstants.MENU_ITEM_ID.menu_view_presets: console.log("presets"); break
           case MenuConstants.MENU_ITEM_ID.menu_view_frameless: actions.backend.toggleFrameless(); break
@@ -95,6 +96,11 @@ const TitleBar= ()=>{
     }
   }
 
+  function _getValueBool(setting){
+    const value= actions.settings.getSetting(setting)
+    return value.ok && value.value
+  }
+
   function getState(menuid, itemid){
     if(itemid== -1) return true
     switch(menuid){
@@ -107,6 +113,7 @@ const TitleBar= ()=>{
         switch(itemid){
           case MenuConstants.MENU_ITEM_ID.menu_view_menubar: return false
           case MenuConstants.MENU_ITEM_ID.menu_view_frameless: return false
+          case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel_right: return _getValueBool('editor_sidepanel')
         }
       case MenuConstants.MENU_ID.menu_file_recent:
         switch(itemid){
@@ -121,26 +128,12 @@ const TitleBar= ()=>{
       switch(menuid){
         case MenuConstants.MENU_ID.menu_view:
           switch(itemid){
-            case MenuConstants.MENU_ITEM_ID.menu_view_menubar: {
-              const value= actions.settings.getSetting('view_menu')
-              return value.ok && value.value
-            }
-            case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: {
-              const value= actions.settings.getSetting('editor_toolbar')
-              return value.ok && value.value
-            }
-            case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: {
-              const value= actions.settings.getSetting('editor_sidepanel')
-              return value.ok && value.value
-            }
-            case MenuConstants.MENU_ITEM_ID.menu_view_frameless: {
-              const value= actions.settings.getSetting('view_decorated')
-              return value.ok && value.value
-            }
-            case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: {
-              const value= actions.settings.getSetting('view_statusbar')
-              return value.ok && value.value
-            }
+            case MenuConstants.MENU_ITEM_ID.menu_view_menubar: return _getValueBool('view_menu')
+            case MenuConstants.MENU_ITEM_ID.menu_view_toolbar: return _getValueBool('editor_toolbar')
+            case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel: return _getValueBool('editor_sidepanel')
+            case MenuConstants.MENU_ITEM_ID.menu_view_sidepanel_right: return _getValueBool('editor_sidepanel_right')
+            case MenuConstants.MENU_ITEM_ID.menu_view_frameless: return _getValueBool('view_decorated')
+            case MenuConstants.MENU_ITEM_ID.menu_view_statusbar: return _getValueBool('view_statusbar')
           }
       }
     throw(itemid)

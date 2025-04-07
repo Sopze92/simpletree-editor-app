@@ -1,8 +1,10 @@
 import webview as wv
-from strevee.core import globals as __GLOBALS__, constants as __CONST__
+from strevee.core import util, globals as __GLOBALS__, constants as __CONST__
+from strevee.logging import logger
 
-def response(status:int, message:str, *kwargs:any):
-  return {"status": status, "message": message, "data": kwargs}
+import os
+
+def response(status:int, message:str, data:any): return {"status": status, "message": message, "data": data}
 
 class app_api():
 
@@ -43,3 +45,27 @@ class app_api():
     import webbrowser
     result= webbrowser.open(url, new=0, autoraise=True)
     return response(200, 'ok') if result else response(400, 'failed')
+  
+  def toggle_settings_window(self):
+    if not __GLOBALS__.win_settings:
+      use_dist= __GLOBALS__.root_mode != __CONST__.ROOT_LOCALHOST
+      url_settings= os.path.join(__GLOBALS__.root, *(("dist", "settings.html") if use_dist else ("settings.html",)))
+      logger.log(f"creating settings window: {url_settings}")
+      __GLOBALS__.win_settings= wv.create_window("sTrevee Editor Settings", url=url_settings, width= 512, height= 640, resizable=False, background_color= "#000000", easy_drag= False)
+    else:
+      __GLOBALS__.win_settings.destroy()
+      __GLOBALS__.win_settings= None
+    return response(200, 'ok')
+  
+  def load_settings(self, path):
+    with open(path, mode='r') as fi:
+      data= {}
+      for l in fi.readlines():
+        l= l.replace('\n','').replace('\r','')
+        t, d= l.split(':',1)
+        k, v= d.split('=',1)
+        t= t.lower()
+        k= k.lower()
+        data[k]= util.getTypedValue(t, v)
+      return response(200, 'ok', data)
+    return response(400, 'failed')

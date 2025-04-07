@@ -1,16 +1,15 @@
 import React from 'react'
 
-import { DndContext, DragOverlay, MouseSensor, useSensor, useSensors, useDndContext } from '@dnd-kit/core'
-
 import { Globals, Constants, Functions } from '../context/AppContext.jsx'
-
 import { Scrollable, Droppable } from '../app/Internal.jsx'
 
-import useDndStylizer from '../hooks/UseDndStylizer.jsx'
+import { DndContext, DragOverlay, MouseSensor, useSensor, useSensors, useDndContext } from '@dnd-kit/core'
 
 import SidePanel from '../module/editor/SidePanel.jsx'
 import Toolbar from '../module/editor/Toolbar.jsx'
 import Tabrow from '../module/editor/Tabrow.jsx'
+
+import useDndStylizer from '../hooks/UseDndStylizer.jsx'
 
 import '../res/editor.css'
 import '../res/fileview.css'
@@ -18,13 +17,14 @@ import '../res/fileview.css'
 const View= ()=>{
 
   const 
-    { ready, store, files, stamp, editor, actions, settings } = React.useContext(Globals),
+    { store, files, editor, actions, settings } = React.useContext(Globals),
+    [ dataTree, set_dataTree ]= React.useState([]),
     dnd_mouseSensor= useSensor(MouseSensor, { activationConstraint: {distance: 64} }),
     dnd_sensors= useSensors(dnd_mouseSensor),
-    [ dataTree, set_dataTree ]= React.useState([]),
     _editor_ref= React.createRef(null),
-    _fileview_ref= React.createRef(null),
-    _dnd_ready= useDndStylizer(_editor_ref, "__stv_dnd_liveregion_editor")
+    _fileview_ref= React.createRef(null)
+    
+  useDndStylizer(_editor_ref, "__stv_dnd_liveregion_editor")
 
   React.useEffect(()=>{
 
@@ -63,12 +63,12 @@ const View= ()=>{
       stv-editor-anydrag={store.dragElement?"":null}
       onMouseMove={handleMouseMove}>
       { settings.editor_toolbar && <Toolbar />}
-      { settings.app_multifile_support && <Tabrow />}
-      {/* Maybe change this to a list of <Tab> containing the rendered file, then only display the active tab (so we dont have to recompute all on tab navigation) */}
       <DndContext sensors={dnd_sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
-          <div stv-editor={""} className="viewport-container">
-            { store.activeFile != -1 &&
+          <div stv-editor-files={""}>
+          { settings.app_multiFile_support && files.length > 1 && <Tabrow />}
+            { store.activeFile != -1 && 
+            <div stv-editor-fileview={""} className="viewport-container">
               <Scrollable options={{overflow:{x:'hidden'}}}>
                 <div ref={_fileview_ref} stv-fileview={""}>
                   { dataTree && dataTree.length > 0 ?
@@ -77,13 +77,14 @@ const View= ()=>{
                       <Droppable hid={[dataTree.elements.length+1, 'H']} />
                     </>
                     :
-                    <span>Drag & drop elements from the library to begin</span>
+                    <span>Drop elements from the library to begin</span>
                   }
                 </div>
               </Scrollable>
+            </div>
             }
           </div>
-          { settings.editor_sidepanel && ready.parser &&
+          { settings.editor_sidepanel &&
             <SidePanel />
           }
         </div>
@@ -97,9 +98,9 @@ const View= ()=>{
   function handleMouseMove(e){
     if(e.target.matches("[te-attr], [te-head]") && !store.dragElement) {
       const he= Functions.findTEHierarchyData(e.target)
-      actions.store.set_hoverElementData(he)
+      actions.store.set_hoverElementData(Constants.APP_ELEMENT_TYPE.element, he)
     }
-    else if(store.hoverElementData) actions.store.set_hoverElementData(null)
+    else if(store.hoverElementData) actions.store.set_hoverElementData(null, null)
   }
 
   function handleDragStart(e){

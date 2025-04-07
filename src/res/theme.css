@@ -18,6 +18,13 @@
   --ti-col-disabled: #373737;
   --ti-bgcol-disabled: #272727;
 
+  /* tabrow */
+
+  --tr-bgcol: #999;
+  --tab-bgcol: #ddd;
+  --tab-bgcol-hover: #ddd;
+  --tab-bgcol-active: #ddd;
+
   /* titlebar */
 
   --tb-title-col: #222;
@@ -76,6 +83,14 @@
   --ti-bgcol-pressed-hover: #202020;
   
   --tmi-bordercol: #303030;
+
+  /* tabrow */
+
+  --tr-bgcol: #111;
+  --tab-bgcol: #222;
+  --tab-bgcol-hover: #333;
+  --tab-col-active: #969696;
+  --tab-bgcol-active: #272727;
 
   /* titlebar */
 

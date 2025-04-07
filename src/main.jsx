@@ -5,6 +5,7 @@ import Layout from "./Layout.jsx"
 
 import 'overlayscrollbars/overlayscrollbars.css'
 import './res/styles.css'
+import './res/utility.css'
 import './res/theme.css'
 
 function main(){

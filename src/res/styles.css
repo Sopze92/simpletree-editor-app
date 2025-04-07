@@ -202,6 +202,7 @@ body {
 
   border-bottom: 1px solid var(--mb-bordercol);
   height: 1.5em;
+  max-width: 100%;
   z-index: 16384;
 
   & .__stv-titlebar-title {
@@ -252,19 +253,47 @@ body {
     }
   }
 
-  & .__stv-titlebar-wincontrol {
+  & .__stv-titlebar-wincontrol, .__stv-titlebar-buttons {
 
     width: min-content;
 
     & > button > svg {
       stroke: var(--tb-col);
       pointer-events: none;
-      width: 2em;
       height: inherit;
     }
 
     & > button:hover > svg {
       stroke: var(--mi-col-hover);
+    }
+  
+  }
+
+  & .__stv-titlebar-buttons {
+
+    margin-left: auto;
+
+    & > button > svg {
+      width: 1em;
+    }
+
+    & #svg-icon-theme-light {
+      stroke: #fff;
+    }
+
+    & #svg-icon-theme-dark {
+      fill: #555;
+    }
+
+    & > button#win-btn-theme > svg {
+      stroke: var(--mi-win_btn_close);
+    }
+  }
+
+  & .__stv-titlebar-wincontrol {
+
+    & > button > svg {
+      width: 2em;
     }
 
     & > button#win-btn-close > svg {

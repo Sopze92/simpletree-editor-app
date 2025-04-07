@@ -9,6 +9,9 @@ import SVG_icon_minimize from "../res/icon/app-minimize.svg"
 import SVG_icon_maximize from "../res/icon/app-maximize.svg"
 import SVG_icon_close from "../res/icon/app-close.svg"
 
+import SVG_icon_theme_light from "../res/icon/theme-mode-light.svg"
+import SVG_icon_theme_dark from "../res/icon/theme-mode-dark.svg"
+
 let _dragOrigin= null
 
 const TitleBar= ()=>{
@@ -146,12 +149,8 @@ const TitleBar= ()=>{
   return (
     <div stv-toolbar={""} className="__stv-titlebar">
       <div stv-toolbar-section={""}>
-        { (true || !settings.view_decorated) &&
-        <>
-          <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
-          <div stv-toolbar-separator={""}/>
-        </>
-        }
+        <div className="__stv-titlebar-title">{Constants.APP_TITLE}</div>
+        <div stv-toolbar-separator={""}/>
         { settings.view_menu &&
           <MenuBar menuid={MenuConstants.MENUBAR_ID.menubar_titlebar} className="__stv_titlebar-menu" 
             onItemClick={onItemClick}
@@ -160,18 +159,28 @@ const TitleBar= ()=>{
           />
         }
       </div>
-      { false && !settings.view_decorated &&
+      <div stv-toolbar-separator={""}/>
+      { !settings.view_decorated ?
       <>
-        <div stv-toolbar-separator={""}/>
         <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}}/>
+        <div stv-toolbar-separator={""}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-buttons">
+          <button onClick={_=>{actions.settings.temp_toggleThemeLight()}} id="win-btn-theme">{actions.settings.temp_isThemeLight() ? <SVG_icon_theme_dark/> : <SVG_icon_theme_light/> }</button>
+        </div>
         <div stv-toolbar-section={""} className="__stv-titlebar-wincontrol">
           <div stv-toolbar-separator={""}/>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.minimize)}}id="win-btn-minimize"><SVG_icon_minimize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}}id="win-btn-maximize"><SVG_icon_maximize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.close)}}id="win-btn-close"><SVG_icon_close/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.minimize)}} id="win-btn-minimize"><SVG_icon_minimize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}} id="win-btn-maximize"><SVG_icon_maximize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.close)}} id="win-btn-close"><SVG_icon_close/></button>
         </div>
       </>
-      }
+      :
+      <>
+        <div stv-toolbar-separator={""}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-buttons __stv-pe-x500em">
+          <button onClick={_=>{actions.settings.temp_toggleThemeLight()}}>{actions.settings.temp_isThemeLight() ? <SVG_icon_theme_dark/> : <SVG_icon_theme_light/> }</button>
+        </div>
+      </>}
     </div>
   )
 }

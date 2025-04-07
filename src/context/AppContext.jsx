@@ -268,7 +268,7 @@ const DEFAULTS= Object.freeze({
     active_theme: "app-theme-dark",
     app_multiFile_support: false,
     view_menu: true, 
-    view_decorated: false,
+    view_decorated: true,
     view_statusbar: true,
     editor_toolbar: true,
     editor_sidepanel: true,
@@ -482,6 +482,22 @@ const globalsState= ({ actions, get, set })=>{
             }
           }
           return {ok:false}
+        },
+
+        temp_isThemeLight: ()=>{
+          const theme= get.settings().active_theme
+          return !theme.includes("dark")
+        },
+
+        temp_toggleThemeLight: ()=>{
+          const modes= ["dark", "light"]
+          let theme= get.settings().active_theme
+          for(let i=0,j=1; i< 2; i++, j--){
+            if(!theme.includes(modes[i])) continue;
+            theme= theme.replace(modes[i], modes[j])
+            break
+          }
+          actions().settings.setSetting("active_theme", theme)
         }
       },
 

@@ -18,6 +18,17 @@ def destroy_splash():
 def create_window(file_url):
   logger.log(f"creating main window: {file_url}")
   __GLOBALS__.win_main= wv.create_window("sTrevee Editor", hidden=__GLOBALS__.show_splash, url=file_url, width= 1280, height= 720, min_size= (480,512), js_api=app_api(), background_color= "#000000", easy_drag= False)
+  __GLOBALS__.win_main.events.before_show += on_before_show_main
+  __GLOBALS__.win_main.events.closing += on_closing_main
+
+def on_before_show_main(window):
+  from strevee import fileio
+  print(type(window.native), window.native)
+  fileio.register()
+
+def on_closing_main():
+  window= __GLOBALS__.win_main
+  return True
 
 def start():
 

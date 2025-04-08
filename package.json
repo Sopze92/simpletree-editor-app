@@ -8,7 +8,8 @@
     "vite": "vite",
     "py": "python srcpy\\main.py --devmode --nosplash --localhost",
     "test": "vite build && python srcpy\\main.py --devmode --nosplash --folder",
-    "build": "vite build && python -m nuitka --mode=app --follow-imports --include-package-data=dist --main=srcpy/main.py --output-dir=build --output-filename=strevee"
+    "onefile": "vite build && python nuitka_compiler.py --mode=app --output-dir=output/nautki_onefile",
+    "standalone": "vite build && python nuitka_compiler.py --mode=standalone --output-dir=output/nautki_standalone"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

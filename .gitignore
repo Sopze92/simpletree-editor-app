@@ -18,6 +18,7 @@ dist-ssr
 .cache/
 .vscode/
 build
+build_*
 .idea
 .DS_Store
 *.suo
@@ -29,4 +30,8 @@ build
 #custom dev
 .dev/
 _pyenv
+output
 **/__pycache__/
+
+# not yet
+*.tre

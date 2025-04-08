@@ -1,3 +1,10 @@
+from typing import Any
+
+def Response(status:int, message:str, body:Any): return {'status': status, 'message': message, 'body': body}
+def Response200(body:Any | None = None): return Response(200, "ok", body)
+def Response400(message:str, body:Any | None = None): return Response(400, message, body)
+def Response404(message:str = "Not found", body:Any | None = None): return Response(404, message, body)
+def Response500(message:str, body:Any | None = None): return Response(500, message, body)
 
 class FileParser():
 

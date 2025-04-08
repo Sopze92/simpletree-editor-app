@@ -1,5 +1,3 @@
-import webview as wv
-
 __PRODUCT_NAME__= "\033[1;92msTrevee\033[0m"
 
 __LOG_STR__= f"[{__PRODUCT_NAME__}]"

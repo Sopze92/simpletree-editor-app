@@ -1,9 +1,9 @@
-import webview as wv
 from strevee import fileio, logger, globals as __GLOBALS__, constants as __CONST__
+from strevee.types import Response, Response200, Response400
+
+import webview as wv
 
 import os
-
-def response(status:int, message:str, body:any): return {"status": status, "message": message, "body": body}
 
 class app_api():
 
@@ -13,7 +13,7 @@ class app_api():
 
   def healthcheck(self):
     print("ok")
-    return response(200, 'ok')
+    return Response200()
   
   def window_action(self, action):
 
@@ -32,30 +32,32 @@ class app_api():
         w.restore()
         self.maximized= False
     elif action== __CONST__.WINDOW_ACTION_CLOSE: w.destroy()
-    else: return response(400, 'invalid')
-    return response(200, 'ok')
+    else: return Response400("invalid")
+    return Response200()
   
   def set_decorated(self, state):
     # not yet supported in pywebview, let me some time to implement it there
     print("unsupported")
-    return response(400, 'unsupported')
+    return Response400("unsupported")
   
   def open_url(self, url):
     import webbrowser
     result= webbrowser.open(url, new=0, autoraise=True)
-    return response(200, 'ok') if result else response(400, 'failed')
+    return Response200() if result else Response400('failed')
   
   def toggle_settings_window(self):
     if not __GLOBALS__.win_settings:
       use_dist= __GLOBALS__.root_mode != __CONST__.ROOT_LOCALHOST
-      url_settings= os.path.join(__GLOBALS__.root, *(("dist", "settings.html") if use_dist else ("settings.html",)))
+      url_settings= os.path.join(__GLOBALS__.root_pack, *(("dist", "settings.html") if use_dist else ("settings.html",)))
       logger.log(f"creating settings window: {url_settings}")
       __GLOBALS__.win_settings= wv.create_window("sTrevee Editor Settings", url=url_settings, width= 512, height= 640, resizable=False, background_color= "#000000", easy_drag= False)
     else:
       __GLOBALS__.win_settings.destroy()
       __GLOBALS__.win_settings= None
-    return response(200, 'ok')
+    return Response200()
   
-  def load_settings(self, path):
-    status, result= fileio.load_file("internal", path)
-    return response(200, 'ok', result[1]) if status else response(400, result["message"])
+  def load_internal(self, path):
+    print(f"loading file internal: {path}")
+    result= fileio.load_file("internal", path)
+    print(result['status'], result['message'])
+    return result

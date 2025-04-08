@@ -9,7 +9,7 @@ const entryFileSettings= [
 ]
 
 const assetFileSettings= [
-  { ext:['css'], path: "data/[name].[ext]" },
+  { ext:['css'], path: "styles/[name].[ext]" },
   { ext:['png','jpg','webp'], path: "resources/[name].[ext]" },
   { ext:['ico','svg'], path: "resources/icon/[name].[ext]" },
   { ext:['ttf','otf'], path: "resources/font/[name].[ext]" },
@@ -17,6 +17,7 @@ const assetFileSettings= [
 
 export default defineConfig(async () => ({
   clearScreen: false,
+  publicDir: "pack/public",
   server: {
     port: 5350,
     strictPort: true,
@@ -44,18 +45,19 @@ export default defineConfig(async () => ({
     })
   ],
   build: {
-    //minify: true,
+    minify: false,
     assetsInlineLimit: 0,
+    outDir: "output/vite",
     rollupOptions: { 
       input: { 
-        main: "index.html",
+        main: "main.html",
         splash: "splash.html"
       },
       output: {
         hashCharacters: "hex",
 
-        entryFileNames: (info)=>{ return "data/strevee_[name].js" },
-        chunkFileNames: (info)=>{ return "data/[name].js" },
+        entryFileNames: (info)=>{ return "in_[name].js" },
+        chunkFileNames: (info)=>{ return "c_[name].js" },
 
         assetFileNames: (info)=>{
           const ext = info.name.split('.').pop()

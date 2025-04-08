@@ -420,18 +420,28 @@ const globalsState= ({ actions, get, set })=>{
 
       _initialize: async()=>{
 
-        const 
-          py= pywebview.api,
-          result= await py.load_settings(".\\settings.ini")
+        const api= pywebview.api
 
-        console.log(result)
-
-        if(result.status == 200){
-          for(const [k, v] of Object.entries(result.body)){
+        let response= await api.load_internal(".\\settings.ini")
+        if(response.status == 200){
+          console.log("loaded settings", response.body)
+          for(const [k, v] of Object.entries(response.body)){
             actions().settings.setSetting(k, v)
           }
         }
-        else console.error("Couldn't read settings file: ", result.message)
+        else console.error("Couldn't read settings file: ", response.message)
+
+        response= await api.load_internal(".\\recents.ini")
+        if(response.status == 200){
+          console.log("loaded recents", response.body)
+        }
+        else console.error("Couldn't read recents file: ", response.message)
+        
+        response= await api.load_internal(".\\session.ini")
+        if(response.status == 200){
+          console.log("loaded session", response.body)
+        }
+        else console.error("Couldn't read session file: ", response.message)
 
         set.ready({app: true})
       },

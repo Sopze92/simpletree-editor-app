@@ -1,2 +1,3 @@
 nuitka==2.6.9
-pywebview==5.4
+#pywebview==5.4 has a relevant bug
+git+https://github.com/r0x0r/pywebview@master

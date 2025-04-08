@@ -2,7 +2,7 @@
 import React from 'react'
 
 //import API, { initialize as backend_init } from './BackendApi.jsx'
-import { BaseElement, BaseElementGroup, BaseElementBlock } from '../treeview/component/TreeElement.jsx'
+import { BaseElement, BaseElementGroup, BaseElementBlock } from '../component/TreeElement.jsx'
 
 export const Constants= Object.freeze({
   APP_TITLE: "sTrevee",
@@ -422,13 +422,16 @@ const globalsState= ({ actions, get, set })=>{
 
         const 
           py= pywebview.api,
-          settings= await py.load_settings(".\\settings.ini")
+          result= await py.load_settings(".\\settings.ini")
 
-        if(settings.status == 200){
-          for(const [k, v] of Object.entries(settings.data)){
+        console.log(result)
+
+        if(result.status == 200){
+          for(const [k, v] of Object.entries(result.body)){
             actions().settings.setSetting(k, v)
           }
         }
+        else console.error("Couldn't read settings file: ", result.message)
 
         set.ready({app: true})
       },

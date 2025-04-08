@@ -4,10 +4,10 @@ import { useSortable } from '@dnd-kit/sortable'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 
-import { Globals, Constants, Functions } from '../../context/AppContext.jsx'
-import SVG_dragger from '../../res/editor/dragger.svg'
+import { Globals, Constants, Functions } from '../context/AppContext.jsx'
+import SVG_dragger from '../res/editor/dragger.svg'
 
-import { Droppable } from "../../app/Internal.jsx"
+import { Droppable } from "../app/Internal.jsx"
 
 export const Attr= ({ type, children, ...rest })=> <div {...rest} te-attr={type}>{children}</div>
 export const AttrSimple= ({ type, text, rich, ...rest })=> <Attr {...rest} type={type}><span>{text}</span></Attr>

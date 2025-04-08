@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "setup": "npm install && python -m venv _pyenv && _pyenv\\scripts\\pip install -r requirements.txt",
     "vite": "vite",
     "py": "python srcpy\\main.py --devmode --nosplash --localhost",
     "test": "vite build && python srcpy\\main.py --devmode --nosplash --folder",

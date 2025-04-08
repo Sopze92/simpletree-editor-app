@@ -1,3 +1,4 @@
+from strevee.types import FileParser
 from webview import Window
 
 root:str= "./"
@@ -9,3 +10,5 @@ show_splash:bool= True
 win_splash:Window= None
 win_settings:Window= None
 win_main:Window= None
+
+parsers:dict[str, type[FileParser]]= {}

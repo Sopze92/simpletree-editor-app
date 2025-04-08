@@ -1,10 +1,9 @@
 import webview as wv
-from strevee.core import util, globals as __GLOBALS__, constants as __CONST__
-from strevee.logging import logger
+from strevee import fileio, logger, globals as __GLOBALS__, constants as __CONST__
 
 import os
 
-def response(status:int, message:str, data:any): return {"status": status, "message": message, "data": data}
+def response(status:int, message:str, body:any): return {"status": status, "message": message, "body": body}
 
 class app_api():
 
@@ -58,14 +57,5 @@ class app_api():
     return response(200, 'ok')
   
   def load_settings(self, path):
-    with open(path, mode='r') as fi:
-      data= {}
-      for l in fi.readlines():
-        l= l.replace('\n','').replace('\r','')
-        t, d= l.split(':',1)
-        k, v= d.split('=',1)
-        t= t.lower()
-        k= k.lower()
-        data[k]= util.getTypedValue(t, v)
-      return response(200, 'ok', data)
-    return response(400, 'failed')
+    status, result= fileio.load_file("internal", path)
+    return response(200, 'ok', result[1]) if status else response(400, result["message"])

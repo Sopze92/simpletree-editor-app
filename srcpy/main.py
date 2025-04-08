@@ -1,5 +1,4 @@
-from strevee.core import window_manager, globals as __GLOBALS__, constants as __CONST__
-from strevee.logging import logger
+from strevee import window_manager, fileio, logger, globals as __GLOBALS__, constants as __CONST__
 
 print(f"\n---- starting sTrevee ----\n")
 
@@ -22,7 +21,7 @@ if __name__ == "__main__":
     if root_mode== __CONST__.ROOT_DEFAULT:
 
       if e == '--folder': 
-        root= os.abspath("..")
+        root= os.path.abspath(".")
         root_mode= __CONST__.ROOT_FOLDER
 
       elif e == '--localhost': 
@@ -46,6 +45,8 @@ if __name__ == "__main__":
   __GLOBALS__.root_mode= root_mode
   __GLOBALS__.dev_mode= dev_mode
   __GLOBALS__.show_splash= show_splash
+  
+  fileio.register()
 
   window_manager.create_window(url_index)
   if __GLOBALS__.show_splash: window_manager.create_splash(url_splash)

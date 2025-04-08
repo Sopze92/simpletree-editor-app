@@ -1,7 +1,7 @@
-from strevee.core import constants as __CONST__, globals as __GLOBALS__
-from strevee.logging import logger
+from strevee import constants as __CONST__, globals as __GLOBALS__
+from strevee import logger
 
-from strevee.api.api import app_api
+from strevee.api import app_api
 
 import webview as wv
 

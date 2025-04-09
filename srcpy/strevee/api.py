@@ -1,5 +1,5 @@
 from strevee import fileio, logger, globals as __GLOBALS__, constants as __CONST__
-from strevee.types import Response, Response200, Response400
+from strevee.util import Response, Response200, Response400
 
 import webview as wv
 

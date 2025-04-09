@@ -1,11 +1,35 @@
 from strevee import util, constants as __CONST__
-from strevee.types import FileParser
+
+from strevee.plugin import constants as __PLUGIN_CONST__
+from strevee.plugin.types import FileParserPlugin
 
 import os
 
-__PARSER_NAME__= "internal"
+'''
+This is just a simple fileparser for read/write the internal .ini files, such as the ones in ./root/
+'''
 
-class __PARSER__(FileParser):
+class __PLUGIN__(FileParserPlugin):
+
+  # TODO: make it internally packed instead of plugin
+  # TODO: file writer
+
+  def register(self)->dict:
+    return {
+      "id": "__internal",
+      "version": "0.1.0",
+      "parsers_data": [
+        {
+          "mode": __PLUGIN_CONST__.FILEPARSER_MODE_READ,
+          "func": self.read
+        },
+        {
+          "mode": __PLUGIN_CONST__.FILEPARSER_MODE_WRITE,
+          "func": self.write
+        }
+      ],
+      
+    }
 
   def read(self, data:str) -> tuple[int, dict]:
     lines= data.readlines()
@@ -53,9 +77,5 @@ class __PARSER__(FileParser):
 
     return (True, result)
 
-def register():
-  return __PARSER__(
-      file_mode= 'rw', data_mode= 't',
-      open_mode= __CONST__.OPENMODE_INTERNAL,
-      save_mode= __CONST__.SAVEMODE_NONE,
-    )
+  def write(self)-> bytes:
+    return b'hello_world'

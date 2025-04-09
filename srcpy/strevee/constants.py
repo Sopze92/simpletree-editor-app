@@ -26,3 +26,7 @@ SAVEMODE_NONE=            0x00
 SAVEMODE_INTERNAL=        0x01
 SAVEMODE_SAVE=            0x02
 SAVEMODE_EXPORT=          0x03
+
+# plugin types
+
+PLUGINTYPE_FILEPARSER=    0x00

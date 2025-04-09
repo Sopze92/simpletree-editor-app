@@ -1,5 +1,5 @@
-from strevee import logger, globals as __GLOBALS__, constants as __CONST__
-from strevee.types import Response, Response200, Response400, Response404
+from strevee import logger, util, globals as __GLOBALS__, constants as __CONST__
+from strevee.util import Response, Response200, Response400, Response404
 
 import os
 
@@ -9,7 +9,7 @@ def resolve_path(path:str):
 def load_file(parser:str, path:str):
 
   filepath= resolve_path(path)
-  if not parser in __GLOBALS__.parsers: return Response400(f"No registerd file parser for ({parser}), file: {filepath}")
+  if not parser in __GLOBALS__.plugins['file_parsers']: return Response400(f"No registerd file parser for ({parser}), file: {filepath}")
   
   file_parser= __GLOBALS__.parsers[parser]
   logger.log(f"reading file: ({parser}) {filepath}")
@@ -58,38 +58,49 @@ def save_file(parser:str, path:str, overwrite:bool=False):
       return Response400(error, {"exception": e})
   return Response400(f"Unknwown error writting file: ({parser}) {filepath}")
 
-def __register_file_parser(path, name, read, write):
-  import importlib.util as iu
-  try:
-    s = iu.spec_from_file_location("module.name", path)
-    m = iu.module_from_spec(s)
-    s.loader.exec_module(m)
+def register_plugins():
+  from strevee.plugin import types as ptypes
 
-    parser= getattr(m, "__PARSER_NAME__")
+  registry_info= {}
 
-    __GLOBALS__.parsers[parser]= getattr(m, "register")()
+  for t in ptypes._TYPES:
+    path= os.path.join(__GLOBALS__.path_plugins, t.folder)
 
-    return f"  [success] {name} ({parser}), {'read' if read else ""} {'write' if write else ''}"
-  except Exception as e:
-    print(f"error registering parser {name}: ", e)
-    return f"  [failed] not registered: {name}"
+    if not os.path.exists(path): os.mkdir(path)
+    if not t.folder in __GLOBALS__.plugins: __GLOBALS__.plugins[t.folder]= {}
 
-def register():
-  path= os.path.join(__GLOBALS__.path_plugins, "file_parsers")
-  logger.log(f"gathering file parsers from: {path}")
-  if not os.path.exists(path):
-    logger.log(f"no user file parsers directory")
-    return
-  
-  parser_info= []
-  for f in os.listdir(path):
-    if not f.endswith(".py") or not '_' in f: continue
-    modes= f.split('_',1)[0]
-    r= 'r' in modes
-    w= 'w' in modes
-    if not (r or w):
-      logger.wrn("found a parser without read nor write abilities, skipped") 
-      continue
-    info= __register_file_parser(os.path.join(path, f), f, 'r' in modes, 'w' in modes)
-    parser_info.append(info)
-  logger.logm(f"registered {len(__GLOBALS__.parsers)} file parsers:", *parser_info)
+    plugins_info=[]
+    plugins_count=0
+    
+    for f in os.listdir(path):
+
+      filepath= os.path.join(path, f)
+
+      if not f.endswith(".py"): continue
+      try:
+        m= util.get_file_as_module(filepath)
+
+        if t.is_subclass(m.__PLUGIN__) and t.is_legit(m.__PLUGIN__):
+          plugin= m.__PLUGIN__()
+          regdata= plugin.__stv_register__()
+
+          __GLOBALS__.plugins[t.folder][regdata['id']]= [regdata, plugin]
+
+          version= f" | v{regdata['version']} " if 'version' in regdata else ""
+          plugins_info.append(f"    [success] {f} | {regdata['id']}{version} -- {os.path.getsize(filepath)}Kb")
+          plugins_count+=1
+        else: 
+          raise Exception("plugin class mismatch")
+      except Exception as e:
+        logger.err(f"error registering parser {f}:", e)
+        plugins_info.append(f"    [failed] not registered: {f} ")
+
+    registry_info[t.folder]= {
+      "entry": f"  {t.category} ({t.folder})",
+      "list": [*plugins_info],
+      "count": plugins_count
+    }
+    
+  plugin_count= sum([v["count"] for v in registry_info.values()])
+
+  logger.logm(f"registered {plugin_count} plugins:", *[ e for pi in registry_info.values() for e in (f"{pi['entry']} [{pi['count']}]:", *pi['list'])  ])

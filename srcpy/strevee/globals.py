@@ -1,5 +1,3 @@
-from strevee.types import FileParser
-
 dev_environment:bool= False
 dev_mode:bool= False
 
@@ -17,4 +15,4 @@ win_splash= None
 win_main= None
 win_settings= None
 
-parsers:dict[str, type[FileParser]]= {}
+plugins:dict= {}

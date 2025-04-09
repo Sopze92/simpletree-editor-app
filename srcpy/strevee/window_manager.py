@@ -24,7 +24,7 @@ def create_window(file_url):
 def on_before_show_main(window):
   from strevee import fileio
   print(type(window.native), window.native)
-  fileio.register()
+  fileio.register_plugins()
 
 def on_closing_main():
   window= __GLOBALS__.win_main

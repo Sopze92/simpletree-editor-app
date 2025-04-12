@@ -1,4 +1,5 @@
-from strevee import util, constants as __CONST__
+from strevee import util
+from strevee.builtins import constants as stv_const
 from strevee.exceptions import MissingAttributeError, AttributeTypeError
 from strevee.types import FileHandler, IterType
 
@@ -18,7 +19,7 @@ def _test_attributes(attributes, data, name):
     _t= type(_o)
 
     if _t in attr[2]: 
-      if _t == dict: _test_attributes(attr[3], _p, f"{name}.{attr[0]}")
+      if _t == dict and len(attr) > 3: _test_attributes(attr[3], _p, f"{name}.{attr[0]}")
 
     elif isinstance(_o, list) or isinstance(_o, tuple):
       _it= tuple(e for e in attr[2] if type(e) == IterType)
@@ -82,12 +83,11 @@ class FileHandlerPlugin(PluginBase, FileHandler):
       ('label',      False,   (str)),                       # label for system's file dialog dropdown
       ('types',      False,   (str, IterType(str))),        # extensions to include, for file dialog dropdown + filtering, dnd awareness (if any)
       ('drop',       False,   (bool, str)),                 # True to allow drop for this filetype, drop region is defined by 'type' unless set to 'user', then this must be a DNDRegion_Enum
-      ('reader',      True,   (str, None)),                 # reader id to be used
-      ('writer',      True,   (str, None))                  # writer id to be used
+      ('tasks',       True,   (dict,))                      # tasks to perform defined as: { 'name':'handlerid', 'name2':'otherhandler', ...}, note that task name must be 'read' or 'write' for implement common IO functionality
     )),
     ('handlers',    True,   (IterType(dict),), (
       ('id',          True,   (str,)),                      # unique string ID within the plugin, for filetype binding
-      ('type',        True,   (str,)),                      # type of handler, one of HandlerType_Enum ( read | write )
+      ('task',        True,   (str,)),                      # name of the task to be performed, must be the same as the key in filetype.tasks that calls it, used for control
       ('passes',      True,   (IterType(dict),), (          # list of passes for this handler, max 16
         ('name',        True,   (str,)),                    # name of the pass, must be unique within the current reader, is up to you how you use it
         ('mode',        True,   (str,))                     # one of FileMode_Enum ( stv_text | stv_bytes ) stv_text is 'utf-8', python encoders also allowed, see: https://docs.python.org/3/library/codecs.html#standard-encodings
@@ -108,6 +108,8 @@ class FileHandlerPlugin(PluginBase, FileHandler):
   @classmethod
   def __stv_meta__(cls, regdata:dict, instance:type['FileHandlerPlugin'])-> dict:
     meta= super().__stv_meta__(regdata, instance)
+    if 'filetypes' in regdata:
+      for ft in regdata['filetypes']: ft['tasks']['__KEEPDICT__']= None
     _test_attributes(__class__._STV_REGISTRY, regdata, "[registry]")
     return meta
 

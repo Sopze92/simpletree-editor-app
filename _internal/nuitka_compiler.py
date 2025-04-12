@@ -1,5 +1,9 @@
 
-APP_VERSION="0.1.0"
+APP_VERSION='undefined'
+
+with open('_internal/version.txt', "r+") as fstream:
+  line= fstream.readline().strip().replace('\n',''.replace('\r',''))
+  APP_VERSION= f"v{line}"
 
 MODE_STANDALONE= 0
 MODE_ONEFILE= 1
@@ -33,6 +37,7 @@ config=[
 
   "--include-raw-dir=output/vite=data/app",
   "--include-raw-dir=pack/plugins=plugins",
+  "--include-raw-dir=pack/data=data/default",
 
   "--windows-console-mode=force",
   #f"--windows-icon-from-ico={icon_file}",

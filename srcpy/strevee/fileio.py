@@ -1,4 +1,4 @@
-from strevee import logger, util, globals as __GLOBALS__, constants as __CONST__
+from strevee import util
 from strevee.types import DictObject
 
 from strevee.exceptions import *
@@ -15,54 +15,73 @@ def get_file_as_module(path):
   return m
 
 def resolve_path(path:str):
-  return os.path.join(__GLOBALS__.root, path[2:]) if (path.startswith('.\\') or path.startswith('./')) else os.path.abspath(path)
-
-def load_file_internal(path:str):
-  try: return load_file("__internal__:ft_internal", path, '_internal', {}), 200
-  except Exception as e: 
-    logger.err(e)
-    if __GLOBALS__.dev_traceback:
-      import traceback
-      traceback.print_exc()
-    return None, 404 if isinstance(e, (FileNotFoundError, FileHandlerNotFoundError)) else 400
-
-def load_file(filetype_id:str, path:str, trigger, settings): # RAISEABLE
-
-  filepath= resolve_path(path)
-  if not os.path.exists(filepath): raise FileNotFoundError(f"File not found: {filepath}")
-
+  return os.path.join(stv_globals.root, path[2:]) if (path[0] == '.' and path[1] in ['\\','/']) else os.path.abspath(path) if path[0] in ['\\','/'] else path
+  
+def _get_filehandler(filetype_id, task):
+  
   pid, fid= filetype_id.split(':')
-  if not pid in __GLOBALS__.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{filetype_id}', file: {filepath}") 
+  if not pid in stv_globals.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{filetype_id}'") 
 
-  package= __GLOBALS__.file_handlers[pid]
+  package= stv_globals.file_handlers[pid]
 
-  # get filetype
-  filetype_list= tuple(e for e in package.filetypes if e.id == fid and e.reader)
-  if not filetype_list: raise FileHandlerError(f"file handler with id '{pid}' has no filetype with id '{fid}', file: {filepath}") 
-  if len(filetype_list) > 1: raise FileHandlerError(f"file handler with id '{pid}' has ambiguous filetypes under same id: '{fid}', file: {filepath}") 
+  # filetype
+  filetype_list= tuple(e for e in package.filetypes if e.id == fid and hasattr(e.tasks, task) and e.tasks[task])
+  if not filetype_list: raise FileHandlerError(f"no filetypes with '{pid}@{fid}' and a '{task}' task call") 
+  if len(filetype_list) > 1: raise FileHandlerError(f"found multiple filetypes '{pid}@{fid}' and a '{task}' task call, please make the ids unique") 
 
   filetype= filetype_list[0]
-  hid= filetype.reader
+  hid= filetype.tasks[task]
 
-  # get handler
-  handler_list= tuple(e for e in package.handlers if e.id == hid and e.type=='read')
-  if not handler_list: raise FileHandlerError(f"file handler with id '{pid}' has no 'read' handler with id '{fid}', file: {filepath}") 
-  if len(handler_list) > 1: raise FileHandlerError(f"file handler with id '{pid}' has ambiguous 'read' handlers under same id: '{hid}', file: {filepath}") 
+  # handler
+  handler_list= tuple(e for e in package.handlers if e.id == hid and e.task==task)
+  if not handler_list: raise FileHandlerError(f"filehandler task required by '{pid}:{hid}@{fid}' doesn't exist") 
+  if len(handler_list) > 1: raise FileHandlerError(f"filehandler task required by '{pid}:{hid}@{fid}' leaded to ambiguity between {len(handler_list)} tasks, please make the ids unique") 
 
   handler= handler_list[0]
 
-  if not handler.passes: raise FileHandlerError(f"file handler with id '{pid}' has ambiguous 'read' handlers under same id: '{hid}', file: {filepath}") 
+  if not handler.passes: raise FileHandlerError(f"filetype '{pid}:{hid}@{fid}' defined no passes for its task") 
 
-  logger.log(f"reading: {filepath}, handler: {pid}:{hid}@{fid}")
+  return (pid, fid, hid, f"{pid}:{hid}@{fid}-{task}", package, filetype, handler)
+
+def file_read_internal(path:str, silent:bool):
+  try: 
+    return file_read("__internal__:ft_internal", True, path, '_internal', {}), 200
+  except Exception as e: 
+    if not silent:
+      stv_logger.err(e)
+      if stv_globals.dev_traceback:
+        import traceback
+        traceback.print_exc()
+    return None, 404 if isinstance(e, (FileNotFoundError, FileHandlerNotFoundError)) else 400
+
+# copy file without importing any lib
+def file_copy(path_src, path_dst):
+  with open(path_src, 'rb') as fsrc:
+    with open(path_dst, 'wb') as fdst:
+      fdst.write(fsrc.read())
+      fdst.close()
+    fsrc.close()
+
+def try_copy_default(filepath):
+  _f= os.path.basename(filepath)
+  _df= os.listdir(stv_globals.path_defaults)
+  if _f in _df: file_copy(os.path.join(_df, _f), filepath)
+
+# ----------------------------------------------------------------------------------------------------------------------- read file
+def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_default:bool): # RAISEABLE
+  
+  filepath= resolve_path(path)
+  if not os.path.exists(filepath) and (not search_default or not try_copy_default(filepath)): raise FileNotFoundError(f"File not found: {filepath}")
+
+  pid, fid, hid, fullid, package, filetype, handler = _get_filehandler(filetype_id, 'read')
+  stv_logger.log(f"reading: {filepath}, handler: {fullid}")
 
   # setup
 
-  id_str= f"{pid}:{hid} ({fid})"
-
-  f= os.path.basename(filepath)
-  dot= f.rfind('.')
-  f= f[:dot] if dot != -1 else f
-  ext= f[dot+1:] if dot != -1 else None
+  fn= os.path.basename(filepath)
+  dot= fn.rfind('.')
+  f= fn[:dot] if dot != -1 else f
+  ext= fn[dot+1:] if dot != -1 else None
 
   pass_fstream:StringIO | BytesIO= None
   pass_context= DictObject({
@@ -103,7 +122,7 @@ def load_file(filetype_id:str, path:str, trigger, settings): # RAISEABLE
     p= pass_context.passes[pi]
     pass_context.active_pass= DictObject({ 'index': i, 'name': p.name, 'mode': p.mode })
     
-    exception_data= (id_str, pi, p, times_passes_overriden)
+    exception_data= (fullid, pi, p, times_passes_overriden)
 
     is_last_pass= pi == len(pass_context.passes)-1
 
@@ -145,7 +164,7 @@ def load_file(filetype_id:str, path:str, trigger, settings): # RAISEABLE
         if 'error' in result: 
           js_result.message= result['error']
           js_result.success= False
-          logger.err(result['error'])
+          stv_logger.err(result['error'])
         else:
           js_result.success= True
           if 'message' in result: js_result.message= result['message']
@@ -163,12 +182,39 @@ def load_file(filetype_id:str, path:str, trigger, settings): # RAISEABLE
     i+=1
     pi+=1
 
-    if i > __CONST__.FILEHANDLER_MAX_ITERATIONS: raise FileHandlerTooManyPassIterationsError(*exception_data)
+    if i > stv_const.FILEHANDLER_MAX_ITERATIONS: raise FileHandlerTooManyPassIterationsError(*exception_data)
 
   return js_result.dict() # return intentional js_object to be used in frontend
 
-def save_file(parser:str, path:str, overwrite:bool=False):
-  ...
+# ----------------------------------------------------------------------------------------------------------------------- write file
+def file_write(filetype_id:str, path:str, trigger, settings:dict, overwrite:bool=False):
+  
+  filepath= resolve_path(path)
+  dirpath= os.path.dirname(filepath)
+  if not os.path.exists(dirpath): os.makedirs(dirpath)
+
+  fn= os.path.basename(filepath)
+  dot= fn.rfind('.')
+  f= fn[:dot] if dot != -1 else f
+  ext= fn[dot+1:] if dot != -1 else None
+
+  if os.path.exists(filepath) and (not overwrite or trigger in ('save_inc','export_inc','backup')):
+    n= 1
+    while os.path.exists(filepath):
+      nf= f"{f}_{n:03}"
+      filepath= f"{nf}{f'.{ext}' if ext else ''}"
+      n+= 1
+    f= nf
+    stv_logger.log(f"changed filename to avoid overwriting: {nf}")
+
+  pid, fid, hid, fullid, package, filetype, handler = _get_filehandler(filetype_id, 'write')
+  stv_logger.log(f"writing: {filepath}, handler: {fullid}")
+
+  print("-------------------------------------------------------------- TODO: FILE WRITE") # TODO: file write
+
+  return None
+
+# plugin registry
 
 def register_plugins():
   from strevee.plugins import types as ptypes
@@ -177,10 +223,10 @@ def register_plugins():
 
   # plugin types
   for t in ptypes.registry():
-    path= os.path.join(__GLOBALS__.path_plugins, t.folder)
+    path= os.path.join(stv_globals.path_plugins, t.folder)
 
     if not os.path.exists(path): os.mkdir(path)
-    if not hasattr(__GLOBALS__, t.folder): setattr(__GLOBALS__, t.folder, {})
+    if not hasattr(stv_globals, t.folder): setattr(stv_globals, t.folder, {})
 
     plugins_info=[]
     plugins_count=0
@@ -195,7 +241,7 @@ def register_plugins():
         m= get_file_as_module(filepath)
 
         if not hasattr(m, "__PLUGIN__"): 
-          logger.wrn(f"skipping file: {os.path.basename(filepath)}, reason: no __PLUGIN__ defined, if its a helper file, please consider placing it on a subfolder")
+          stv_logger.wrn(f"skipping file: {os.path.basename(filepath)}, reason: no __PLUGIN__ defined, if its a helper file, please consider placing it on a subfolder")
           continue
 
         if t.is_subclass(m.__PLUGIN__) and t.is_legit(m.__PLUGIN__):
@@ -205,17 +251,17 @@ def register_plugins():
           if not regdata: raise Exception("plugin didn't provide any registry data")
 
           metadata= t.create_metadata(regdata, plugin)
-          __GLOBALS__.__dict__[t.folder][regdata['id']]= DictObject(metadata)
+          stv_globals.__dict__[t.folder][regdata['id']]= DictObject(metadata)
 
-          plugins_info.append(f"    [success] {f} [ {regdata['author']} - {regdata['id']} | {regdata["version"]} ] ({os.path.getsize(filepath)}Kb)")
+          plugins_info.append(f"    [success] {f} [ {regdata['author']} - {regdata['id']} | {regdata["version"]} ] ({os.path.getsize(filepath)}b)")
           plugins_count+=1
         else: 
           raise Exception("plugin class mismatch")
       except Exception as e:
-        logger.err(f"error registering plugin {f} ({t.category}): {e}")
+        stv_logger.err(f"error registering plugin {f} ({t.category}): {e}")
         plugins_info.append(f"    [failed] not registered: {t.folder} -- {f} | {e}")
 
-        if __GLOBALS__.dev_traceback:
+        if stv_globals.dev_traceback:
           import traceback
           traceback.print_exc()
 
@@ -227,8 +273,8 @@ def register_plugins():
     
   plugin_count= sum([v["count"] for v in plugin_summary.values()])
 
-  if plugin_count > 0: logger.logm(f"registered {plugin_count} {'plugin' if plugin_count == 1 else 'plugins'}:", *[ e for pi in plugin_summary.values() for e in (f"{pi['entry']} [{pi['count']}]:", *pi['list'])  ])
-  else: logger.log("no plugins registered")
+  if plugin_count > 0: stv_logger.logm(f"registered {plugin_count} {'plugin' if plugin_count == 1 else 'plugins'}:", *[ e for pi in plugin_summary.values() for e in (f"{pi['entry']} [{pi['count']}]:", *pi['list'])  ])
+  else: stv_logger.log("no plugins registered")
 
 # helpers
 def _get_passes(new_passes, exception_data):

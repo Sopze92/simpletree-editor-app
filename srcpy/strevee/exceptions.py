@@ -1,4 +1,3 @@
-from strevee import constants as __CONST__
 from typing import final
 
 # file handlers
@@ -48,7 +47,7 @@ class FileHandlerTooManyPassIterationsError(FileHandlerPassError):
     super().__init__(invoker, passindex, passinfo, overriden)
 
   def __str__(self):
-    return f"Too many iterations (+{__CONST__.FILEHANDLER_MAX_ITERATIONS}) for file handler: {self._invoker}. Last pass: {self._pass.name}:{self._pass.mode} (index {self._index}) {self.times_overriden_str()}"
+    return f"Too many iterations (+{stv_const.FILEHANDLER_MAX_ITERATIONS}) for file handler: {self._invoker}. Last pass: {self._pass.name}:{self._pass.mode} (index {self._index}) {self.times_overriden_str()}"
 
 @final
 class FileHandlerInvalidPassReturnError(Exception):...
@@ -74,4 +73,4 @@ class AttributeTypeError(Exception):
     self._type_i= type_in
 
   def __str__(self):
-    return f"Wrong registry attribute value type '{self._type_i.__name__}' at {self._name}, must be:{','.join(e.__name__ if type(e) == type else e.__repr__() for e in self._types_r)}"
+    return f"Wrong registry attribute value type at {self._name}, got:{self._type_i.__name__}, expected:{','.join(e.__name__ if type(e) == type else e.__repr__() for e in self._types_r)}"

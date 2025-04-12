@@ -11,7 +11,7 @@ FileDomain_Enum:TypeAlias= Literal['document', 'element', 'library', 'preset', '
 FileMode_Enum:TypeAlias= Literal['stv_text', 'stv_bytes']
 
 FileReadTrigger:TypeAlias= Literal['open', 'reopen', 'import', 'reimport', 'recent', 'drop', '__temp__']
-FileWriteTrigger:TypeAlias= Literal['save', 'save_as', 'export', 'autosave', '__temp__']
+FileWriteTrigger:TypeAlias= Literal['save', 'save_as', 'save_inc', 'export', 'export_last', 'export_inc', 'backup', 'autosave', '__temp__']
 
 HandlerType_Enum:TypeAlias= Literal['read', 'write']
 
@@ -46,7 +46,11 @@ class DictObject():
             if b(e): d[k][i]= a(d[k][i])
     self.__dict__= d
 
-  def __repr__(self): return f"{{{', '.join(self.__dict__.keys())}}}"
+  def __str__(self, *, r:int= 0):
+    return " "*(r*2)+f"\n{' '*(r*2)}".join( f"{k}: {v}" if not isinstance(v, DictObject) else f"{k}:\n{v.__str__(r=r+1)}" for k,v in self.__dict__.items() )
+
+  def __repr__(self): 
+    return f"{{{', '.join(self.__dict__.keys())}}}"
 
   def dict(self): return self.__dict__
 
@@ -107,7 +111,7 @@ class FileHandler():
 
     ## exceptions
     
-    - FileHandlerTooManyPassIterationsError :  if a handler exceeds `strevee.constants.FILEHANDLER_MAX_ITERATIONS` pass iterations
+    - FileHandlerTooManyPassIterationsError :  if a handler exceeds `stv_constants.FILEHANDLER_MAX_ITERATIONS` pass iterations
 
     ## returns (one of) (intermediate passes)
 

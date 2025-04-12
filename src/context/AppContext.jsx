@@ -425,7 +425,7 @@ const globalsState= ({ actions, get, set })=>{
         let response= await api.load_internal(".\\settings.ini")
         if(response.status == 200){
           console.log("loaded settings", response.body)
-          for(const [k, v] of Object.entries(response.body)){
+          for(const [k, v] of Object.entries(response.body.content)){
             actions().settings.setSetting(k, v)
           }
         }

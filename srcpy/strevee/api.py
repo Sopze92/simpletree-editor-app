@@ -57,7 +57,5 @@ class app_api():
     return Response200()
   
   def load_internal(self, path):
-    print(f"loading file internal: {path}")
-    result= fileio.load_file("internal", path)
-    print(result['status'], result['message'])
-    return result
+    js_result, status= fileio.load_file_internal(path)
+    return Response200({**js_result}) if status==200 else Response(status, "couldn't read, see python output for more info")

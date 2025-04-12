@@ -28,10 +28,12 @@ build_*
 *.sw?
 
 #custom dev
+.typed
 .dev/
 _pyenv
 output
 **/__pycache__/
 
 # not yet
+pack/plugins
 *.tre

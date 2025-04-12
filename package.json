@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "setup": "npm install && python -m venv _pyenv && _pyenv\\scripts\\pip install -r requirements.txt",
-    "vite": "vite",
-    "py": "python srcpy\\main.py --devmode --nosplash --localhost",
+    "js": "vite",
+    "py": "python srcpy\\main.py --devmode --traceback --nosplash --localhost",
     "test": "vite build && python srcpy\\main.py --devmode --nosplash --folder",
     "onefile": "vite build && python nuitka_compiler.py --mode=app --output-dir=output/nautki_onefile",
     "standalone": "vite build && python nuitka_compiler.py --mode=standalone --output-dir=output/nautki_standalone"

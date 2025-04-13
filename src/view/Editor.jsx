@@ -60,8 +60,7 @@ const View= ()=>{
     <div ref={_editor_ref} stv-view-editor={""}
       stv-editor-vis-dev={editor.vis_dev?"":null}
       stv-editor-vis-hover={editor.vis_hover?"":null}
-      stv-editor-anydrag={store.dragElement?"":null}
-      onMouseMove={handleMouseMove}>
+      stv-editor-anydrag={store.dragElement?"":null}>
       { settings.editor_toolbar && <Toolbar />}
       <DndContext sensors={dnd_sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
@@ -94,14 +93,6 @@ const View= ()=>{
       </DndContext>
     </div>
   )
-
-  function handleMouseMove(e){
-    if(e.target.matches("[te-attr], [te-head]") && !store.dragElement) {
-      const he= Functions.findTEHierarchyData(e.target)
-      actions.store.set_hoverElementData(Constants.APP_ELEMENT_TYPE.element, he)
-    }
-    else if(store.hoverElementData) actions.store.set_hoverElementData(null, null)
-  }
 
   function handleDragStart(e){
     const data= e.active.data.current;

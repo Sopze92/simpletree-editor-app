@@ -1,15 +1,16 @@
 import React from "react"
 
 import { Constants, Functions, Globals } from '../context/AppContext.jsx'
-import { Constants as MenuConstants, Functions as MenuFunctions, AppMenus } from '../context/AppMenus.jsx'
+import { Constants as MConst, MenuDefinitions } from './MenuDefinitions.jsx'
 import useMenuItems from "../hooks/UseMenuItems.jsx"
 
-export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_SIDES.right, openState, onMenuHover, onMenu, onItem, getValue, getState, ...rest })=>{
+export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.right, openState, onMenuHover, onMenu, onItem, getValue, getState, ...rest })=>{
 
   const 
-    [ openMenuClasses, set_openMenuClasses ]= React.useState(""),
+    { actions, store }= React.useContext(Globals),
+    [ posfixClasses, set_posfixClasses ]= React.useState(""),
     [openMenu, set_openMenu, menuProps]= useMenuItems(-1),
-    menu= AppMenus.menu.find(e=>e.id== menuid),
+    menu= MenuDefinitions.menu.find(e=>e.id== menuid),
     self= React.useRef(null),
     selfMenu= React.useRef(null)
 
@@ -19,7 +20,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
     }
     else {
       set_openMenu(-1)
-      set_openMenuClasses("")
+      set_posfixClasses("")
     }
   },[openState])
 
@@ -30,38 +31,46 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
         bbox= selfMenu.current.getBoundingClientRect(),
         classNames= getPositionClasses(bbox, openDir, menu.direction).join(' ')
 
-      set_openMenuClasses(classNames)
+      set_posfixClasses(classNames)
     }
   },[selfMenu.current, openState])
 
   return (menu &&
-    <div ref={self} className={`${className??""} ${openState?"active": ""}`} {...rest} onClick={e=>onMenu(e, true)}>
+    <div ref={self} className={openState?"__active": null} {...rest} onClick={e=>onMenu(e, true)}>
       <span>{menu.label??"missingno"}</span>
       <span>&gt;</span>
       { openState && 
-        <ul ref={selfMenu} className={`__stv-dropdown-menu ${openMenuClasses}`} style={{zIndex:zindex}}>
+        <ul stv-dropdown-menu={""} ref={selfMenu} className={posfixClasses} style={{zIndex:zindex}}>
           { menu.items.map((e,i)=>{
               if(e){
                 const k= `mi${i}`
                 switch(e.type){
-                  case MenuConstants.MENU_ITEM.label:
+                  case MConst.MENU_ITEM.label:
                     return (
-                      <li key={k} className="__stv-menu-label">
+                      <li key={k} stv-menu-label={""}>
                         <span>{e.label??"missingno"}</span>
                       </li>
                     )
-                  case MenuConstants.MENU_ITEM.menu:
-                    return <Menu key={i} role="menu" className="__stv-menu-item" data-type="menu" zindex={zindex+1}
+                  case MConst.MENU_ITEM.menu:
+                    return <Menu key={i} stv-menu-item={""} role="menu" data-type="menu" zindex={zindex+1}
                       menuid={e.id} openDir={menu.open} openState={openMenu==e}
                       onItem={onItem}
                       getValue={getValue} getState={getState}
                       {...menuProps.get(e)}
                     />
-                  case MenuConstants.MENU_ITEM.item:
+                  case MConst.MENU_ITEM.dynamic:
+                    // TODO: dynamic
+                    return (
+                      <li key={k} stv-menu-label={""} className="strevee-error">
+                        <span>TODO: dynamic :: {e.scope}</span>
+                      </li>
+                    )
+                  case MConst.MENU_ITEM.item:
                     {
                       const enabled= getState(menuid, e.id)
                       return (
-                        <li key={k} className={`__stv-menu-item ${enabled ? "":"__stv-menu-item-disabled"}`} role="button" data-type="item" 
+                        <li key={k} stv-menu-item={""} className={enabled ? null:"__disabled"} role="button" data-type="item"
+                          stv-statusbar-simple={e.description || "no description provided"}
                           onClick={enabled ? (ev)=>{onItem(ev, menuid, e.id)} : _e=>{}}
                         >
                           <span>{e.label??"missingno"}</span>
@@ -71,22 +80,22 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
                         </li>
                       )
                     }
-                  case MenuConstants.MENU_ITEM.separator:
+                  case MConst.MENU_ITEM.separator:
                     return (
-                      <li key={k} className="__stv-menu-separator">
+                      <li key={k} stv-menu-separator={""}>
                         {e.label && <span>e.label</span>}
                       </li>
                     )
-                  case MenuConstants.MENU_ITEM.boolean:
+                  case MConst.MENU_ITEM.boolean:
                     {
                       const 
                         enabled= getState(menuid, e.id),
                         value= getValue(menuid, e.id)
                       return (
-                        <li key={k} className={`__stv-menu-item ${enabled ? "":"__stv-menu-item-disabled"}`} role="checkbox" data-type="boolean"
+                        <li key={k} stv-menu-item={""} className={enabled ? null:"__disabled"} role="checkbox" data-type="boolean"
                           onClick={enabled ? (ev)=>{onItem(ev, menuid, e.id)} : _e=>{}}
                         >
-                          <div className="__stv-menu-boolean">
+                          <div stv-menu-boolean={""}>
                             <span>{value?"▣ ":"▢ "}</span>
                             <span>{e.label??"missingno"}</span>
                           </div>
@@ -98,7 +107,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
                     }
                 }
               }
-              return <li key={`mi${i}`} className="__stv-menu-item strevee-error" >missingno</li>
+              return <li stv-menu-label={""} key={`mi${i}`} className="strevee-error" >missingno</li>
             })
           }
         </ul>
@@ -116,8 +125,8 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
     
     const
       classes= [],
-      _sides= MenuConstants.MENU_SIDE,
-      _dirs= MenuConstants.MENU_DIRECTION
+      _sides= MConst.MENU_SIDE,
+      _dirs= MConst.MENU_DIRECTION
 
     function _checkSide(side){
       switch(side){
@@ -146,7 +155,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MenuConstants.MENU_S
 export const MenuBar= ({ menuid=-1, zindex=4096, onItemClick=(event, menuid, itemid)=>console.log(`Menu item clicked (menuid: ${menuid} itemid:${itemid})\n`, event), getValue, getState, ...rest })=>{
 
   const 
-    menubar= AppMenus.menubar.find(e=>e.id== menuid),
+    menubar= MenuDefinitions.menubar.find(e=>e.id== menuid),
     [openMenu, set_openMenu, menuProps]= useMenuItems(false, 250)
 
   return (

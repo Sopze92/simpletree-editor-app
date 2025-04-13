@@ -81,6 +81,16 @@ const StatusbarChunkSetting= ({ data })=>{
   )
 }
 
+const StatusbarChunkSimple= ({ data })=>{
+  return (
+    <div stv-toolbar-section={""}>
+      <div stv-statusbar-item={""} className="__stv-statusbar-item-base">
+        <span>{data.description}</span>
+      </div>
+    </div>
+  )
+}
+
 const Module= ()=>{
 
   const 
@@ -96,7 +106,7 @@ const Module= ()=>{
     <div stv-toolbar={""} stv-statusbar={""}>
       { localData && 
       <>
-        { localData.type== Constants.APP_ELEMENT_TYPE.element &&
+        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.element &&
         <>
           <StatusbarChunkBase data={localData.data}/>
           { localData.data.container &&
@@ -115,9 +125,14 @@ const Module= ()=>{
           <StatusbarChunkTree data={localData.data}/>
         </>
         }
-        { localData.type== Constants.APP_ELEMENT_TYPE.setting &&
+        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.setting &&
         <>
           <StatusbarChunkSetting data={localData.data}/>
+        </>
+        }
+        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.simple &&
+        <>
+          <StatusbarChunkSimple data={localData.data}/>
         </>
         }
       </>

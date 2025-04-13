@@ -1,5 +1,5 @@
 from strevee import fileio
-from strevee.util import Response, Response200, Response400
+from strevee.util import Response, Response200, Response400, Response404
 
 import webview as wv
 
@@ -57,5 +57,5 @@ class app_api():
     return Response200()
   
   def load_internal(self, path):
-    js_result, status= fileio.file_read_internal(path, True)
-    return Response200({**js_result}) if status==200 else Response(status, "couldn't read file, see python output for more info")
+    status, js_result= fileio.file_read_internal(path, not stv_globals.dev_mode)
+    return Response(status, js_result['message'], js_result['content'])

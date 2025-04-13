@@ -37,10 +37,11 @@ export const Constants= Object.freeze({
     editor: 2
   },
 
-  APP_ELEMENT_TYPE: {
-    tool: 0,
-    element: 1,
-    setting: 2
+  STATUSBAR_HOVERABLE_TYPE: {
+    simple: 0,
+    setting: 1,
+    tool: 2,
+    element: 3
   },
   
   FILEVIEW_COMMAND: {
@@ -425,23 +426,23 @@ const globalsState= ({ actions, get, set })=>{
         let response= await api.load_internal(".\\settings.ini")
         if(response.status == 200){
           console.log("loaded settings", response.body)
-          for(const [k, v] of Object.entries(response.body.content)){
+          for(const [k, v] of Object.entries(response.body)){
             actions().settings.setSetting(k, v)
           }
         }
-        else console.error("Couldn't read settings file: ", response.message)
+        else console.error("Couldn't read settings file:", response.status, response.message)
 
         response= await api.load_internal(".\\recents.ini")
         if(response.status == 200){
           console.log("loaded recents", response.body)
         }
-        else console.error("Couldn't read recents file: ", response.message)
+        else console.error("Couldn't read recents file:", response.status,  response.message)
         
         response= await api.load_internal(".\\session.ini")
         if(response.status == 200){
           console.log("loaded session", response.body)
         }
-        else console.error("Couldn't read session file: ", response.message)
+        else console.error("Couldn't read session file:", response.status,  response.message)
 
         set.ready({app: true})
       },

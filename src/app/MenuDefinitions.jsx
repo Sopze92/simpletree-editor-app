@@ -13,15 +13,20 @@ const MENU_ID= Object.freeze({
   menu_file_recent: 5,
 
   menu_file_import: 6,
-  menu_file_export: 7
+  menu_file_export: 7,
+
+  menu_plugins: 8
 }) 
 
 const MENU_ITEM_ID= Object.freeze({
+  // next: 0x27
+
   menu_file_new:                   0x01,
   menu_file_open:                  0x02,
   menu_file_reload:                0x03,
   menu_file_save:                  0x04,
   menu_file_saveas:                0x05,
+  menu_file_saveinc:               0x25,
   menu_file_saveall:               0x06,
   menu_file_exit:                  0x09,
 
@@ -50,6 +55,8 @@ const MENU_ITEM_ID= Object.freeze({
   menu_view_language:              0x1C,
   menu_view_frameless:             0x1D,
   menu_view_statusbar:             0x1E,
+  
+  menu_plugin_manage:              0x26,
 
   menu_help_docs:                  0x1F,
   menu_help_updates:               0x20,
@@ -64,6 +71,7 @@ const MENU_ITEM= Object.freeze({
   item: 2,
   separator: 3,
   boolean: 4,
+  dynamic: 5,
 })
 
 const MENU_SIDE= Object.freeze({
@@ -82,26 +90,6 @@ export const Constants= Object.freeze({
   MENUBAR_ID, MENU_ID, MENU_ITEM, MENU_ITEM_ID, MENU_SIDE, MENU_DIRECTION
 })
 
-export const Functions= Object.freeze({
-  
-  getMenu: (menuid)=>{
-    const menu= AppMenus.menu.find(e=>e.id == menuid)
-    return menu && menu.length > 0 ? menu[0] : null
-  },
-
-  getEnableStates: (globals, menuid)=>{
-    const menu= Functions.getMenu(menuid)
-    return menu ? Array(menu.items.length).fill(true) : null
-  },
-
-  onMenuItemClicked: (globals, menuid, itemid)=>{
-    console.log("menu item clicked:", menuid, itemid)
-    console.log(globals)
-
-    return true
-  }
-})
-
 //#region -------------------------------------------------------- MENU DEFINITION
 
 const MENUBAR_TITLEBAR= Object.freeze({
@@ -109,6 +97,7 @@ const MENUBAR_TITLEBAR= Object.freeze({
     MENU_ID.menu_file,
     MENU_ID.menu_edit,
     MENU_ID.menu_view,
+    //MENU_ID.menu_plugins,
     MENU_ID.menu_help
   ]
 })
@@ -122,6 +111,7 @@ const MENU_TITLEBAR_FILE= Object.freeze({
     { type:MENU_ITEM.separator },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_save, label:"Save", pnemonic:"Ctrl+S" },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveas, label:"Save as" },
+    { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveinc, label:"Save incremental" },
     //{ type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_file_saveall, label:"Save all" },
     { type:MENU_ITEM.separator },
     { type:MENU_ITEM.menu, id: MENU_ID.menu_file_import},
@@ -135,6 +125,7 @@ const MENU_TITLEBAR_FILE_RECENT= Object.freeze({
   id: MENU_ID.menu_file_recent, label:"Open Recent", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
     { type:MENU_ITEM.label, label:"No recent files..." },
     { type:MENU_ITEM.separator },
+    { type:MENU_ITEM.dynamic, scope:"file_recents" },
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_recent_forget, label:"Forget all" }
   ]
 })
@@ -143,11 +134,12 @@ const MENU_TITLEBAR_FILE_IMPORT= Object.freeze({
   id: MENU_ID.menu_file_import, label:"Import", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
     { type:MENU_ITEM.item, id: 0, label:"sTreeve Library (.tre, .trl)" },
     { type:MENU_ITEM.separator },
-    { type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
-    { type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
-    { type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
-    { type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
-    { type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
+    { type:MENU_ITEM.dynamic, scope:"file_import" }
+    //{ type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
+    //{ type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
+    //{ type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
+    //{ type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
+    //{ type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
   ]
 })
 
@@ -155,11 +147,12 @@ const MENU_TITLEBAR_FILE_EXPORT= Object.freeze({
   id: MENU_ID.menu_file_export, label:"Export", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
     { type:MENU_ITEM.item, id: 0, label:"sTreeve Library (.tre, .trl)" },
     { type:MENU_ITEM.separator },
-    { type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
-    { type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
-    { type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
-    { type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
-    { type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
+    { type:MENU_ITEM.dynamic, scope:"file_export" }
+    //{ type:MENU_ITEM.item, id: 1, label:"Extensible Markup Language (.xml)" },
+    //{ type:MENU_ITEM.item, id: 2, label:"HyperText Markup Language (.htm / .html)" },
+    //{ type:MENU_ITEM.item, id: 3, label:"JavaScript Object Notation (.json)" },
+    //{ type:MENU_ITEM.item, id: 4, label:"Windows Registry/Configuration File (.reg / .ini)" },
+    //{ type:MENU_ITEM.item, id: 5, label:"Plain Text File (.txt)" },
   ]
 })
 
@@ -207,6 +200,14 @@ const MENU_TITLEBAR_VIEW= Object.freeze({
   ]
 })
 
+const MENU_TITLEBAR_PLUGINS= Object.freeze({
+  id: MENU_ID.menu_plugins, label:"Plugins", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
+    { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_plugins_manage, label:"Manage Plugins" },
+    { type:MENU_ITEM.separator },
+    { type:MENU_ITEM.dynamic, scope:"plugin_list" }
+  ]
+})
+
 const MENU_TITLEBAR_HELP= Object.freeze({
   id: MENU_ID.menu_help, label:"Help", direction: MENU_DIRECTION.down, open: MENU_SIDE.right, items: [
     { type:MENU_ITEM.item, id: MENU_ITEM_ID.menu_help_docs, label:"Documentation (Github)" },
@@ -219,7 +220,7 @@ const MENU_TITLEBAR_HELP= Object.freeze({
   ]
 })
 
-export const AppMenus= Object.freeze({
+export const MenuDefinitions= Object.freeze({
   menubar: [
     MENUBAR_TITLEBAR
   ],
@@ -231,7 +232,8 @@ export const AppMenus= Object.freeze({
     MENU_TITLEBAR_EDIT,
     MENU_TITLEBAR_EDIT_TREEVIEW,
     MENU_TITLEBAR_VIEW,
-    MENU_TITLEBAR_HELP
+    MENU_TITLEBAR_HELP,
+    MENU_TITLEBAR_PLUGINS
   ]
 })
 

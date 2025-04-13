@@ -25,34 +25,23 @@ def _get_filehandler(filetype_id, task):
   package= stv_globals.file_handlers[pid]
 
   # filetype
-  filetype_list= tuple(e for e in package.filetypes if e.id == fid and hasattr(e.tasks, task) and e.tasks[task])
-  if not filetype_list: raise FileHandlerError(f"no filetypes with '{pid}@{fid}' and a '{task}' task call") 
-  if len(filetype_list) > 1: raise FileHandlerError(f"found multiple filetypes '{pid}@{fid}' and a '{task}' task call, please make the ids unique") 
+  filetype_list= tuple(e for e in package.filetypes if e.id == fid and task in e.tasks)
+  if not filetype_list: raise Exception(f"no filetypes found with id '{pid}@{fid}' and a '{task}' task") 
+  if len(filetype_list) > 1: raise Exception(f"found {len(filetype_list)} filetypes with id '{pid}@{fid}' and a '{task}' task, please make the ids unique") 
 
   filetype= filetype_list[0]
   hid= filetype.tasks[task]
 
   # handler
   handler_list= tuple(e for e in package.handlers if e.id == hid and e.task==task)
-  if not handler_list: raise FileHandlerError(f"filehandler task required by '{pid}:{hid}@{fid}' doesn't exist") 
-  if len(handler_list) > 1: raise FileHandlerError(f"filehandler task required by '{pid}:{hid}@{fid}' leaded to ambiguity between {len(handler_list)} tasks, please make the ids unique") 
+  if not handler_list: raise Exception(f"filehandler with id '{pid}:{hid}@{fid}' requires a '{task}' task that doesn't exist") 
+  if len(handler_list) > 1: raise Exception(f"filehandler with id '{pid}:{hid}@{fid}' requires a '{task}' task but there's {len(handler_list)} tasks registered under that id, please make the ids unique") 
 
   handler= handler_list[0]
 
-  if not handler.passes: raise FileHandlerError(f"filetype '{pid}:{hid}@{fid}' defined no passes for its task") 
+  if not handler.passes: raise Exception(f"handler '{fid}' defined no passes") 
 
   return (pid, fid, hid, f"{pid}:{hid}@{fid}-{task}", package, filetype, handler)
-
-def file_read_internal(path:str, silent:bool):
-  try: 
-    return file_read("__internal__:ft_internal", True, path, '_internal', {}), 200
-  except Exception as e: 
-    if not silent:
-      stv_logger.err(e)
-      if stv_globals.dev_traceback:
-        import traceback
-        traceback.print_exc()
-    return None, 404 if isinstance(e, (FileNotFoundError, FileHandlerNotFoundError)) else 400
 
 # copy file without importing any lib
 def file_copy(path_src, path_dst):
@@ -66,6 +55,18 @@ def try_copy_default(filepath):
   _f= os.path.basename(filepath)
   _df= os.listdir(stv_globals.path_defaults)
   if _f in _df: file_copy(os.path.join(_df, _f), filepath)
+
+# should be only used internally
+def file_read_internal(path:str, silent:bool):
+  try: 
+    return 200, file_read("__internal__:ft_internal", path, '_internal', {}, True)
+  except Exception as e: 
+    if not silent:
+      stv_logger.err(e)
+      if stv_globals.dev_traceback:
+        import traceback
+        traceback.print_exc()
+    return 404 if isinstance(e, FileNotFoundError) else 400, {'success':False, 'message':str(e), 'content':None}
 
 # ----------------------------------------------------------------------------------------------------------------------- read file
 def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_default:bool): # RAISEABLE

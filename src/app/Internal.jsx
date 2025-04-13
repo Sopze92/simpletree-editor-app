@@ -35,12 +35,35 @@ export const Droppable=({ hid })=>{
   );
 }
 
-import { Globals } from "../context/AppContext"
+import { Constants, Globals } from "../context/AppContext"
 
 // silent global event listener
 export const GlobalListener=()=>{
 
-  const { actions, files }= React.useContext(Globals)
+  const { actions, store, files }= React.useContext(Globals)
+
+  function handleMouseMove(e){
+    if(e.target){
+
+      const obj= e.target
+      
+      if(obj.matches("[stv-statusbar-simple]")) {
+        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.simple, {description: obj.getAttribute('stv-statusbar-simple')})
+      }
+      else if(obj.matches("[te-attr], [te-head]") && !store.dragElement) {
+        const he= Functions.findTEHierarchyData(obj)
+        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.element, he)
+      }
+      else if(obj.matches("[cfg-element]")) {
+        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.setting, {type: "boolean", name: "test", value: "1", description:obj.innerHTML})
+      }
+      else if(store.hoverElementData) actions.store.set_hoverElementData(null, null)
+    }
+  }
+
+  React.useEffect(()=>{
+    document.addEventListener("mousemove", handleMouseMove)
+  },[])
 
   React.useEffect(()=>{
     if(files.length == 0) {

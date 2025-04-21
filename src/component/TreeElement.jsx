@@ -84,6 +84,7 @@ export const RootElement= ({ fid })=>{
       { currentTree.length > 0 ?
         <>
         { currentTree }
+        <Droppable hid={[fid, currentTree.length, 'H']} />
         </>
         :
         <span>Drop elements from the library to begin</span>
@@ -176,7 +177,7 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
           <div te-body={""} {...params.body}>
   {/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
             { currentTree }
-            <Droppable hid={[...hid, currentTree.length+1, 'H']} />
+            <Droppable hid={[...hid, currentTree.length, 'H']} />
           </div>
         }
       </div>

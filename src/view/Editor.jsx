@@ -63,8 +63,8 @@ const View= ()=>{
     if(e.collisions.length > 0){
       const 
         collision= e.collisions[0],
-        origin_hid= e.active.id.includes(':') ? e.active.id.split(':') : [e.active.id],
-        target_hid= collision.id.includes(':') ? collision.id.split(':') : [collision.id]
+        origin_hid= e.active.id.split(':'),
+        target_hid= collision.id.split(':')
 
       fileactions.moveElement(origin_hid, target_hid)
     }

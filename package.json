@@ -1,7 +1,7 @@
 {
   "name": "strevee-editor",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.3",
   "type": "module",
   "scripts": {
     "setup": "npm install && python -m venv _pyenv && _pyenv\\scripts\\pip install -r requirements.txt",
@@ -12,23 +12,23 @@
     "standalone": "vite build && python _internal/nuitka_compiler.py --mode=standalone --output-dir=output/nautki_standalone"
   },
   "dependencies": {
-    "@dnd-kit/core": "^6.1.0",
-    "@dnd-kit/modifiers": "^7.0.0",
-    "@dnd-kit/sortable": "^8.0.0",
-    "overlayscrollbars": "^2.10.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "overlayscrollbars": "^2.11.1",
     "overlayscrollbars-react": "^0.5.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.3.1",
-    "vite-plugin-svgr": "^4.2.0"
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.2.6",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "author": {
-    "name": "sopze"
+    "name": "Sergio 'sopze' del Pino"
   },
   "license": "MIT"
 }

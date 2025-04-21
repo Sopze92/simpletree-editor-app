@@ -1,25 +1,33 @@
 import React from 'react'
 
-import { Constants, Globals } from '../../context/AppContext.jsx'
+import { GlobalContext, FileContext } from '../../context/GlobalStores.jsx'
+import { Const, FileConst as FConst } from '../../context/Constants.jsx'
+
+const ToolbarButton= ({ label, action, pressed })=>{
+
+  return (
+    <div stv-toolbar-button={""} stv-toolbar-pressed={pressed ? "" : null} onClick={action}><span>{label}</span></div>
+  )
+}
 
 const Module= ()=>{
 
-  const { editor, actions }= React.useContext(Globals)
+  const { editor, actions }= React.useContext(GlobalContext)
+  const { actions: fileactions }= React.useContext(FileContext)
 
   return (
     <div stv-toolbar={""} stv-editor-toolbar={""}>
       <div stv-toolbar-section={""}>
-        <div stv-toolbar-button={""} stv-toolbar-pressed={editor.vis_hover ? "" : null} onClick={()=>{actions.editor.toggleSetting('vis_hover')}}><span>H</span></div>
-        <div stv-toolbar-button={""} stv-toolbar-pressed={editor.vis_dev ? "" : null} onClick={()=>{actions.editor.toggleSetting('vis_dev')}}><span>D</span></div>
-        <div stv-toolbar-button={""} stv-toolbar-pressed={editor.mode_select ? "" : null} onClick={()=>{actions.editor.toggleSetting('mode_select')}}><span>SM</span></div>
+        <ToolbarButton label="H" action={()=>{actions.editor.toggleSetting('vis_hover')}} pressed={editor.vis_hover} />
+        <ToolbarButton label="D" action={()=>{actions.editor.toggleSetting('vis_dev')}} pressed={editor.vis_dev} />
+        <ToolbarButton label="SM" action={()=>{actions.editor.toggleSetting('mode_select')}} pressed={editor.mode_select} />
       </div>
       <div stv-toolbar-separator={""}/>
       <div stv-toolbar-section={""}>
-        <div stv-toolbar-button={""} onClick={()=>{actions.store.fileviewCommand(Constants.FILEVIEW_COMMAND.expand_all)}}><span>ID</span></div>
-        <div stv-toolbar-button={""} onClick={()=>{actions.store.fileviewCommand(Constants.FILEVIEW_COMMAND.collapse_all)}}><span>type</span></div>
+        <ToolbarButton label="type" action={()=>{fileactions.current.toggleTypeVisibility("type")}} pressed={false}/>
         <div stv-toolbar-multibutton={""}>
-          <div stv-toolbar-button={""} onClick={()=>{actions.store.fileviewCommand(Constants.FILEVIEW_COMMAND.expand_all)}}><span>+</span></div>
-          <div stv-toolbar-button={""} onClick={()=>{actions.store.fileviewCommand(Constants.FILEVIEW_COMMAND.collapse_all)}}><span>-</span></div>
+          <ToolbarButton label="+" action={()=>{fileactions.current.setBlockStateAll(true)}} pressed={false}/>
+          <ToolbarButton label="-" action={()=>{fileactions.current.setBlockStateAll(false)}} pressed={false}/>
         </div>
       </div>
     </div>

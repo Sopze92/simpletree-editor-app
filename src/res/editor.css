@@ -182,32 +182,34 @@
 
 [stv-editor-vis-hover] {
   --hover-1-col: #46d782;
-  --hover-2-col: #56b2c9;
+  --hover-2-col: #4898ac;
   --hover-3-col: #368c4b;
-  --hover-4-col: #764d3d;
+  --hover-4-col: #9e6650;
 }
 
 [stv-editor-vis-hover] [te-base]:hover > [te-head] {
   outline: 1px solid var(--hover-4-col);
 }
 
-[stv-editor-vis-hover] [te-head]:hover:has([te-attr]:hover) {
-  outline: 1px solid var(--hover-3-col);
-}
-
 [stv-editor-vis-hover] [te-base]:hover > [te-body]:not(:has( > [te-base]:hover)){
   outline: 1px solid var(--hover-2-col);
 }
 
+[stv-editor-vis-hover] [te-body]:has( > [te-base]:hover) {
+  outline: 1px solid var(--hover-2-col);
+}
+
 /* tail te-base hovered's head */
-[stv-editor-vis-hover] [te-base]:hover > [te-head]:not(:has([te-attr]:hover)):not(:has( + [te-body] > [te-base]:hover)) {
+[stv-editor-vis-hover] [te-base]:hover:not(:has(> [te-body]:hover)) > [te-head]:not(:has([te-attr]:hover)) {
   outline: 1px solid var(--hover-1-col);
-  z-index: 512;
+}
+
+[stv-editor-vis-hover] [te-head]:hover:has([te-attr]:hover) {
+  outline: 1px solid var(--hover-3-col);
 }
 
 [stv-editor-vis-hover] [te-head]:hover, [stv-editor-vis-hover] [te-attr]:hover {
-  outline: 1px solid var(--hover-1-col);
-  z-index: 512;
+  outline: 2px solid var(--hover-1-col);
 }
 
 /* VIEW */

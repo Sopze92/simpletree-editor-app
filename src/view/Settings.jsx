@@ -1,11 +1,12 @@
 import React from 'react'
 
-import { Globals, Constants, Functions } from '../context/AppContext.jsx'
+import { GlobalContext } from '../context/GlobalStores.jsx'
+import { Const } from '../context/Constants.jsx'
 
 const View= ()=>{
 
   const 
-    { actions, store, settings } = React.useContext(Globals)
+    { actions, store, settings } = React.useContext(GlobalContext)
 
   return (
     <div stv-view-settings={""}>

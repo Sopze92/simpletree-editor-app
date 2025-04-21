@@ -8,11 +8,19 @@ import './res/styles.css'
 import './res/utility.css'
 import './res/theme.css'
 
+const strict= true
+
 function main(){
   ReactDOM.createRoot(document.getElementById('react-root')).render(
-    <React.StrictMode>
+    <>
+    { strict ?
+      <React.StrictMode>
+        <Layout />
+      </React.StrictMode>
+      :
       <Layout />
-    </React.StrictMode>
+    }
+    </>
   )
 }
 

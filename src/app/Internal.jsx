@@ -35,12 +35,15 @@ export const Droppable=({ hid })=>{
   );
 }
 
-import { Constants, Globals } from "../context/AppContext"
+import { GlobalContext, FileContext } from "../context/GlobalStores.jsx"
+import { Const } from "../context/Constants.jsx"
+import { Funcs } from "../context/Functions.jsx"
 
 // silent global event listener
 export const GlobalListener=()=>{
 
-  const { actions, store, files }= React.useContext(Globals)
+  const { actions, store }= React.useContext(GlobalContext)
+  const { files, actions:fileactions }= React.useContext(FileContext)
 
   function handleMouseMove(e){
     if(e.target){
@@ -48,14 +51,14 @@ export const GlobalListener=()=>{
       const obj= e.target
       
       if(obj.matches("[stv-statusbar-simple]")) {
-        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.simple, {description: obj.getAttribute('stv-statusbar-simple')})
+        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.simple, {description: obj.getAttribute('stv-statusbar-simple')})
       }
       else if(obj.matches("[te-attr], [te-head]") && !store.dragElement) {
-        const he= Functions.findTEHierarchyData(obj)
-        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.element, he)
+        const he= Funcs.findTEHierarchyData(obj)
+        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.element, he)
       }
       else if(obj.matches("[cfg-element]")) {
-        actions.store.set_hoverElementData(Constants.STATUSBAR_HOVERABLE_TYPE.setting, {type: "boolean", name: "test", value: "1", description:obj.innerHTML})
+        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.setting, {type: "boolean", name: "test", value: "1", description:obj.innerHTML})
       }
       else if(store.hoverElementData) actions.store.set_hoverElementData(null, null)
     }
@@ -63,15 +66,15 @@ export const GlobalListener=()=>{
 
   React.useEffect(()=>{
     document.addEventListener("mousemove", handleMouseMove)
+    return ()=> { document.removeEventListener('mousemove', handleMouseMove) }
   },[])
 
   React.useEffect(()=>{
-    if(files.length == 0) {
+    if(files.size == 0) {
       console.info("no file data, creating one")
-      //actions.file.create(true)
-      actions.file.load("UNUSED", true)
+      fileactions.io.load("UNUSED", true)
     }
-  },[files.length])
+  },[files.size])
 
   return null
 }

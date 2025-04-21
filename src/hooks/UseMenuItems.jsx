@@ -1,5 +1,5 @@
 import React from "react"
-import { Functions } from '../context/AppContext.jsx'
+import { Funcs } from '../context/Functions.jsx'
 
 const useMenuItems= (auto=true, time=450)=>{
 
@@ -39,12 +39,12 @@ const useMenuItems= (auto=true, time=450)=>{
   ]
 
   function onMenuClick(e, inbounds, menu=-1){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     set_openMenu(inbounds ? menu : -1)
   }
 
   function onMenuHover(e, menu=-1, hover){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     if(!hover && menu == hoverMenu) set_hoverMenu(-1)
     else if(menu != -1) set_hoverMenu(menu)
   }

@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { Globals } from '../../context/AppContext.jsx'
+import { GlobalContext } from '../../context/GlobalStores.jsx'
 
 const Module= ()=>{
 
   const 
-    { ready, actions, store, file, parser, settings }= React.useContext(Globals)
+    { ready, actions, store, file, parser, settings }= React.useContext(GlobalContext)
   
   const 
     [ libraryData, set_libraryData ]= React.useState({type:0})

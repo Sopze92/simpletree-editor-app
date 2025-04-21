@@ -1,13 +1,13 @@
 import React from "react"
 
-import { Constants, Functions, Globals } from '../context/AppContext.jsx'
+import { GlobalContext } from '../context/GlobalStores.jsx'
 import { Constants as MConst, MenuDefinitions } from './MenuDefinitions.jsx'
 import useMenuItems from "../hooks/UseMenuItems.jsx"
 
 export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.right, openState, onMenuHover, onMenu, onItem, getValue, getState, ...rest })=>{
 
   const 
-    { actions, store }= React.useContext(Globals),
+    { actions, store }= React.useContext(GlobalContext),
     [ posfixClasses, set_posfixClasses ]= React.useState(""),
     [openMenu, set_openMenu, menuProps]= useMenuItems(-1),
     menu= MenuDefinitions.menu.find(e=>e.id== menuid),
@@ -61,7 +61,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.ri
                   case MConst.MENU_ITEM.dynamic:
                     // TODO: dynamic
                     return (
-                      <li key={k} stv-menu-label={""} className="strevee-error">
+                      <li key={k} stv-menu-label={""} className="__stv-error">
                         <span>TODO: dynamic :: {e.scope}</span>
                       </li>
                     )
@@ -70,7 +70,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.ri
                       const enabled= getState(menuid, e.id)
                       return (
                         <li key={k} stv-menu-item={""} className={enabled ? null:"__disabled"} role="button" data-type="item"
-                          stv-statusbar-simple={e.description || "no description provided"}
+                          stv-statusbar-simple={e.description || ""}
                           onClick={enabled ? (ev)=>{onItem(ev, menuid, e.id)} : _e=>{}}
                         >
                           <span>{e.label??"missingno"}</span>
@@ -93,6 +93,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.ri
                         value= getValue(menuid, e.id)
                       return (
                         <li key={k} stv-menu-item={""} className={enabled ? null:"__disabled"} role="checkbox" data-type="boolean"
+                          stv-statusbar-simple={e.description || ""}
                           onClick={enabled ? (ev)=>{onItem(ev, menuid, e.id)} : _e=>{}}
                         >
                           <div stv-menu-boolean={""}>
@@ -107,7 +108,7 @@ export const Menu= ({ className, menuid=-1, zindex, openDir=MConst.MENU_SIDES.ri
                     }
                 }
               }
-              return <li stv-menu-label={""} key={`mi${i}`} className="strevee-error" >missingno</li>
+              return <li stv-menu-label={""} key={`mi${i}`} className="__stv-error" >missingno</li>
             })
           }
         </ul>
@@ -170,7 +171,7 @@ export const MenuBar= ({ menuid=-1, zindex=4096, onItemClick=(event, menuid, ite
                 {...menuProps.get(e)}
               />
           }
-          return <li key={`mi${i}`} className="strevee-error" >missingno</li>
+          return <li key={`mi${i}`} className="__stv-error" >missingno</li>
         })
       }
     </div>

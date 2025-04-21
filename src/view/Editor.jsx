@@ -1,13 +1,14 @@
 import React from 'react'
-
-import { Globals, Constants, Functions } from '../context/AppContext.jsx'
-import { Scrollable, Droppable } from '../app/Internal.jsx'
-
 import { DndContext, DragOverlay, MouseSensor, useSensor, useSensors, useDndContext } from '@dnd-kit/core'
+
+import { GlobalContext, FileContext } from '../context/GlobalStores.jsx'
+import { Const } from '../context/Constants.jsx'
 
 import SidePanel from '../module/editor/SidePanel.jsx'
 import Toolbar from '../module/editor/Toolbar.jsx'
-import Tabrow from '../module/editor/Tabrow.jsx'
+import Tabsrow from '../module/editor/Tabsrow.jsx'
+
+import TreeDocument from '../component/TreeDocument.jsx'
 
 import useDndStylizer from '../hooks/UseDndStylizer.jsx'
 
@@ -17,44 +18,13 @@ import '../res/fileview.css'
 const View= ()=>{
 
   const 
-    { store, files, editor, actions, settings } = React.useContext(Globals),
-    [ dataTree, set_dataTree ]= React.useState([]),
+    { ready, store, editor, actions, settings } = React.useContext(GlobalContext),
+    { actions: fileactions } = React.useContext(FileContext),
     dnd_mouseSensor= useSensor(MouseSensor, { activationConstraint: {distance: 64} }),
     dnd_sensors= useSensors(dnd_mouseSensor),
-    _editor_ref= React.createRef(null),
-    _fileview_ref= React.createRef(null)
+    _editor_ref= React.createRef(null)
     
   useDndStylizer(_editor_ref, "__stv_dnd_liveregion_editor")
-
-  React.useEffect(()=>{
-
-    const l= store.history.length
-    if(l > 0){
-
-      console.log(_fileview_ref)
-
-      switch(store.history[l-1]){
-        case Constants.FILEVIEW_COMMAND.collapse_all:
-          {
-            const _elements= _fileview_ref.current.querySelectorAll("[te-block]")
-            for(const e of _elements){
-              e.setAttribute("te-open", "0")
-              e.classList.add("__closed")
-            }
-          }
-          break
-        case Constants.FILEVIEW_COMMAND.expand_all:
-          {
-            const _elements= _fileview_ref.current.querySelectorAll("[te-block]")
-            for(const e of _elements){
-              e.setAttribute("te-open", "1")
-              e.classList.remove("__closed")
-            }
-          }
-          break
-      }
-    }
-  },[store.history.length])
 
   return (
     <div ref={_editor_ref} stv-view-editor={""}
@@ -65,22 +35,9 @@ const View= ()=>{
       <DndContext sensors={dnd_sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
           <div stv-editor-files={""}>
-          { settings.app_multiFile_support && files.length > 1 && <Tabrow />}
-            { store.activeFile != -1 && 
-            <div stv-editor-fileview={""} className="viewport-container">
-              <Scrollable options={{overflow:{x:'hidden'}}}>
-                <div ref={_fileview_ref} stv-fileview={""}>
-                  { dataTree && dataTree.length > 0 ?
-                    <>
-                      {dataTree.elements}
-                      <Droppable hid={[dataTree.elements.length+1, 'H']} />
-                    </>
-                    :
-                    <span>Drop elements from the library to begin</span>
-                  }
-                </div>
-              </Scrollable>
-            </div>
+            { (settings.force_tabrow || (settings.app_multiFile_support && fileactions.getFilesCount() > 1)) && <Tabsrow />}
+            { store.activeFile != -1 && ready.file && 
+              <TreeDocument fid={store.activeFile}/>
             }
           </div>
           { settings.editor_sidepanel &&
@@ -96,7 +53,7 @@ const View= ()=>{
 
   function handleDragStart(e){
     const data= e.active.data.current;
-    actions.store.set_dragElement(data.index, data.hid)
+    actions.store.set_dragElement(data.hid, data.eid)
   }
 
   function handleDragOver(e){
@@ -109,7 +66,7 @@ const View= ()=>{
         origin_hid= e.active.id.includes(':') ? e.active.id.split(':') : [e.active.id],
         target_hid= collision.id.includes(':') ? collision.id.split(':') : [collision.id]
 
-      set_dataTree(actions.store.tree_moveElement({...dataTree}, origin_hid, target_hid))
+      fileactions.moveElement(origin_hid, target_hid)
     }
 
     actions.store.set_dragElement(-1)

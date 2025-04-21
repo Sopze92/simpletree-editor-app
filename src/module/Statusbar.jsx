@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { Globals, Constants } from '../context/AppContext.jsx'
+import { GlobalContext } from '../context/GlobalStores.jsx'
+import { Const } from '../context/Constants.jsx'
 
 const StatusbarChunkBase= ({ data })=>{
   return (
@@ -94,7 +95,7 @@ const StatusbarChunkSimple= ({ data })=>{
 const Module= ()=>{
 
   const 
-    { store }= React.useContext(Globals),
+    { store }= React.useContext(GlobalContext),
     [ localData, set_localData ]= React.useState(null)
 
   React.useEffect(()=>{
@@ -106,7 +107,7 @@ const Module= ()=>{
     <div stv-toolbar={""} stv-statusbar={""}>
       { localData && 
       <>
-        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.element &&
+        { localData.type== Const.STATUSBAR_HOVERABLE_TYPE.element &&
         <>
           <StatusbarChunkBase data={localData.data}/>
           { localData.data.container &&
@@ -125,12 +126,12 @@ const Module= ()=>{
           <StatusbarChunkTree data={localData.data}/>
         </>
         }
-        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.setting &&
+        { localData.type== Const.STATUSBAR_HOVERABLE_TYPE.setting &&
         <>
           <StatusbarChunkSetting data={localData.data}/>
         </>
         }
-        { localData.type== Constants.STATUSBAR_HOVERABLE_TYPE.simple &&
+        { localData.type== Const.STATUSBAR_HOVERABLE_TYPE.simple &&
         <>
           <StatusbarChunkSimple data={localData.data}/>
         </>

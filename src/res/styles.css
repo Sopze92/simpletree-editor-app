@@ -50,7 +50,7 @@ body {
   flex-direction: column;
 }
 
-.strevee-error {
+.__stv-error {
   color: #f0f !important;
 }
 

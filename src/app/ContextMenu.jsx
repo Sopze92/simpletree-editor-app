@@ -1,18 +1,12 @@
 import React from 'react'
 
-import { Globals, Functions } from '../context/AppContext.jsx'
-
-export const MENUITEM_ID= Object.freeze({
-  menu: 0,
-  item: 1,
-  separator: 2,
-  boolean: 3,
-})
+import { GlobalContext } from '../context/GlobalStores.jsx'
+import { Funcs } from '../context/Functions.jsx'
 
 const ContextMenu= ()=>{
 
   const
-    { ready, stamp, store, actions }= React.useContext(Globals),
+    { ready, stamp, store, actions }= React.useContext(GlobalContext),
     [ localData, set_localData ]= React.useState({pos:[8,8], items:[null]})
     self= React.useRef(null)
 
@@ -29,16 +23,16 @@ const ContextMenu= ()=>{
   },[ready.contextmenu])
 
   function handleMenuClick(e, idx){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     console.log("clicked on:", e.target, "idx:", idx)
   }
 
   function handleMenuHover(e, idx, state){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
   }
 
   function handleItemClick(e, callback, autoClose){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     console.log("clicked on:", e.target, "callback:", callback, "autoClose:", autoClose)
   }
 
@@ -51,7 +45,7 @@ const ContextMenu= ()=>{
             if(e){
               const k= `mi${i}`
               switch(e.id){
-                case MENUITEM_ID.menu:
+                case MConst.menu:
                   return <li key={k} className="streeve-cb-mi-item" role="menu" data-type="menu" onClick={(_e)=>{handleMenuClick(_e, e.childIdx)}} onMouseEnter={(_e)=>{handleMenuHover(_e, e.childIdx, true)}} onMouseLeave={(_e)=>{handleMenuHover(_e, e.childIdx, false)}}>{e.name??"missingno"}</li>
                 case MENUITEM_ID.item:
                   return <li key={k} className="streeve-cb-mi-item" role="button" data-type="item" onClick={(_e)=>{handleItemClick(_e, e.callback, e.autoClose)}}>{e.name??"missingno"}</li>
@@ -61,7 +55,7 @@ const ContextMenu= ()=>{
                   return <li key={k} className="streeve-cb-mi-item" role="checkbox" data-type="boolean"><span>{e.name??"missingno"}</span><span>{e.value?"1":"0"}</span></li>
               }
             }
-            return <li key={`mi${i}`} className="strevee-error" >missingno</li>
+            return <li key={`mi${i}`} className="__stv-error" >missingno</li>
           })
         }
       </ul>
@@ -70,4 +64,4 @@ const ContextMenu= ()=>{
   )
 }
 
-export default ContextMenu
+//export default ContextMenu

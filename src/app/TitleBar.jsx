@@ -1,6 +1,8 @@
 import React from 'react'
 
-import { Globals, Constants, Functions } from '../context/AppContext.jsx'
+import { FileContext, GlobalContext } from '../context/GlobalStores.jsx'
+import { Const } from '../context/Constants.jsx'
+import { Funcs } from '../context/Functions.jsx'
 
 import { MenuBar } from './DropdownMenu.jsx'
 import { Constants as MConst } from './MenuDefinitions.jsx'
@@ -16,16 +18,18 @@ let _dragOrigin= null
 
 const TitleBar= ()=>{
 
-  const { actions, settings }= React.useContext(Globals)
+  const 
+    { actions, settings }= React.useContext(GlobalContext),
+    { actions: fileactions }= React.useContext(FileContext)
 
   function handleWindowAction(e, action){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     actions.backend.windowAction(action)
   }
 
   function handleDragWindow(e){
     if(e.button == 0){
-      Functions.cancelEvent(e)
+      Funcs.cancelEvent(e)
 
       _dragOrigin= [window.screenX - e.screenX,  window.screenY- e.screenY]
 
@@ -49,11 +53,11 @@ const TitleBar= ()=>{
   }
 
   function onItemClick(e, menuid, itemid){
-    Functions.cancelEvent(e)
+    Funcs.cancelEvent(e)
     switch(menuid){
       case MConst.MENU_ID.menu_file:
         switch(itemid){
-          case MConst.MENU_ITEM_ID.menu_file_new: actions.file.create(true); break
+          case MConst.MENU_ITEM_ID.menu_file_new: fileactions.io.create(true); break
           case MConst.MENU_ITEM_ID.menu_file_open: console.log("open file"); break
           case MConst.MENU_ITEM_ID.menu_file_reload: console.log("reload file from disk"); break
           case MConst.MENU_ITEM_ID.menu_file_save: console.log("save file"); break
@@ -84,10 +88,10 @@ const TitleBar= ()=>{
         }
       case MConst.MENU_ID.menu_help:
         switch(itemid){
-          case MConst.MENU_ITEM_ID.menu_help_docs: actions.backend.openBuiltinLink(Constants.BUILTIN_LINK.documentation); break
+          case MConst.MENU_ITEM_ID.menu_help_docs: actions.backend.openBuiltinLink(Const.BUILTIN_LINK.documentation); break
           case MConst.MENU_ITEM_ID.menu_help_updates: actions.backend.checkUpdates(); break
-          case MConst.MENU_ITEM_ID.menu_help_feedback: actions.backend.openBuiltinLink(Constants.BUILTIN_LINK.feedback); break
-          case MConst.MENU_ITEM_ID.menu_help_contribute: actions.backend.openBuiltinLink(Constants.BUILTIN_LINK.contributing); break
+          case MConst.MENU_ITEM_ID.menu_help_feedback: actions.backend.openBuiltinLink(Const.BUILTIN_LINK.feedback); break
+          case MConst.MENU_ITEM_ID.menu_help_contribute: actions.backend.openBuiltinLink(Const.BUILTIN_LINK.contributing); break
           case MConst.MENU_ITEM_ID.menu_help_about: console.log("about"); break
         }
       case MConst.MENU_ID.menu_file_recent:
@@ -107,9 +111,9 @@ const TitleBar= ()=>{
     switch(menuid){
       case MConst.MENU_ID.menu_file:
         switch(itemid){
-          case MConst.MENU_ITEM_ID.menu_file_reload: return actions.file.isActiveFileOnDisk()
-          case MConst.MENU_ITEM_ID.menu_file_save: return actions.file.isActiveFileOnDisk()
-          case MConst.MENU_ITEM_ID.menu_file_saveinc: return actions.file.isActiveFileOnDisk()
+          case MConst.MENU_ITEM_ID.menu_file_reload: return fileactions.current.isFileOnDisk()
+          case MConst.MENU_ITEM_ID.menu_file_save: return fileactions.current.isFileOnDisk()
+          case MConst.MENU_ITEM_ID.menu_file_saveinc: return fileactions.current.isFileOnDisk()
         }
       case MConst.MENU_ID.menu_view:
         switch(itemid){
@@ -144,7 +148,7 @@ const TitleBar= ()=>{
   return (
     <div stv-toolbar={""} id="__stv-titlebar">
       <div stv-toolbar-section={""}>
-        <div stv-titlebar-title={""}>{Constants.APP_TITLE}</div>
+        <div stv-titlebar-title={""}>{Const.APP_TITLE}</div>
         <div stv-toolbar-separator={""}/>
         { settings.view_menu &&
           <MenuBar stv-titlebar-menu={""} menuid={MConst.MENUBAR_ID.menubar_titlebar} 
@@ -157,16 +161,16 @@ const TitleBar= ()=>{
       <div stv-toolbar-separator={""}/>
       { !settings.view_decorated ?
       <>
-        <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}}/>
+        <div stv-toolbar-section={""} className="__stv-titlebar-dragger" onMouseDown={(e)=>{handleDragWindow(e)}} onDoubleClick={(e)=>{handleWindowAction(e, Const.WINDOW_ACTION.maximize)}}/>
         <div stv-toolbar-separator={""}/>
         <div stv-toolbar-section={""} className="__stv-titlebar-buttons">
           <button onClick={_=>{actions.settings.temp_toggleThemeLight()}} id="win-btn-theme">{actions.settings.temp_isThemeLight() ? <SVG_icon_theme_dark/> : <SVG_icon_theme_light/> }</button>
         </div>
         <div stv-toolbar-section={""} className="__stv-titlebar-wincontrol">
           <div stv-toolbar-separator={""}/>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.minimize)}} id="win-btn-minimize"><SVG_icon_minimize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.maximize)}} id="win-btn-maximize"><SVG_icon_maximize/></button>
-          <button onClick={(e)=>{handleWindowAction(e, Constants.WINDOW_ACTION.close)}} id="win-btn-close"><SVG_icon_close/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Const.WINDOW_ACTION.minimize)}} id="win-btn-minimize"><SVG_icon_minimize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Const.WINDOW_ACTION.maximize)}} id="win-btn-maximize"><SVG_icon_maximize/></button>
+          <button onClick={(e)=>{handleWindowAction(e, Const.WINDOW_ACTION.close)}} id="win-btn-close"><SVG_icon_close/></button>
         </div>
       </>
       :

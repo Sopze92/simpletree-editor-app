@@ -86,11 +86,11 @@
   padding: var(--blk-body-padding);
   border: var(--blk-border);
 }
-
-[te-block].__closed > [te-body] {
+/*
+[te-block]:not([te-open]) > [te-body] {
   display: none;
 }
-
+*/
 /* theme apply */
 
 [te-head] {

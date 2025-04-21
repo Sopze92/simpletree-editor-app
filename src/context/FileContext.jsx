@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import { FileStoreDefaults, FileInstanceDefault, DEV_FileInstance } from './GlobalStores.jsx'
+import { FileStoreDefaults, createDefaultfile, createDevFile } from './GlobalStores.jsx'
 import { FileConst as FConst } from './Constants.jsx'
 
 import { BaseElement, BaseElementGroup, BaseElementBlock } from '../component/TreeElement.jsx'
@@ -119,6 +119,11 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           util= actions().util,
           source= util.getDataFromHid(srchid),
           destination= util.getDataFromHid(dsthid)
+
+        if(!hierarchyDrop && !('body' in dstFile.tree[destination.eid])) {
+          console.log("element doesn't accept children")
+          return
+        }
 
         if(!swapDrop && !hierarchyDrop) {
           destination.parent= destination.eid
@@ -293,9 +298,9 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           
           const 
             multiFile= globalStore().settings.app_multiFile_support,
-            files= multiFile ? new Map(self().files) : new Map(),
+            files= multiFile ? new Map(self().files.entries()) : new Map(),
             cache= multiFile ? {...self().cache} : {},
-            settings= multiFile ? new Map(self().settings) : new Map()
+            settings= multiFile ? {...self().settings} : {}
       
           const fid= getNextFileid()
 
@@ -318,7 +323,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
         create: (focus)=>{
           // TODO: change to default as soon as we have the ability to create files dynamically
-          return actions().io._addFile({...DEV_FileInstance}, focus)
+          return actions().io._addFile(createDevFile(), focus)
         },
 
         load: (path, focus)=>{
@@ -326,7 +331,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           // TODO: load the actual file
           //   determine the parser based on extension or header
           //   parse and compose something with like FileInstanceDefault and DEV_FileInstance
-          const data= DEV_FileInstance
+          const data= createDevFile()
           return actions().io._addFile(data, focus)
         },
 

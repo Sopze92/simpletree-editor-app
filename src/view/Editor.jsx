@@ -33,17 +33,17 @@ const View= ()=>{
       stv-editor-anydrag={store.dragElement?"":null}>
       { settings.editor_toolbar && <Toolbar />}
       <DndContext sensors={dnd_sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+        { store.activeFile != -1 && ready.file &&
         <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
           <div stv-editor-files={""}>
             { (settings.force_tabrow || (settings.app_multiFile_support && fileactions.getFilesCount() > 1)) && <Tabsrow />}
-            { store.activeFile != -1 && ready.file && 
-              <TreeDocument fid={store.activeFile}/>
-            }
+            <TreeDocument fid={store.activeFile}/>
           </div>
           { settings.editor_sidepanel &&
             <SidePanel />
           }
         </div>
+        }
         <DragOverlay className="__stv-drag-container" dropAnimation={null} zIndex={8192}>
           { store.dragElement }
         </DragOverlay>

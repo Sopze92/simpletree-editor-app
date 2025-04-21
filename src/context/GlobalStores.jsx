@@ -47,7 +47,7 @@ export const FileStoreDefaults= Object.freeze({
   settings: {},
 })
 
-export const FileInstanceDefault= Object.freeze({
+export const createDefaultfile= ()=> { return {
   meta: {
     name: "new file",
     author: "not provided",
@@ -87,15 +87,15 @@ export const FileInstanceDefault= Object.freeze({
     ["thumb",   FConst.ATTR_CLASS.image,       false]        // 10
   ],
   tree: {}, // full document hierarchy
-})
+}}
 
-export const DEV_FileInstance= { ...FileInstanceDefault, ...{
+export const createDevFile= ()=> { const def= createDefaultfile(); return { ...def, ...{
   meta: {
     name: "DEV file",
     author: "sopze",
     timestamp: 3462342,
     file: {
-      ...FileInstanceDefault.meta.file,
+      ...def.meta.file,
       modified: false,
       parser: "strevee"
     }
@@ -113,7 +113,7 @@ export const DEV_FileInstance= { ...FileInstanceDefault, ...{
     8:    { 'type': 4, 'head': ["so this text is of type single-line with a newline char >\n< just to see what happens"] },
     9:    { 'type': 3, 'head': ["name","very long (and zero informative) description for a testing so we will se what happen with a possible value where the field contents are too large to fit nicely within the app window","latest attribute"] }
   }
-}}
+}}}
 
 // #endregion
 // #region -------------------------------------------------------- GLOBAL CONTEXT

@@ -6,15 +6,15 @@ import { Funcs } from '../context/Functions.jsx'
 
 import { Scrollable, Droppable } from '../app/Internal.jsx'
 
+import { useDocument } from '../hooks/UseDocument.jsx'
+
 import { RootElement } from './TreeElement.jsx'
 
 const Component= ({ fid } )=> {
 
   const 
     { store } = React.useContext(GlobalContext),
-    { files, cache, actions:fileactions } = React.useContext(FileContext),
-    [ documentReady, set_documentReady ]= React.useState(false),
-    [ _document, _sd ]= React.useState(files.get(fid)),
+    [ stvReady, stvdoc ]= useDocument(fid, true),
     _ref= React.createRef(null)
 
   // initialize
@@ -25,12 +25,6 @@ const Component= ({ fid } )=> {
       return ()=>{ prev_ref.removeEventListener('document-action', onDocumentAction) }
     }
   },[_ref.current])
-
-  React.useEffect(()=>{
-    const ready= cache[fid].ready
-    if(!ready) fileactions.cache.initialize(fid)
-    set_documentReady(ready)
-  },[cache[fid].ready])
 
   // handle document-wide actions
   function onDocumentAction(e){
@@ -67,7 +61,7 @@ const Component= ({ fid } )=> {
     <div stv-editor-fileview={""} className="viewport-container">
       <Scrollable options={{overflow:{x:'hidden'}}}>
         <div ref={_ref} stv-fileview={""}>
-          { documentReady && 
+          { stvReady && 
             <RootElement fid={fid}/>
           }
         </div>

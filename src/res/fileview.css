@@ -63,7 +63,7 @@
   flex-direction: column;
 }
 
-[stv-fileview], [te-body] {
+[stv-fileview-content], [te-body] {
   gap: var(--base-gap);
 }
 

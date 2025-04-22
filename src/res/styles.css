@@ -384,22 +384,25 @@ body {
   }
 }
 
-[stv-fileview], .__stv-drag-container {
-  box-sizing: border-box;
-  font-size: 11px;
-  white-space: nowrap;
-  height: fit-content;
-}
+/* FILEVIEW */
 
 [stv-fileview] {
   display: flex;
   flex-direction: column;
-  max-width: 100%;
   min-height: 100%;
 }
 
-[stv-fileview]:not(:has([stv-fileview-empty])) {
-  padding: 1em 3em 1em 1em;
+[stv-fileview], .__stv-drag-container {
+  box-sizing: border-box;
+  font-size: 11px;
+  white-space_: nowrap;
+  height: fit-content;
+}
+
+[stv-fileview-content] {
+  display: flex;
+  flex-direction: column;
+  margin: 1em 3em 1em 1em;
 }
 
 /* STATUSBAR */
@@ -439,9 +442,9 @@ body {
 
 #app {
   padding: 0;
-  overflow: auto;
-  width: 100%;
-  height: 100%;
+  overflow: hidden;
+  width: 100dvw;
+  height: 100dvh;
 }
 
 /* SETTINGS */
@@ -483,6 +486,10 @@ body {
 
 .os-scrollbar-vertical {
   margin: 2px 4px 2px 0;
+}
+
+.os-scrollbar-horizontal {
+  margin: 4px 2px 0 2px;
 }
 
 /* DEBUG */

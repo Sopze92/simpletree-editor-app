@@ -10,7 +10,7 @@ export const Scrollable=({ options={}, children, ...rest })=>{
     <OverlayScrollbarsComponent 
       defer 
       {...rest} 
-      options={Object.assign(options, {scrollbars:{theme:"os-theme-strevee", visibility:'visible'}})}
+      options={{ ...options, scrollbars:{theme:"os-theme-strevee", visibility:'visible'}} }
     >
       {children}
     </OverlayScrollbarsComponent>
@@ -33,6 +33,18 @@ export const Droppable=({ hid })=>{
       <div></div>
     </div>
   );
+}
+
+import { MouseSensor } from '@dnd-kit/core'
+
+export class MouseSensorLMB extends MouseSensor {
+  static activators= [
+    {
+      eventName: 'onMouseDown',
+      handler: (event, onActivation) => {
+        return event.button === 0
+      }
+  }]
 }
 
 import { GlobalContext, FileContext } from "../context/GlobalStores.jsx"

@@ -102,7 +102,7 @@ export const createDevFile= ()=> { const def= createDefaultfile(); return { ...d
   },
   tree: {
     root: { 'body': [0,1,2] },
-    0:    { 'type': 0, 'head': [null,"Test object"], 'body': [3,4,5,6], 'open': true },
+    0:    { 'type': 0, 'head': [null,"Test object"], 'body': [3,4,5,6,7,10], 'open': true },
     1:    { 'type': 6, 'head': ["my key","the value"] },
     2:    { 'type': 7, 'head': ["class","name","value","desc"] },
     3:    { 'type': 3, 'head': ["name","desc text","info text"] },
@@ -111,7 +111,8 @@ export const createDevFile= ()=> { const def= createDefaultfile(); return { ...d
     6:    { 'type': 5, 'head': ["this is just a longer text that is deliberatedly\ndivided into two lines for testing purposes"] },
     7:    { 'type': 2, 'head': ["grpname","grp2","Test group"], 'body': [8,9] },
     8:    { 'type': 4, 'head': ["so this text is of type single-line with a newline char >\n< just to see what happens"] },
-    9:    { 'type': 3, 'head': ["name","very long (and zero informative) description for a testing so we will se what happen with a possible value where the field contents are too large to fit nicely within the app window","latest attribute"] }
+    9:    { 'type': 3, 'head': ["name","very long (and zero informative) description for a testing so we will se what happen with a possible value where the field contents are too large to fit nicely within the app window","latest attribute"] },
+    10:   { 'type': 5, 'head': ["line\npadding\nfor\nmore\ntesting\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline"] },
   }
 }}}
 

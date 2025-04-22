@@ -1,5 +1,6 @@
 import React from 'react'
-import { DndContext, DragOverlay, MouseSensor, useSensor, useSensors, useDndContext } from '@dnd-kit/core'
+import { DndContext, DragOverlay, useSensor, useSensors, useDndContext } from '@dnd-kit/core'
+import { MouseSensorLMB } from '../app/Internal.jsx'
 
 import { GlobalContext, FileContext } from '../context/GlobalStores.jsx'
 import { Const } from '../context/Constants.jsx'
@@ -20,7 +21,7 @@ const View= ()=>{
   const 
     { ready, store, editor, actions, settings } = React.useContext(GlobalContext),
     { actions: fileactions } = React.useContext(FileContext),
-    dnd_mouseSensor= useSensor(MouseSensor, { activationConstraint: {distance: 64} }),
+    dnd_mouseSensor= useSensor(MouseSensorLMB, { activationConstraint: {distance: 64} }),
     dnd_sensors= useSensors(dnd_mouseSensor),
     _editor_ref= React.createRef(null)
     

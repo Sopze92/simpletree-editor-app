@@ -68,6 +68,7 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         },
 
         checkUpdates: ()=>{
+          // TODO: update system + check for updates
           console.log("TODO: update system + check for updates")
         },
 
@@ -75,7 +76,7 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           switch(linkid){
             case Const.BUILTIN_LINK.documentation: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app"); break;
             case Const.BUILTIN_LINK.feedback: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app/issues"); break;
-            case Const.BUILTIN_LINK.contributing: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app/blob/nuitka/contributing.md"); break;
+            case Const.BUILTIN_LINK.contributing: pywebview.api.open_url("https://github.com/Sopze92/simpletree-editor-app/blob/main/contributing.md"); break;
           }
         },
 

@@ -80,8 +80,8 @@ class FileHandlerPlugin(PluginBase, FileHandler):
     ('filetypes',   True,   (IterType(dict),), (
       ('id',          True,   (str,)),                      # unique string ID within the plugin, for internal use and ui binding
       ('domain',      True,   (str,)),                      # one of FileDomain_Enum ( document | element | library | preset | style | user )
-      ('label',      False,   (str)),                       # label for system's file dialog dropdown
-      ('types',      False,   (str, IterType(str))),        # extensions to include, for file dialog dropdown + filtering, dnd awareness (if any)
+      ('label',      False,   (str,)),                      # label for system's file dialog dropdown
+      ('types',      False,   (IterType(str),)),            # extensions to include, for file dialog dropdown + filtering, dnd awareness (if any)
       ('drop',       False,   (bool, str)),                 # True to allow drop for this filetype, drop region is defined by 'type' unless set to 'user', then this must be a DNDRegion_Enum
       ('tasks',       True,   (dict,))                      # tasks to perform defined as: { 'name':'handlerid', 'name2':'otherhandler', ...}, note that task name must be 'read' or 'write' for implement common IO functionality
     )),
@@ -96,7 +96,7 @@ class FileHandlerPlugin(PluginBase, FileHandler):
     ('ui',         False,   (IterType(dict),), (
       ('label',       True,   (str,)),                      # menu entry name
       ('region',     False,   (str,)),                      # where to place the menu entry, one of MenuRegionPlugin_Enum ( file | addon )
-      ('filetypes',   True,   (str, IterType(str))),        # filetype id(s) to be used in the file dialog (within the plugin)
+      ('filetypes',   True,   (IterType(str),)),            # filetype id(s) to be used in the file dialog (within the plugin)
       ('strict',     False,   (bool,))                      # default True, set to False to include the 'All files (.*)' option in file dialog, which require implementing the all() method
     ))
   ) 

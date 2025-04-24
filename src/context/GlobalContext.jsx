@@ -82,8 +82,12 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
 
         toggleSettingsWindow: ()=>{
           pywebview.api.toggle_settings_window()
+        },
+
+        openFileDialog: async(packageName, filetypes)=>{
+          const response= await pywebview.api.dialog_open(".", packageName, filetypes)
+          console.log(response)
         }
-        
       },
 
       settings: { // ---------------------------------------------------------------------------------------------------------------- SETTINGS

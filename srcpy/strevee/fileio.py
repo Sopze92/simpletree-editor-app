@@ -14,32 +14,36 @@ def get_file_as_module(path):
   s.loader.exec_module(m)
   return m
 
-def resolve_path(path:str):
-  return os.path.join(stv_globals.root, path[2:]) if (path[0] == '.' and path[1] in ['\\','/']) else os.path.abspath(path) if path[0] in ['\\','/'] else path
+def _get_package_filehandler(package_id):
+  
+  pid= package_id
+  if not pid in stv_globals.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{package_id}'") 
+
+  return stv_globals.file_handlers[pid]
+
+def _get_filehandler_filetype(package, fid, task=None):
+  filetype_list= tuple(e for e in package.filetypes if e.id == fid and (task in e.tasks if task else True))
+  if not filetype_list: raise Exception(f"no filetypes found with id '{package.id}@{fid}' and a '{task}' task") 
+  if len(filetype_list) > 1: raise Exception(f"found {len(filetype_list)} filetypes with id '{package.id}@{fid}' and a '{task}' task, please make the ids unique")
+  
+  ft= filetype_list[0]
+  return ft, ft.tasks[task]
+
+def _get_filehandler_handler(package, fid, hid, task=None):
+  handler_list= tuple(e for e in package.handlers if e.id == hid and (e.task==task if task else True))
+  if not handler_list: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task that doesn't exist") 
+  if len(handler_list) > 1: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task but there's {len(handler_list)} tasks registered under that id, please make the ids unique") 
+  handler= handler_list[0]
+  if not handler.passes: raise Exception(f"handler '{fid}' defined no passes") 
+  
+  return handler
   
 def _get_filehandler(filetype_id, task):
   
   pid, fid= filetype_id.split(':')
-  if not pid in stv_globals.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{filetype_id}'") 
-
-  package= stv_globals.file_handlers[pid]
-
-  # filetype
-  filetype_list= tuple(e for e in package.filetypes if e.id == fid and task in e.tasks)
-  if not filetype_list: raise Exception(f"no filetypes found with id '{pid}@{fid}' and a '{task}' task") 
-  if len(filetype_list) > 1: raise Exception(f"found {len(filetype_list)} filetypes with id '{pid}@{fid}' and a '{task}' task, please make the ids unique") 
-
-  filetype= filetype_list[0]
-  hid= filetype.tasks[task]
-
-  # handler
-  handler_list= tuple(e for e in package.handlers if e.id == hid and e.task==task)
-  if not handler_list: raise Exception(f"filehandler with id '{pid}:{hid}@{fid}' requires a '{task}' task that doesn't exist") 
-  if len(handler_list) > 1: raise Exception(f"filehandler with id '{pid}:{hid}@{fid}' requires a '{task}' task but there's {len(handler_list)} tasks registered under that id, please make the ids unique") 
-
-  handler= handler_list[0]
-
-  if not handler.passes: raise Exception(f"handler '{fid}' defined no passes") 
+  package= _get_package_filehandler(pid)
+  filetype, hid= _get_filehandler_filetype(package, fid, task)
+  handler= _get_filehandler_handler(package, fid, hid, task)
 
   return (pid, fid, hid, f"{pid}:{hid}@{fid}-{task}", package, filetype, handler)
 
@@ -67,11 +71,22 @@ def file_read_internal(path:str, silent:bool):
         import traceback
         traceback.print_exc()
     return 404 if isinstance(e, FileNotFoundError) else 400, {'success':False, 'message':str(e), 'content':None}
+  
+# general front-end file reader
+def file_read_general(filetype_id:str, path:str, trigger:str, settings:dict={}):
+  try: 
+    return 200, file_read(filetype_id, path, trigger, settings, False)
+  except Exception as e: 
+    stv_logger.err(e)
+    if stv_globals.dev_traceback:
+      import traceback
+      traceback.print_exc()
+    return 404 if isinstance(e, FileNotFoundError) else 400, {'success':False, 'message':str(e), 'content':None}
 
 # ----------------------------------------------------------------------------------------------------------------------- read file
 def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_default:bool): # RAISEABLE
   
-  filepath= resolve_path(path)
+  filepath= util.resolve_path(path)
   if not os.path.exists(filepath) and (not search_default or not try_copy_default(filepath)): raise FileNotFoundError(f"File not found: {filepath}")
 
   pid, fid, hid, fullid, package, filetype, handler = _get_filehandler(filetype_id, 'read')
@@ -79,15 +94,17 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
 
   # setup
 
-  fn= os.path.basename(filepath)
-  dot= fn.rfind('.')
-  f= fn[:dot] if dot != -1 else f
-  ext= fn[dot+1:] if dot != -1 else None
+  file, ext= util.split_extension(os.path.basename(filepath))
+
+  #fn= os.path.basename(filepath)
+  #dot= fn.rfind('.')
+  #file= fn[:dot] if dot != -1 else f
+  #ext= fn[dot+1:] if dot != -1 else None
 
   pass_fstream:StringIO | BytesIO= None
   pass_context= DictObject({
     "id": { 'package':pid, 'filetype':fid, 'handler':hid },
-    "file": { 'filename': f, 'extension': ext, 'size': os.path.getsize(filepath) },
+    "file": { 'filename': file, 'extension': ext, 'size': os.path.getsize(filepath) },
     "trigger": trigger,
     "settings": { "__KEEPDICT__":None, **settings },
     "filetype": filetype,

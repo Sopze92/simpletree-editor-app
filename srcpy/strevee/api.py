@@ -1,4 +1,4 @@
-from strevee import fileio
+from strevee import fileio, util, window_manager
 from strevee.util import Response, Response200, Response400, Response404
 
 import webview as wv
@@ -56,6 +56,19 @@ class app_api():
       stv_globals.win_settings= None
     return Response200()
   
+  def dialog_open(self, path, package, filetypes):
+    # placeholder
+
+    filepath, filetype_id= window_manager.dialog_open_file(util.resolve_path(path), package, filetypes, False)
+    if not filepath: return Response(200, "cancelled")
+  
+
+    print(filepath, filetype_id)
+
+    status, js_result= fileio.file_read_general(filetype_id, filepath, 'open')
+
+    return Response(status, js_result['message'], js_result['content'])
+    
   def load_internal(self, path):
     status, js_result= fileio.file_read_internal(path, not stv_globals.dev_mode)
     return Response(status, js_result['message'], js_result['content'])

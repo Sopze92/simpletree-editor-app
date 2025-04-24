@@ -1,4 +1,5 @@
 from typing import Any
+import os
 
 # http responses
 
@@ -13,6 +14,15 @@ def Response500(message:str, body:Any | None = None): return Response(500, messa
 def _get_signature(*l): return sum([hash(f.__code__) for f in l])
 def _get_signature_plugin(c): return _get_signature(c.__init__, c.__del__, c.__stv_reg__, c.__stv_rem__, c.__stv_meta__)
 def _is_function_owned(c, f:callable): return f.__self__.__class__ == c if '__self__' in f.__dict__ else False
+
+# path util
+
+def resolve_path(path:str):
+  return os.path.join(stv_globals.root, path[2:]) if (path[0] == '.' and (len(path)==1 or path[1] in ['\\','/'])) else os.path.abspath(path) if path[0] in ['\\','/'] else path
+
+def split_extension(path:str):
+  f, e=  os.path.splitext(path)
+  return f, e[1:] if e else None
 
 # dict util
 

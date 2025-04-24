@@ -58,7 +58,7 @@ const TitleBar= ()=>{
       case MConst.MENU_ID.menu_file:
         switch(itemid){
           case MConst.MENU_ITEM_ID.menu_file_new: fileactions.io.create(true); break
-          case MConst.MENU_ITEM_ID.menu_file_open: console.log("open file"); break
+          case MConst.MENU_ITEM_ID.menu_file_open: actions.backend.openFileDialog("__strevee__", ["ft_strevee_doc"]); break
           case MConst.MENU_ITEM_ID.menu_file_reload: console.log("reload file from disk"); break
           case MConst.MENU_ITEM_ID.menu_file_save: console.log("save file"); break
           case MConst.MENU_ITEM_ID.menu_file_saveas: console.log("save file as"); break

@@ -12,12 +12,6 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
   const [ fileid, set_fileid ]= React.useState(0)
 
-  function getNextFileid(){
-    const newid= fileid
-    set_fileid(fileid+1)
-    return newid
-  }
-
   return {
     ...FileStoreDefaults,
 
@@ -302,7 +296,9 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
             cache= multiFile ? {...self().cache} : {},
             settings= multiFile ? {...self().settings} : {}
       
-          const fid= getNextFileid()
+          const fid= funcs.getNextFileID()
+
+          data.meta.id= fid
 
           files.set(fid, data)
           cache[fid]= { ready: false, next: 0, tree:{} }
@@ -315,7 +311,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           globalStore().actions.store.setFileReady(true)
 
           if(!multiFile || focus){
-            globalStore().actions.store.set_activeFile(fid)
+            globalStore().actions.store.setActiveFile(fid)
           }
 
           return fid
@@ -335,11 +331,32 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           return actions().io._addFile(data, focus)
         },
 
-        save: (path, filename, format)=>{
+        save: (fid, path, filename, format)=>{
 
           // TODO: save the file
           //   determine the proper parser based format
           //   write file bytes through the parser
+        },
+
+        close: (fid, focused)=>{
+          
+          const 
+            multiFile= globalStore().settings.app_multiFile_support,
+            singlefile= !multiFile && self().files.size == 1,
+            files= new Map(self().files.entries())
+            
+          if(multiFile && focused){
+            const
+              keys= Array.from(files.keys()),
+              nindex= keys.indexOf(fid)-1
+
+            globalStore().actions.store.setActiveFile(keys[nindex < 0 ? 1 : nindex])
+          }
+
+          files.delete(fid)
+
+          if(singlefile) actions().io.create(true)
+          else funcs.setFiles(files)
         }
       }
     }

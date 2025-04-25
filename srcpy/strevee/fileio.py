@@ -6,6 +6,8 @@ from strevee.exceptions import *
 import os
 from io import BytesIO, StringIO
 
+# ----------------------------------------------------------------------------------------------------------------------- general
+
 def get_file_as_module(path):
   import importlib.util as iu
   name= f"module_{os.path.basename(path)[:-3]}"
@@ -13,39 +15,6 @@ def get_file_as_module(path):
   m = iu.module_from_spec(s)
   s.loader.exec_module(m)
   return m
-
-def _get_package_filehandler(package_id):
-  
-  pid= package_id
-  if not pid in stv_globals.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{package_id}'") 
-
-  return stv_globals.file_handlers[pid]
-
-def _get_filehandler_filetype(package, fid, task=None):
-  filetype_list= tuple(e for e in package.filetypes if e.id == fid and (task in e.tasks if task else True))
-  if not filetype_list: raise Exception(f"no filetypes found with id '{package.id}@{fid}' and a '{task}' task") 
-  if len(filetype_list) > 1: raise Exception(f"found {len(filetype_list)} filetypes with id '{package.id}@{fid}' and a '{task}' task, please make the ids unique")
-  
-  ft= filetype_list[0]
-  return ft, ft.tasks[task]
-
-def _get_filehandler_handler(package, fid, hid, task=None):
-  handler_list= tuple(e for e in package.handlers if e.id == hid and (e.task==task if task else True))
-  if not handler_list: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task that doesn't exist") 
-  if len(handler_list) > 1: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task but there's {len(handler_list)} tasks registered under that id, please make the ids unique") 
-  handler= handler_list[0]
-  if not handler.passes: raise Exception(f"handler '{fid}' defined no passes") 
-  
-  return handler
-  
-def _get_filehandler(filetype_id, task):
-  
-  pid, fid= filetype_id.split(':')
-  package= _get_package_filehandler(pid)
-  filetype, hid= _get_filehandler_filetype(package, fid, task)
-  handler= _get_filehandler_handler(package, fid, hid, task)
-
-  return (pid, fid, hid, f"{pid}:{hid}@{fid}-{task}", package, filetype, handler)
 
 # copy file without importing any lib
 def file_copy(path_src, path_dst):
@@ -59,6 +28,8 @@ def try_copy_default(filepath):
   _f= os.path.basename(filepath)
   _df= os.listdir(stv_globals.path_defaults)
   if _f in _df: file_copy(os.path.join(_df, _f), filepath)
+
+# ----------------------------------------------------------------------------------------------------------------------- read file
 
 # should be only used internally
 def file_read_internal(path:str, silent:bool):
@@ -83,7 +54,8 @@ def file_read_general(filetype_id:str, path:str, trigger:str, settings:dict={}):
       traceback.print_exc()
     return 404 if isinstance(e, FileNotFoundError) else 400, {'success':False, 'message':str(e), 'content':None}
 
-# ----------------------------------------------------------------------------------------------------------------------- read file
+# -------------------------------------------------------- READER
+
 def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_default:bool): # RAISEABLE
   
   filepath= util.resolve_path(path)
@@ -205,9 +177,35 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
   return js_result.dict() # return intentional js_object to be used in frontend
 
 # ----------------------------------------------------------------------------------------------------------------------- write file
+  
+# should be only used internally
+def file_write_internal(path:str, silent:bool):
+  try: 
+    return 200, file_write("__internal__:ft_internal", path, '_internal', {}, True)
+  except Exception as e: 
+    if not silent:
+      stv_logger.err(e)
+      if stv_globals.dev_traceback:
+        import traceback
+        traceback.print_exc()
+    return 400, {'success':False, 'message':str(e), 'content':None}
+  
+# general front-end file writer
+def file_write_general(filetype_id:str, path:str, trigger:str, settings:dict={}, overwrite=True):
+  try: 
+    return 200, file_write(filetype_id, path, trigger, settings, overwrite)
+  except Exception as e: 
+    stv_logger.err(e)
+    if stv_globals.dev_traceback:
+      import traceback
+      traceback.print_exc()
+    return 400, {'success':False, 'message':str(e)}
+  
+# -------------------------------------------------------- WRITER
+
 def file_write(filetype_id:str, path:str, trigger, settings:dict, overwrite:bool=False):
   
-  filepath= resolve_path(path)
+  filepath= util.resolve_path(path)
   dirpath= os.path.dirname(filepath)
   if not os.path.exists(dirpath): os.makedirs(dirpath)
 
@@ -232,7 +230,7 @@ def file_write(filetype_id:str, path:str, trigger, settings:dict, overwrite:bool
 
   return None
 
-# plugin registry
+# ----------------------------------------------------------------------------------------------------------------------- plugin registry
 
 def register_plugins():
   from strevee.plugins import types as ptypes
@@ -294,7 +292,35 @@ def register_plugins():
   if plugin_count > 0: stv_logger.logm(f"registered {plugin_count} {'plugin' if plugin_count == 1 else 'plugins'}:", *[ e for pi in plugin_summary.values() for e in (f"{pi['entry']} [{pi['count']}]:", *pi['list'])  ])
   else: stv_logger.log("no plugins registered")
 
-# helpers
+# ----------------------------------------------------------------------------------------------------------------------- helpers
+
+def _get_package_filehandler(package_id):
+  pid= package_id
+  if not pid in stv_globals.file_handlers: raise FileHandlerNotFoundError(f"No registered file handler with id '{package_id}'") 
+  return stv_globals.file_handlers[pid]
+
+def _get_filehandler_filetype(package, fid, task=None):
+  filetype_list= tuple(e for e in package.filetypes if e.id == fid and (task in e.tasks if task else True))
+  if not filetype_list: raise Exception(f"no filetypes found with id '{package.id}@{fid}' and a '{task}' task") 
+  if len(filetype_list) > 1: raise Exception(f"found {len(filetype_list)} filetypes with id '{package.id}@{fid}' and a '{task}' task, please make the ids unique")
+  ft= filetype_list[0]
+  return ft, ft.tasks[task]
+
+def _get_filehandler_handler(package, fid, hid, task=None):
+  handler_list= tuple(e for e in package.handlers if e.id == hid and (e.task==task if task else True))
+  if not handler_list: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task that doesn't exist") 
+  if len(handler_list) > 1: raise Exception(f"filehandler with id '{package.id}:{hid}@{fid}' requires a '{task}' task but there's {len(handler_list)} tasks registered under that id, please make the ids unique") 
+  handler= handler_list[0]
+  if not handler.passes: raise Exception(f"handler '{fid}' defined no passes") 
+  return handler
+  
+def _get_filehandler(filetype_id, task):
+  pid, fid= filetype_id.split(':')
+  package= _get_package_filehandler(pid)
+  filetype, hid= _get_filehandler_filetype(package, fid, task)
+  handler= _get_filehandler_handler(package, fid, hid, task)
+  return (pid, fid, hid, f"{pid}:{hid}@{fid}-{task}", package, filetype, handler)
+
 def _get_passes(new_passes, exception_data):
   if not (isinstance(new_passes, list) or isinstance(new_passes, tuple)): raise FileHandlerPassError(*exception_data, "the provided passlist is not either a list or tuple")
   if len(new_passes) == 0: raise FileHandlerPassError(*exception_data, "provided empty passlist as override")
@@ -302,7 +328,7 @@ def _get_passes(new_passes, exception_data):
   if len(_pt) > 0: raise FileHandlerPassListError(*exception_data, _pt)
   return tuple(DictObject(e) for e in new_passes)
 
-# other
+# ----------------------------------------------------------------------------------------------------------------------- other
 
 _dictsurface_pass_drop_out= ('error', 'settings', 'data', 'result')
 _dictsurface_pass_readwrite_out= ('error', 'passes', 'filedata', 'data', 'result')

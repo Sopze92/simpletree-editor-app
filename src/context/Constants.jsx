@@ -4,6 +4,18 @@ export const Const= Object.freeze({
   APP_TITLE: "sTrevee",
   APP_MULTIFILE: false,
 
+  FILEHANDLING: {
+    open:       "open",
+    reload:     "reload",
+    save:       "save",
+    save_as:    "save_as",
+    save_inc:   "save_inc",
+    save_all:   "save_all",
+    import:     "import",
+    export:     "export",
+    backup:     "backup",
+  },
+
   WINDOW_ACTION: {
     close: 0,
     maximize: 1,

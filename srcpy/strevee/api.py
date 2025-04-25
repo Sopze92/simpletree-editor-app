@@ -57,7 +57,6 @@ class app_api():
     return Response200()
   
   def dialog_open(self, path, package, filetypes):
-    # placeholder
 
     filepath, filetype_id= window_manager.dialog_open_file(util.resolve_path(path), package, filetypes, False)
     if not filepath: return Response(200, "cancelled")
@@ -68,7 +67,19 @@ class app_api():
     status, js_result= fileio.file_read_general(filetype_id, filepath, 'open')
 
     return Response(status, js_result['message'], js_result['content'])
-    
+  
+  def dialog_save(self, path, package, filetypes, trigger):
+
+    filepath, filetype_id= window_manager.dialog_save_file(util.resolve_path(path), package, filetypes, False)
+    if not filepath: return Response(200, "cancelled")
+
+    status, message= fileio.file_write_general(filetype_id, filepath, trigger, True)
+
+    return Response(status, message)
+  
+  def file_save(self, path, filetype_id):
+    ...
+
   def load_internal(self, path):
     status, js_result= fileio.file_read_internal(path, not stv_globals.dev_mode)
     return Response(status, js_result['message'], js_result['content'])

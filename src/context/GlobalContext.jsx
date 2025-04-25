@@ -27,19 +27,21 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         }
         else console.error("Couldn't read settings file:", response.status, response.message)
 
-        response= await api.load_internal(".\\recents.ini")
-        if(response.status == 200){
-          const values= Object.values(response.body)
-          if(values.length > 0) funcs.setRecents(values)
-          console.log("loaded recents", values)
-        }
-        else console.log("no recents file loaded", response.message)
-        
-        response= await api.load_internal(".\\session.ini")
-        if(response.status == 200){
-          console.log("loaded session", response.body)
-        }
-        else console.log("no session file loaded", response.message)
+        //response= await api.load_internal(".\\recents.ini")
+        //if(response.status == 200){
+        //  const values= Object.values(response.body)
+        //  if(values.length > 0) funcs.setRecents(values)
+        //  console.log("loaded recents", values)
+        //}
+        //else console.log("no recents file loaded", response.message)
+        //
+        //response= await api.load_internal(".\\session.ini")
+        //if(response.status == 200){
+        //  console.log("loaded session", response.body)
+        //}
+        //else console.log("no session file loaded", response.message)
+
+        if(fileStore().files.size == 0) fileStore().actions.io.create(true)
 
         funcs.setReady({ app: true })
       },
@@ -84,8 +86,19 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           pywebview.api.toggle_settings_window()
         },
 
-        openFileDialog: async(packageName, filetypes)=>{
-          const response= await pywebview.api.dialog_open(".", packageName, filetypes)
+        openFileDialog: async(packageName, filetypes, trigger)=>{
+          const response= await pywebview.api.dialog_open(".", packageName, filetypes, trigger)
+          console.log(response)
+        },
+
+        saveFile: async(trigger)=>{
+          // TODO: get required data from file instance
+          const response= await pywebview.api.file_save(".", null, null)
+          console.log(response)
+        },
+
+        saveFileDialog: async(packageName, filetypes, trigger)=>{
+          const response= await pywebview.api.dialog_save(".", packageName, filetypes, trigger)
           console.log(response)
         }
       },
@@ -162,9 +175,17 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
 
         setFileReady: (state)=> { funcs.setReady({ file:state })},
 
-        set_activeFile: (index)=> { 
-          if(index < 0 || index > fileStore().files.length -1) funcs.setReady({ file:false })
-          funcs.setStore({ activeFile: index })
+        setActiveFile: (fid)=> { 
+          const files= fileStore().files
+          if(files.has(fid)) funcs.setStore({ activeFile: fid })
+          else funcs.setReady({ file:false })
+        },
+
+        closeFile: (fid)=> { 
+          const files= fileStore().files
+          if(files.has(fid)){
+            fileStore().actions.io.close(fid, self().store.activeFile == fid)
+          }
         },
 
         set_hoverElementData: (type, data)=> { funcs.setStore({ hoverElementData: {type, data} }) },

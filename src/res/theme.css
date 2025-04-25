@@ -23,7 +23,7 @@
   --tr-bgcol: #999;
   --tab-bgcol: #ddd;
   --tab-bgcol-hover: #ddd;
-  --tab-bgcol-active: #ddd;
+  --tab-bgcol-active: #eee;
 
   /* titlebar */
 
@@ -87,8 +87,9 @@
   /* tabrow */
 
   --tr-bgcol: #111;
-  --tab-bgcol: #222;
-  --tab-bgcol-hover: #333;
+  --tab-bgcol: #171717;
+  --tab-col: #676767;
+  --tab-bgcol-hover: #222;
   --tab-col-active: #969696;
   --tab-bgcol-active: #272727;
 

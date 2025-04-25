@@ -55,7 +55,6 @@ import { Funcs } from "../context/Functions.jsx"
 export const GlobalListener=()=>{
 
   const { actions, store }= React.useContext(GlobalContext)
-  const { files, actions:fileactions }= React.useContext(FileContext)
 
   function handleMouseMove(e){
     if(e.target){
@@ -80,13 +79,6 @@ export const GlobalListener=()=>{
     document.addEventListener("mousemove", handleMouseMove)
     return ()=> { document.removeEventListener('mousemove', handleMouseMove) }
   },[])
-
-  React.useEffect(()=>{
-    if(files.size == 0) {
-      console.info("no file data, creating one")
-      fileactions.io.load("UNUSED", true)
-    }
-  },[files.size])
 
   return null
 }

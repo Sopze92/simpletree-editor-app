@@ -402,7 +402,7 @@ body {
 [stv-fileview-content] {
   display: flex;
   flex-direction: column;
-  margin: 1em 3em 1em 1em;
+  padding: 2em 3em calc(100dvh - 9em) 1em;
 }
 
 /* STATUSBAR */

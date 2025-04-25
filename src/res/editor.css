@@ -50,6 +50,7 @@
 
   & [stv-tabrow-tab] {
 
+    color: var(--tab-col);
     background: var(--tab-bgcol);
 
     border: 1px solid var(--mb-bordercol);
@@ -70,15 +71,19 @@
 
     text-align: center;
 
-    &:hover {
-      background: var(--tab-bgcol-hover);
-      border-bottom-color: var(--mi-bordercol-hover);
+    &.__active {
+      color: var(--tab-col-active);
+      background: var(--tab-bgcol-active);
+      border-bottom-color: var(--fv-bgcol);
     }
 
-    &:active {
-      color: var(--tab-col-active);
-      background: var(--fv-bgcol);
-      border-bottom-color: var(--fv-bgcol);
+    & * {
+      pointer-events: none;
+    }
+
+    &:hover:not(.__active) {
+      background: var(--tab-bgcol-hover);
+      border-bottom-color: var(--mi-bordercol-hover);
     }
   }
 }

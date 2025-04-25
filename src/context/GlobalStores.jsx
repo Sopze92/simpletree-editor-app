@@ -12,7 +12,7 @@ export const GlobalStoreDefaults= Object.freeze({
   stamp:    { general:0, file:0 },
   settings: { // snake case for ease of parsing
     active_layout: Const.LAYOUT_MODE.editor,
-    app_multiFile_support: false,
+    app_multiFile_support: true,
     force_tabrow: false,
     view_menu: true, 
     view_decorated: true,
@@ -42,6 +42,7 @@ export const GlobalStoreDefaults= Object.freeze({
 })
 
 export const FileStoreDefaults= Object.freeze({
+  fileid: 0,
   files: new Map(),
   cache: {},
   settings: {},
@@ -137,6 +138,7 @@ export const AppStoreProvider= WrappedComponent=>{
           actions:        ()=> fileStore.actions,   // file actions
           funcs: {
             current:        ()=> globalStore.store.activeFile != -1 ? fileStore.files[globalStore.store.activeFile] : null,
+            getNextFileID:  ()=> {const fid= fileStore.fileid; set_fileStore(Object.assign(fileStore, { fileid: fid+1 } )); return fid},
             setFiles:       (data)=> set_fileStore( Object.assign(fileStore, { files: data } )),
             setCache:       (data)=> setPartial_fileStore({ cache: Object.assign(fileStore.cache, data) }),
             setSettings:    (data)=> setPartial_fileStore({ settings: Object.assign(fileStore.settings, data) })

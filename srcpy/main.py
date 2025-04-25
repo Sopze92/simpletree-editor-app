@@ -1,6 +1,6 @@
 '''
 ## important note
-this module install a 'strevee' class into __builtins__ in order to get access to some own global scope without the need of imports, althought this is not recommended, 
+this module install some objects into __builtins__ in order to get access to some own global scope without the need of imports, althought this is not recommended, 
 it's practical, so i've done it this way just because this is an isolated module that aims to run inside an executable with a embebbed python runtime
 '''
 

@@ -58,13 +58,18 @@ const TitleBar= ()=>{
       case MConst.MENU_ID.menu_file:
         switch(itemid){
           case MConst.MENU_ITEM_ID.menu_file_new: fileactions.io.create(true); break
-          case MConst.MENU_ITEM_ID.menu_file_open: actions.backend.openFileDialog("__strevee__", ["ft_strevee_doc"]); break
-          case MConst.MENU_ITEM_ID.menu_file_reload: console.log("reload file from disk"); break
-          case MConst.MENU_ITEM_ID.menu_file_save: console.log("save file"); break
-          case MConst.MENU_ITEM_ID.menu_file_saveas: console.log("save file as"); break
-          case MConst.MENU_ITEM_ID.menu_file_saveinc: console.log("save file as"); break
+          case MConst.MENU_ITEM_ID.menu_file_open: actions.backend.openFileDialog("__strevee__", ["ft_strevee_doc"], Const.FILEHANDLING.open); break
+          case MConst.MENU_ITEM_ID.menu_file_reload: actions.backend.saveFile(Const.FILEHANDLING.reload); break
+          case MConst.MENU_ITEM_ID.menu_file_save: 
+            if(fileactions.current.isFileOnDisk()) {
+              actions.backend.saveFile(Const.FILEHANDLING.save)
+              break
+            }
+          // no break, intential fallthrough to saveas
+          case MConst.MENU_ITEM_ID.menu_file_saveas: actions.backend.saveFileDialog("__strevee__", ["ft_strevee_doc"], Const.FILEHANDLING.save_as); break
+          case MConst.MENU_ITEM_ID.menu_file_saveinc: actions.backend.saveFile(Const.FILEHANDLING.save_inc); break
           // unused
-          case MConst.MENU_ITEM_ID.menu_file_saveall: console.log("save all files"); break
+          case MConst.MENU_ITEM_ID.menu_file_saveall: actions.backend.saveFile(Const.FILEHANDLING.save_all); break
         }
       case MConst.MENU_ID.menu_edit:
         switch(itemid){
@@ -112,7 +117,6 @@ const TitleBar= ()=>{
       case MConst.MENU_ID.menu_file:
         switch(itemid){
           case MConst.MENU_ITEM_ID.menu_file_reload: return fileactions.current.isFileOnDisk()
-          case MConst.MENU_ITEM_ID.menu_file_save: return fileactions.current.isFileOnDisk()
           case MConst.MENU_ITEM_ID.menu_file_saveinc: return fileactions.current.isFileOnDisk()
         }
       case MConst.MENU_ID.menu_view:

@@ -62,7 +62,7 @@ const Component= ({ fid } )=> {
       <Scrollable options={{overflow:{x:'hidden'}}}>
         <div ref={_ref} stv-fileview={""}>
           <div stv-fileview-content={""}>
-            { stvReady && 
+            { stvReady &&
               <RootElement fid={fid}/>
             }
           </div>

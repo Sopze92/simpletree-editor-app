@@ -1,3 +1,4 @@
+from copy import deepcopy
 from strevee import util
 from strevee.types import DictObject
 
@@ -68,11 +69,6 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
 
   file, ext= util.split_extension(os.path.basename(filepath))
 
-  #fn= os.path.basename(filepath)
-  #dot= fn.rfind('.')
-  #file= fn[:dot] if dot != -1 else f
-  #ext= fn[dot+1:] if dot != -1 else None
-
   pass_fstream:StringIO | BytesIO= None
   pass_context= DictObject({
     "id": { 'package':pid, 'filetype':fid, 'handler':hid },
@@ -89,7 +85,7 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
   mode_switch_allowed= True
   times_passes_overriden= 0
   is_last_pass= False
-  active_mode= 'stv_bytes'
+  active_mode= 'utf-8' if pass_context.passes[0].mode == 'stv_text' else pass_context.passes[0].mode
 
   i= pi= 0
 
@@ -101,8 +97,10 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
 
   # get file as bytes
 
-  with open(filepath, 'rb') as fb:
-    pass_fstream= BytesIO(fb.read())
+  fbytes= active_mode=='stv_bytes'
+
+  with open(filepath, 'rb' if fbytes else 'r') as fb:
+    pass_fstream= BytesIO(fb.read()) if fbytes else StringIO(fb.read())
     fb.close()
 
   # execute passes
@@ -174,7 +172,7 @@ def file_read(filetype_id:str, path:str, trigger:str, settings:dict, search_defa
 
     if i > stv_const.FILEHANDLER_MAX_ITERATIONS: raise FileHandlerTooManyPassIterationsError(*exception_data)
 
-  return js_result.dict() # return intentional js_object to be used in frontend
+  return js_result.to_dict() # return intentional js_object to be used in frontend
 
 # ----------------------------------------------------------------------------------------------------------------------- write file
   
@@ -191,9 +189,9 @@ def file_write_internal(path:str, silent:bool):
     return 400, {'success':False, 'message':str(e), 'content':None}
   
 # general front-end file writer
-def file_write_general(filetype_id:str, path:str, trigger:str, settings:dict={}, overwrite=True):
+def file_write_general(data, filetype_id:str, path:str, trigger:str, settings:dict, overwrite:bool):
   try: 
-    return 200, file_write(filetype_id, path, trigger, settings, overwrite)
+    return 200, file_write(data, filetype_id, path, trigger, settings, overwrite)
   except Exception as e: 
     stv_logger.err(e)
     if stv_globals.dev_traceback:
@@ -203,7 +201,7 @@ def file_write_general(filetype_id:str, path:str, trigger:str, settings:dict={},
   
 # -------------------------------------------------------- WRITER
 
-def file_write(filetype_id:str, path:str, trigger, settings:dict, overwrite:bool=False):
+def file_write(data, filetype_id:str, path:str, trigger:str, settings:dict, overwrite:bool):
   
   filepath= util.resolve_path(path)
   dirpath= os.path.dirname(filepath)
@@ -226,9 +224,115 @@ def file_write(filetype_id:str, path:str, trigger, settings:dict, overwrite:bool
   pid, fid, hid, fullid, package, filetype, handler = _get_filehandler(filetype_id, 'write')
   stv_logger.log(f"writing: {filepath}, handler: {fullid}")
 
-  print("-------------------------------------------------------------- TODO: FILE WRITE") # TODO: file write
+  # setup
 
-  return None
+  file, ext= util.split_extension(os.path.basename(filepath))
+
+  pass_data= data
+  pass_context= DictObject({
+    "id": { 'package':pid, 'filetype':fid, 'handler':hid },
+    "file": { 'filename': file, 'extension': ext },
+    "trigger": trigger,
+    "settings": { "__KEEPDICT__":None, **settings },
+    "filetype": filetype,
+    "passes": tuple(handler.passes),
+    "active_pass": None,
+    "data": None
+  })
+
+  mode_switch_allowed= True
+  times_passes_overriden= 0
+  is_last_pass= False
+  active_mode= None
+
+  i= pi= 0
+
+  js_result= DictObject({
+    'success': False,
+    'message': None,
+    'content': None,
+    'encoding': None,
+  })
+
+  # open temp file to write
+
+  while pi < len(pass_context.passes):
+
+    p= pass_context.passes[pi]
+    pass_context.active_pass= DictObject({ 'index': i, 'name': p.name, 'mode': p.mode })
+    
+    exception_data= (fullid, pi, p, times_passes_overriden)
+    
+    is_last_pass= pi == len(pass_context.passes)-1
+
+    if mode_switch_allowed or not active_mode:
+      new_mode= 'utf-8' if p.mode == 'stv_text' else p.mode
+
+      if active_mode != new_mode:
+        #if active_mode == 'stv_bytes': pass_fstream= StringIO(pass_fstream.read().decode(new_mode))
+        #elif new_mode != 'stv_bytes': pass_fstream= StringIO(pass_fstream.read().encode(active_mode).decode(new_mode))
+        #else: pass_fstream= BytesIO(pass_fstream.read().encode(active_mode))
+        active_mode= new_mode
+
+    outdata= package.__INSTANCE__.write(pass_data, pass_context)
+  
+    if isinstance(outdata, bool):
+      if outdata: continue
+      else: break
+
+    # pass data result
+    if isinstance(outdata, dict) and util.check_dict_surface(outdata, _dictsurface_pass_readwrite_out, False, True):
+
+      skip= False
+
+      if 'passes' in outdata:
+        pass_context.passes= _get_passes(outdata['passes'], exception_data) # ---- raises if fail
+        pi= 0
+        times_passes_overriden+=1
+        is_last_pass= False
+        skip= True
+
+      if 'data' in outdata: pass_context.data= outdata['data']
+      if 'filedata' in outdata:
+        pass_data= outdata['filedata']
+        mode_switch_allowed= False
+
+      if 'result' in outdata:
+        result= outdata['result']
+        if 'error' in result: 
+          js_result.message= result['error']
+          js_result.success= False
+          stv_logger.err(result['error'])
+        else:
+          js_result.success= True
+          if 'message' in result: js_result.message= result['message']
+          if 'data' in result: 
+            js_result.content= result['data']
+            js_result.encoding= result['encoding'] if 'encoding' in result else active_mode
+        break
+      elif is_last_pass:
+        if not filetype.domain == 'user': raise FileHandlerInvalidPassReturnError("last pass must return the resulting data")
+      
+      if skip: continue
+        
+    elif is_last_pass:
+      if not filetype.domain == 'user': raise FileHandlerInvalidPassReturnError("last pass must return the resulting data")
+      else: return outdata # return user-defined thing
+  
+    i+=1
+    pi+=1
+
+    if i > stv_const.FILEHANDLER_MAX_ITERATIONS: raise FileHandlerTooManyPassIterationsError(*exception_data)
+
+  if js_result.success:
+
+    wb= js_result.encoding=='stv_bytes'
+
+    with open(filepath, 'wb' if wb else "w") as fb:
+      fb.write(js_result.content)
+      fb.close()
+
+  return js_result.to_dict() # return intentional js_object to be used in frontend
 
 # ----------------------------------------------------------------------------------------------------------------------- plugin registry
 

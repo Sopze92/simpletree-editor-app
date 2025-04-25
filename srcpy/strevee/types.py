@@ -52,7 +52,7 @@ class DictObject():
   def __repr__(self): 
     return f"{{{', '.join(self.__dict__.keys())}}}"
 
-  def dict(self): return self.__dict__
+  def to_dict(self): return self.__dict__
 
 # handlers
 
@@ -168,6 +168,7 @@ class FileHandler():
         - result (Any)        -- a dictionary containing the final result in the format, file handling process will end if provided, provide `{}` to fail silently
             - error (str)         -- error feedback, if provided the message is shown to the user in an alert popup, can be omited
             - message (str)       -- a message to be briefly shown in the user's statusbar+logs (if no 'error' defined), can be omited
+            - encoding (str)      -- encoding to use for file writing (same options as passes' mode), last pass' mode will be used if not provided
             - data(str|bytes)     -- the final result that will be written to disk
 
     ## returns (last/unique pass)

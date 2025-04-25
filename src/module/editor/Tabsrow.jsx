@@ -14,7 +14,6 @@ const Module= ()=>{
 
   function handleOnClick(e, meta){
     Funcs.cancelEvent(e)
-    console.log(e)
     const fid= meta.id
     switch(e.button){
       case 0:

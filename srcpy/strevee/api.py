@@ -1,4 +1,5 @@
 from strevee import fileio, util, window_manager
+from strevee.types import DictObject
 from strevee.util import Response, Response200, Response400, Response404
 
 import webview as wv
@@ -56,28 +57,27 @@ class app_api():
       stv_globals.win_settings= None
     return Response200()
   
-  def dialog_open(self, path, package, filetypes):
+  def dialog_open(self, path, package, filetypes, trigger):
 
     filepath, filetype_id= window_manager.dialog_open_file(util.resolve_path(path), package, filetypes, False)
     if not filepath: return Response(200, "cancelled")
-  
 
     print(filepath, filetype_id)
 
-    status, js_result= fileio.file_read_general(filetype_id, filepath, 'open')
+    status, js_result= fileio.file_read_general(filetype_id, filepath, trigger)
 
     return Response(status, js_result['message'], js_result['content'])
   
-  def dialog_save(self, path, package, filetypes, trigger):
+  def dialog_save(self, data, path, package, filetypes, trigger):
 
     filepath, filetype_id= window_manager.dialog_save_file(util.resolve_path(path), package, filetypes, False)
     if not filepath: return Response(200, "cancelled")
 
-    status, message= fileio.file_write_general(filetype_id, filepath, trigger, True)
+    status, message= fileio.file_write_general(data, filetype_id, filepath, trigger, {}, True)
 
     return Response(status, message)
   
-  def file_save(self, path, filetype_id):
+  def file_save(self, data, trigger):
     ...
 
   def load_internal(self, path):

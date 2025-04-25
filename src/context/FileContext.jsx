@@ -160,6 +160,13 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         funcs.setCache(cache)
       },
 
+      getWritableFile: (fid)=>{
+        
+        // TODO: getWritableFile() -> ensure file data only contains very basic types to avoid data loss or type ambiguity resulting from sending js types to python
+
+        return self().files.get(fid)
+      },
+
       util: {
 
         getDataFromHid: (hid)=>{
@@ -209,6 +216,10 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
         getDragElement: (hid, eid)=>{
           return actions().element.build(hid, eid, false)[0]
+        },
+
+        getWritableFile: ()=>{
+          return actions().getWritableFile(globalStore().store.activeFile)
         }
       },
 
@@ -318,16 +329,10 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         },
 
         create: (focus)=>{
-          // TODO: change to default as soon as we have the ability to create files dynamically
-          return actions().io._addFile(createDevFile(), focus)
+          return actions().io._addFile(createDefaultfile(), focus)
         },
 
-        load: (path, focus)=>{
-
-          // TODO: load the actual file
-          //   determine the parser based on extension or header
-          //   parse and compose something with like FileInstanceDefault and DEV_FileInstance
-          const data= createDevFile()
+        fromData: (data, focus)=>{
           return actions().io._addFile(data, focus)
         },
 

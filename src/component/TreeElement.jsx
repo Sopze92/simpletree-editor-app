@@ -74,7 +74,7 @@ export const RootElement= ({ fid })=>{
   React.useEffect(()=>{
     console.log("updated root for file", fid)
     const obj= file.tree.root
-    set_currentTree(obj.body.map((e,i)=> <ElementWrapper key={i} hid={[fid, i]} eid={e} />))
+    set_currentTree(obj ? obj.body.map((e,i)=> <ElementWrapper key={i} hid={[fid, i]} eid={e} />) : [])
   },[file.tree.root])
 
   return (

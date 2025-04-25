@@ -18,6 +18,10 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
       _initialize: async()=>{
 
         const api= pywebview.api
+
+        // TODO: retrieve registered filetypes, packages and 
+
+
         let response
 
         response= await api.load_internal(".\\settings.ini")
@@ -89,16 +93,27 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         openFileDialog: async(packageName, filetypes, trigger)=>{
           const response= await pywebview.api.dialog_open(".", packageName, filetypes, trigger)
           console.log(response)
+
+          if(response.status == 200 && 'body' in response){
+            fileStore().actions.io.fromData(response.body, true)
+          }
         },
 
         saveFile: async(trigger)=>{
-          // TODO: get required data from file instance
-          const response= await pywebview.api.file_save(".", null, null)
+
+          const dataOut= fileStore().actions.getWritableFile(self().store.activeFile)
+          
+          const response= await pywebview.api.file_save(dataOut, trigger)
           console.log(response)
         },
 
         saveFileDialog: async(packageName, filetypes, trigger)=>{
-          const response= await pywebview.api.dialog_save(".", packageName, filetypes, trigger)
+
+          // CHANGEME: get if user actually SAVED a file (not cancelled) before sending any file data to python then call some 'write file' func on api if so
+
+          const dataOut= fileStore().actions.getWritableFile(self().store.activeFile)
+
+          const response= await pywebview.api.dialog_save(dataOut, ".", packageName, filetypes, trigger)
           console.log(response)
         }
       },
@@ -237,93 +252,6 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
             hids: tree.elements.map(e=>e.props.hid),
             elements: tree.elements, 
             length: tree.elements.length}
-        }
-      },
-
-      parser: { // ---------------------------------------------------------------------------------------------------------------- PARSER
-
-        set: (data)=>{
-          set.parser(data)
-          set.ready({ parser:true })
-        },
-
-        parseDataTree: (data=fileStore().getActiveFile().data, parser=null)=>{
-
-          const parseDataElement_= actions().parser.parseDataElement
-
-          // create a list of skips (elements that should be skipped as they'll be created along with their parents)
-          const 
-            ctypes= parser.types.map(e=> e[1] == Const.TREOBJ_CLASS.group || e[1] == Const.TREOBJ_CLASS.block),
-            skip= Array(data.length),
-            tree= []
-
-          let e
-
-          for(let i in data){
-            e= data[i]
-            if(ctypes[e[0]]){
-              for(let j of e[2]) {
-                if(j!=i) skip[j]= true
-                else console.warn(`element [${i}:${parser.types[e[0]][0]}] is set to contain itself!`)
-              }
-            }
-          }
-
-          // element creation
-          let j=0
-          for(let i in data){
-            if(skip[i]) continue
-            j++;
-            tree.push(parseDataElement_(i, [j], { data, parser }))
-          }
-
-          return{
-            hids: tree.map(e=>e.props.hid),
-            elements: tree, 
-            length: tree.length
-          }
-        },
-
-        parseDataElement: (idx, hid, { data=fileStore.getActiveFile().data, parser=null, body=true })=>{
-
-          idx= Number(idx)
-          const element= data[idx]
-
-          let 
-            type= parser.types[element[0]],
-            attrs= []
-
-          for(let j in type[2]) { // required attrs for type
-            attrs.push([...parser.attrs[type[2][j]], element[1][j]])
-          }
-
-          // create tree element
-          let treeElement
-          switch(type[1]) { // check type class
-            case Const.TREOBJ_CLASS.item:
-              treeElement= <BaseElement key={idx} index={idx} hid={hid} attrs={attrs} params={{type:type[0]}}/>
-              break
-            case Const.TREOBJ_CLASS.group:
-              treeElement= <BaseElementGroup key={idx} index={idx} hid={hid} attrs={attrs} params={{type:type[0]}}>
-                { body && element[2] && 
-                  element[2].map((e,i)=>
-                    actions().parser.parseDataElement(e, [...hid, i+1], { data, parser })
-                  )
-                }
-                </BaseElementGroup>
-              break
-            case Const.TREOBJ_CLASS.block:
-              treeElement= <BaseElementBlock key={idx} index={idx} hid={hid} attrs={attrs} params={{type:type[0]}}>
-              { body && element[2] && 
-                element[2].map((e,i)=>
-                  actions().parser.parseDataElement(e, [...hid, i+1], { data, parser })
-                )
-              }
-              </BaseElementBlock>
-              break
-          }
-
-          return treeElement
         }
       },
 

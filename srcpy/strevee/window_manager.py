@@ -84,4 +84,4 @@ def dialog_save_file(path, pid:str, filetypes:list[str], wildcard:bool):
 
   if not filetype[0]: return None, None
 
-  return filepath[0], f"{pid}:{filetype[0].data.id}"
+  return filepath, f"{pid}:{filetype[0].data.id}"

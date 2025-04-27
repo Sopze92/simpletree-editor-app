@@ -2,36 +2,31 @@ import React from 'react'
 
 import { FileContext, GlobalContext } from '../context/GlobalStores'
 
-export const useDocument= ( fid, init=false )=>{
+export const useDocument= ( fid )=>{
 
   const
-    { files, cache, actions }= React.useContext(FileContext),
-    [ stvDoc, set_stvDoc ]= React.useState(files.get(fid)),
-    [ stvReady, set_stvReady ]= React.useState(false)
+    { files }= React.useContext(FileContext),
+    [ stvDoc, set_stvDoc ]= React.useState(files.get(fid))
     
   React.useEffect(()=>{
-    const ready= cache[fid].ready
-    if(!ready && init) actions.cache.initialize(fid)
-    set_stvReady(ready)
-  },[cache[fid].ready])
+    set_stvDoc(files.get(fid))
+  },[files, fid])
 
-  return [ stvReady, stvDoc ]
+  return stvDoc
 }
 
 const useActiveDocument= ()=>{
 
   const
     { store }= React.useContext(GlobalContext),
-    { files, cache }= React.useContext(FileContext),
-    [ stvDoc, set_stvDoc ]= React.useState(files.get(store.activeFile)),
-    [ stvReady, set_stvReady ]= React.useState(false)
+    { files }= React.useContext(FileContext),
+    [ stvDoc, set_stvDoc ]= React.useState(files.get(store.activeFile))
     
   React.useEffect(()=>{
-    const ready= cache[store.activeFile].ready
-    set_stvReady(ready)
-  },[cache[store.activeFile].ready])
+    set_stvDoc(files.get(store.activeFile))
+  },[files, store.activeFile])
 
-  return [ stvReady, stvDoc ]
+  return stvDoc
 }
 
 export default useActiveDocument

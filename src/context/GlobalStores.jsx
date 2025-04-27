@@ -37,7 +37,7 @@ export const GlobalStoreDefaults= Object.freeze({
   editor: { // snake case for ease of parsing
     vis_hover: false,
     vis_dev: false,
-    mode_select: false
+    mode_view: true
   }
 })
 
@@ -45,77 +45,45 @@ export const FileStoreDefaults= Object.freeze({
   fileid: 0,
   files: new Map(),
   cache: {},
+  selection: {},
   settings: {},
 })
 
-export const createDefaultfile= ()=> { return {
+export const createDefaultfile= (author="")=> { return {
   meta: {
     name: "new file",
-    author: "not provided",
-    timestamp: 0,
-    file: {
-      modified: true,
-      from_disk: false,
-      parser: "",
-      filename: "",
-      extension: "",
-      path: ""
-    }
+    author,
+    version: 0,
+    comment: "",
+    timestamp: Date.now(),
   },
-  types:[
-  // name,      class,                            attrs
-    ["obj",     FConst.TREOBJ_CLASS.block,     [10,0]    ],  // 0
-    ["blk",     FConst.TREOBJ_CLASS.block,     [0,1,2]   ],  // 1
-    ["grp",     FConst.TREOBJ_CLASS.group,     [0,1,2]   ],  // 2
-    ["itm",     FConst.TREOBJ_CLASS.item,      [0,1,2]   ],  // 3
-    ["txt",     FConst.TREOBJ_CLASS.item,      [5]       ],  // 4
-    ["txt",     FConst.TREOBJ_CLASS.item,      [6]       ],  // 5 (paragraph)
-    ["val",     FConst.TREOBJ_CLASS.item,      [8,9]     ],  // 6
-    ["var",     FConst.TREOBJ_CLASS.item,      [7,0,9,1] ]   // 7
-  ],
-  attrs: [
-  // name,      class,                            richtext
-    ["name",    FConst.ATTR_CLASS.simple,      true],        // 0
-    ["desc",    FConst.ATTR_CLASS.simple,      true],        // 1
-    ["info",    FConst.ATTR_CLASS.simple,      true],        // 2
-    ["warn",    FConst.ATTR_CLASS.simple,      true],        // 3
-    ["error",   FConst.ATTR_CLASS.simple,      true],        // 4
-    ["text",    FConst.ATTR_CLASS.simple,      true],        // 5
-    ["text",    FConst.ATTR_CLASS.paragraph,   true],        // 6
-    ["class",   FConst.ATTR_CLASS.simple,      false],       // 7
-    ["key",     FConst.ATTR_CLASS.simple,      false],       // 8
-    ["value",   FConst.ATTR_CLASS.simple,      false],       // 9
-    ["thumb",   FConst.ATTR_CLASS.image,       false]        // 10
-  ],
-  tree: {}, // full document hierarchy
+  types:{
+  //      name        class                          attrs
+    0:    ["obj",     FConst.TREOBJ_CLASS.block,     [10,0]     ],
+    1:    ["blk",     FConst.TREOBJ_CLASS.block,     [0,1,2]    ],
+    2:    ["grp",     FConst.TREOBJ_CLASS.group,     [0,1,2]    ],
+    3:    ["itm",     FConst.TREOBJ_CLASS.item,      [0,1,2]    ],
+    4:    ["txt",     FConst.TREOBJ_CLASS.item,      [5]        ],
+    5:    ["txt",     FConst.TREOBJ_CLASS.item,      [6]        ],
+    6:    ["val",     FConst.TREOBJ_CLASS.item,      [8,9]      ],
+    7:    ["var",     FConst.TREOBJ_CLASS.item,      [7,0,9,1]  ] 
+  },
+  attrs: {
+  //      name        class                           rich
+    0:    ["name",    FConst.ATTR_CLASS.simple,       true      ], 
+    1:    ["desc",    FConst.ATTR_CLASS.simple,       true      ], 
+    2:    ["info",    FConst.ATTR_CLASS.simple,       true      ], 
+    3:    ["warn",    FConst.ATTR_CLASS.simple,       true      ], 
+    4:    ["error",   FConst.ATTR_CLASS.simple,       true      ], 
+    5:    ["text",    FConst.ATTR_CLASS.simple,       true      ], 
+    6:    ["text",    FConst.ATTR_CLASS.paragraph,    true      ], 
+    7:    ["class",   FConst.ATTR_CLASS.simple,       false     ],
+    8:    ["key",     FConst.ATTR_CLASS.simple,       false     ],
+    9:    ["value",   FConst.ATTR_CLASS.simple,       false     ],
+    10:   ["thumb",   FConst.ATTR_CLASS.image,        false     ] 
+  },
+  tree: {},
 }}
-
-export const createDevFile= ()=> { const def= createDefaultfile(); return { ...def, ...{
-  meta: {
-    name: "DEV file",
-    author: "sopze",
-    timestamp: 3462342,
-    file: {
-      ...def.meta.file,
-      modified: false,
-      parser: "strevee"
-    }
-  },
-  tree: {
-    root: { 'body': [0,1,2] },
-    0:    { 'type': 0, 'head': [null,"Test object"], 'body': [3,4,5,6,7,10], 'open': true },
-    1:    { 'type': 6, 'head': ["my key","the value"] },
-    2:    { 'type': 7, 'head': ["class","name","value","desc"] },
-    3:    { 'type': 3, 'head': ["name","desc text","info text"] },
-    4:    { 'type': 3, 'head': ["ITEM name only",null,null] },
-    5:    { 'type': 4, 'head': ["this is just basic text line"] },
-    6:    { 'type': 5, 'head': ["this is just a longer text that is deliberatedly\ndivided into two lines for testing purposes"] },
-    7:    { 'type': 2, 'head': ["grpname","grp2","Test group"], 'body': [8,9] },
-    8:    { 'type': 4, 'head': ["so this text is of type single-line with a newline char >\n< just to see what happens"] },
-    9:    { 'type': 3, 'head': ["name","very long (and zero informative) description for a testing so we will se what happen with a possible value where the field contents are too large to fit nicely within the app window","latest attribute"] },
-    10:   { 'type': 5, 'head': ["line\npadding\nfor\nmore\ntesting\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline"] },
-  }
-}}}
 
 // #endregion
 // #region -------------------------------------------------------- GLOBAL CONTEXT
@@ -141,6 +109,7 @@ export const AppStoreProvider= WrappedComponent=>{
             getNextFileID:  ()=> {const fid= fileStore.fileid; set_fileStore(Object.assign(fileStore, { fileid: fid+1 } )); return fid},
             setFiles:       (data)=> set_fileStore( Object.assign(fileStore, { files: data } )),
             setCache:       (data)=> setPartial_fileStore({ cache: Object.assign(fileStore.cache, data) }),
+            setSelection:   (data)=> setPartial_fileStore({ selection: Object.assign(fileStore.selection, data) }),
             setSettings:    (data)=> setPartial_fileStore({ settings: Object.assign(fileStore.settings, data) })
           }
         })
@@ -204,6 +173,11 @@ export const AppStoreProvider= WrappedComponent=>{
         window.strevee= strevee
       })
     },[])
+
+    // update grabbing cursor
+    React.useEffect(()=>{
+      document.body.classList.toggle("__dragging", globalStore.store.dragElement != null)
+    },[globalStore.store.dragElement])
 
     // update theme
     React.useEffect(()=>{

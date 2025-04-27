@@ -1,5 +1,3 @@
-import React from "react"
-
 import { useDroppable } from '@dnd-kit/core'
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react"
 
@@ -17,12 +15,12 @@ export const Scrollable=({ options={}, children, ...rest })=>{
   )
 }
 
-export const Droppable=({ hid })=>{
+export const HierarchyDroppable=({ hid })=>{
   const { setNodeRef, isOver } = useDroppable({ 
     id:  hid.join(':'),
     data: {
       type: "hierarchy",
-      accepts: ["element", "template" ]
+      accepts: ["element", "layout", "template" ]
     }
   });
 
@@ -32,7 +30,7 @@ export const Droppable=({ hid })=>{
     stv-drop-active={isOver?"":null}>
       <div></div>
     </div>
-  );
+  )
 }
 
 import { MouseSensor } from '@dnd-kit/core'
@@ -42,43 +40,7 @@ export class MouseSensorLMB extends MouseSensor {
     {
       eventName: 'onMouseDown',
       handler: (event, onActivation) => {
-        return event.button === 0
+        return !onActivation.editor.mode_view && event.button === 0
       }
   }]
-}
-
-import { GlobalContext, FileContext } from "../context/GlobalStores.jsx"
-import { Const } from "../context/Constants.jsx"
-import { Funcs } from "../context/Functions.jsx"
-
-// silent global event listener
-export const GlobalListener=()=>{
-
-  const { actions, store }= React.useContext(GlobalContext)
-
-  function handleMouseMove(e){
-    if(e.target){
-
-      const obj= e.target
-      
-      if(obj.matches("[stv-statusbar-simple]")) {
-        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.simple, {description: obj.getAttribute('stv-statusbar-simple')})
-      }
-      else if(obj.matches("[te-attr], [te-head]") && !store.dragElement) {
-        const he= Funcs.findTEHierarchyData(obj)
-        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.element, he)
-      }
-      else if(obj.matches("[cfg-element]")) {
-        actions.store.set_hoverElementData(Const.STATUSBAR_HOVERABLE_TYPE.setting, {type: "boolean", name: "test", value: "1", description:obj.innerHTML})
-      }
-      else if(store.hoverElementData) actions.store.set_hoverElementData(null, null)
-    }
-  }
-
-  React.useEffect(()=>{
-    document.addEventListener("mousemove", handleMouseMove)
-    return ()=> { document.removeEventListener('mousemove', handleMouseMove) }
-  },[])
-
-  return null
 }

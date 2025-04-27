@@ -14,35 +14,35 @@ import TreeDocument from '../component/TreeDocument.jsx'
 import useDndStylizer from '../hooks/UseDndStylizer.jsx'
 
 import '../res/editor.css'
-import '../res/fileview.css'
 
 const View= ()=>{
 
   const 
     { ready, store, editor, actions, settings } = React.useContext(GlobalContext),
     { actions: fileactions } = React.useContext(FileContext),
-    dnd_mouseSensor= useSensor(MouseSensorLMB, { activationConstraint: {distance: 64} }),
+    dnd_mouseSensor= useSensor(MouseSensorLMB, { activationConstraint: {distance: 64}, editor }),
     dnd_sensors= useSensors(dnd_mouseSensor),
     _editor_ref= React.createRef(null)
     
   useDndStylizer(_editor_ref, "__stv_dnd_liveregion_editor")
 
   return (
-    <div ref={_editor_ref} stv-view-editor={""}
-      stv-editor-vis-dev={editor.vis_dev?"":null}
-      stv-editor-vis-hover={editor.vis_hover?"":null}
-      stv-editor-anydrag={store.dragElement?"":null}>
+    <div ref={_editor_ref} stv-view={""} stv-editor={""}
+      stv-editor-mode={editor.mode_view?"view":"edit"}
+      stv-vis-dev={editor.vis_dev?"":null}
+      stv-vis-hover={editor.vis_hover?"":null}
+      stv-anydrag={store.dragElement?"":null}>
       { settings.editor_toolbar && <Toolbar />}
       <DndContext sensors={dnd_sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         { store.activeFile != -1 && ready.file &&
-        <div stv-editor-main={""} className={settings.editor_sidepanel_right ? " __stv-row" : " __stv-row-inv"}>
-          <div stv-editor-files={""}>
-            { (settings.force_tabrow || (settings.app_multiFile_support && fileactions.getFilesCount() > 1)) && <Tabsrow />}
-            <TreeDocument fid={store.activeFile}/>
-          </div>
+        <div stv-editor-main={""} className={settings.editor_sidepanel_right ? "__stv-row-inv" : "__stv-row"}>
           { settings.editor_sidepanel &&
             <SidePanel />
           }
+          <div stv-files={""}>
+            { (settings.force_tabrow || (settings.app_multiFile_support && fileactions.getFilesCount() > 1)) && <Tabsrow />}
+            <TreeDocument fid={store.activeFile}/>
+          </div>
         </div>
         }
         <DragOverlay className="__stv-drag-container" dropAnimation={null} zIndex={8192}>

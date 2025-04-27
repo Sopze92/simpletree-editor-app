@@ -18,3 +18,5 @@ win_main= None
 win_settings= None
 
 file_handlers:dict= {}
+
+titlebar_filename:str= None

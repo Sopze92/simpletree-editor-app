@@ -3,6 +3,11 @@ def void(*args): ...
 def void_with_args(*args): ...
 def void_with_kwargs(**kwargs): ...
 
+# general
+
+APP_TITLE= "sTrevee Editor"
+APP_VERSTR= "v0.1.4"
+
 # root modes
 
 ROOT_DEFAULT=             0x00

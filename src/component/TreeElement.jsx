@@ -8,7 +8,7 @@ import { FileContext, GlobalContext } from '../context/GlobalStores.jsx'
 import { FileConst as FConst } from '../context/Constants.jsx'
 import { Funcs } from '../context/Functions.jsx'
 
-import { Droppable } from "../app/Internal.jsx"
+import { HierarchyDroppable } from "../app/Internal.jsx"
 
 import SVG_dragger from '../res/editor/dragger.svg'
 
@@ -57,7 +57,6 @@ export const ElementWrapper= ({ hid, eid })=> {
   },[file.tree[eid]])
 
   React.useEffect(()=>{
-    //console.log("wrapper update", hid.join())
     const ce= cache.tree[eid]
     set_current(ce.element ? ce.element : null)
   },[cache.tree[eid].element])
@@ -84,7 +83,7 @@ export const RootElement= ({ fid })=>{
       { currentTree.length > 0 ?
         <>
         { currentTree }
-        <Droppable hid={[fid, currentTree.length, 'H']} />
+        <HierarchyDroppable hid={[fid, currentTree.length, 'H']} />
         </>
         :
         <span>Drop elements from the library to begin</span>
@@ -113,7 +112,7 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
       id: hid_str,
       data: {
         type: "head",
-        accepts: ["element", "template" ]
+        accepts: ["attribute", "template", ...('te-container' in rest ? ["element"] : [])]
       }
     })
     //{ attributes, listeners, setNodeRef, transform, transition }= useSortable({id: hid}),
@@ -121,13 +120,17 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
   const 
     [ file, cache ]= useFileCache(hid[0]),
     [ headAttributes, set_headAttributes ]= React.useState(null),
-    [ currentTree, set_currentTree ]= React.useState(null)
+    [ currentTree, set_currentTree ]= React.useState(null),
+    [ select, set_select ]= React.useState(false)
 
     React.useEffect(()=>{
-      //console.log("updated element", hid.join())
       const obj= file.tree[eid]
       set_currentTree(obj.body ? obj.body.map((e,i)=> <ElementWrapper key={i} hid={[...hid, i]} eid={e} />) : null)
     },[file.tree[eid]])
+
+    React.useEffect(()=>{
+      set_select(cache.tree[eid].select)
+    },[cache.tree[eid].select])
 
     React.useEffect(()=>{
       set_headAttributes(
@@ -161,8 +164,8 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
 
   return (
     <>
-      <Droppable hid={[...hid, "H"]} />
-      <div te-id={hid_str} te-type={params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
+      <HierarchyDroppable hid={[...hid, "H"]} />
+      <div te-hid={hid_str} te-eid={eid} te-select={!isDragging && select?"":null} te-type={params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
         {...rest} {...attributes} {...listeners}
         >
         { attrs.length > 0 &&
@@ -177,7 +180,7 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
           <div te-body={""} {...params.body}>
   {/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
             { currentTree }
-            <Droppable hid={[...hid, currentTree.length, 'H']} />
+            <HierarchyDroppable hid={[...hid, currentTree.length, 'H']} />
           </div>
         }
       </div>
@@ -192,6 +195,7 @@ export const BaseElement= ({ params={}, children, ...rest })=>{
 
   return (
     <TreeElement
+      te-item={'item'}
       params={params}
       {...rest}
     />
@@ -204,6 +208,7 @@ export const BaseElementGroup= ({ params={}, children, ...rest })=>{
 
   return (
     <TreeElement
+      te-item={'group'}
       te-container={""} te-group={""}
       params={params}
       {...rest}
@@ -213,23 +218,19 @@ export const BaseElementGroup= ({ params={}, children, ...rest })=>{
   )
 }
 
-export const BaseElementBlock= ({ hid, eid, params={}, children, ...rest })=>{
+export const BaseElementBlock= ({ params={}, children, ...rest })=>{
+
+  // TODO: make all the click logic global then check the element clicked and the store state, similar to element hovering method for statusbar
 
   params= { type:"blk", indent:true, open:false, ...params}
 
-  const
-    { actions: fileactions }= React.useContext(FileContext)
-
-  params.full= params.full && params.open
-
-  params.head= { ...params.head, onClick: ()=>{ fileactions.current.setBlockState(eid, !params.open) } }
+  params.head= { ...params.head }
 
   return (
     <TreeElement
-      hid={hid}
-      eid={eid}
+      te-item={'block'}
       te-container={""} te-block={""}
-/*       te-open={params.open? "" : null} */
+      te-open={params.open? "" : null}
       params={params}
       {...rest}
     >

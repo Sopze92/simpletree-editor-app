@@ -2,7 +2,8 @@
   all clases required to render an independent HTML version
 */
 
-[stv-fileview], .__stv-drag-container {
+[stv-docwrapper], .__stv-drag-container {
+  
   color: var(--fv-col);
   background-color:var(--fv-bgcol);
   
@@ -38,6 +39,7 @@
   & * {
     box-sizing: border-box;
   }
+  
 }
 
 [te-attr] * {
@@ -63,7 +65,7 @@
   flex-direction: column;
 }
 
-[stv-fileview-content], [te-body] {
+[te-root], [te-body] {
   gap: var(--base-gap);
 }
 
@@ -81,7 +83,11 @@
   border: var(--grp-body-border);
 }
 
-[te-block] > [te-body] {
+[te-block]:not([te-open]) > [te-body] {
+  display: none;
+}
+
+[te-block][te-open] > [te-body] {
   margin: var(--blk-body-margin);
   padding: var(--blk-body-padding);
   border: var(--blk-border);
@@ -140,7 +146,7 @@
 
 .__stv-drag-container {
   position: fixed;
-  z-index: 2048;
+  z-index: 8192;
   background: none;
 
   /* pointer-events: none; */
@@ -193,6 +199,28 @@
   }
 }
 
+[te-root] > [stv-drop-hierarchy]:first-child {
+  flex: 1;
+  min-height: 32px;
+  max-height: 32px;
+  margin: calc(var(--base-gap) * -.5) -2px;
+  margin-top: calc(var(--base-gap) * -.5 - 32px);
+
+  & > div {
+    margin-bottom: 0;
+  }
+}
+
+[te-root] > [stv-drop-hierarchy]:last-child {
+  flex: 1;
+  min-height: 80dvh;
+  max-height: 80dvh;
+
+  & > div {
+    margin-top: 0;
+  }
+}
+
 [stv-drag-element] {
   position: absolute;
   opacity: 0;
@@ -205,11 +233,15 @@
   outline: 1px solid #81c781;
 }
 
-[stv-editor-vis-dev] [stv-drop-hierarchy]:not([stv-drop-active]) > div {
+[stv-editor][stv-vis-dev] [stv-drop-hierarchy]:not([stv-drop-active]) > div {
   border-color: #707;
 }
 
 [te-body] > [stv-drop-hierarchy]:last-child {
   margin-top: -8px;
   margin-bottom: -2px;
+}
+
+[stv-editor-mode='view'] [te-attr] {
+  user-select:text !important;
 }

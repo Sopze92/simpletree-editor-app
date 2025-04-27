@@ -20,7 +20,7 @@ const Module= ()=>{
       <div stv-toolbar-section={""}>
         <ToolbarButton label="H" action={()=>{actions.editor.toggleSetting('vis_hover')}} pressed={editor.vis_hover} />
         <ToolbarButton label="D" action={()=>{actions.editor.toggleSetting('vis_dev')}} pressed={editor.vis_dev} />
-        <ToolbarButton label="SM" action={()=>{actions.editor.toggleSetting('mode_select')}} pressed={editor.mode_select} />
+        <ToolbarButton label="V" action={()=>{actions.editor.toggleSetting('mode_view')}} pressed={editor.mode_view} />
       </div>
       <div stv-toolbar-separator={""}/>
       <div stv-toolbar-section={""}>

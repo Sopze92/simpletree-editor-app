@@ -57,6 +57,10 @@ class app_api():
       stv_globals.win_settings= None
     return Response200()
   
+  def set_titlebar_filename(self, name:str | None):
+    stv_globals.titlebar_filename= name
+    window_manager.update_titlebar()
+  
   def dialog_open(self, path, package, filetypes, trigger):
 
     filepath, filetype_id= window_manager.dialog_open_file(util.resolve_path(path), package, filetypes, False)

@@ -9,32 +9,36 @@ const Module= ()=>{
 
   const 
     { store, editor, actions }= React.useContext(GlobalContext),
-    { files, actions:fileactions }= React.useContext(FileContext)
+    { files, cache, actions:fileactions }= React.useContext(FileContext)
 
-
-  function handleOnClick(e, meta){
+  function handleOnClick(e, fid, cache){
     Funcs.cancelEvent(e)
-    const fid= meta.id
     switch(e.button){
       case 0:
         actions.store.setActiveFile(fid)
         break
       case 1:
-        if(!meta.file.from_file) console.log("closing a ephimeral file!")
-        if(meta.modified) console.log("closing a modified file!")
+        if(!cache.ondisk) console.log("closing a ephimeral file!")
+        if(cache.modified) console.log("closing a modified file!")
         actions.store.closeFile(fid)
         break 
     }
   }
 
   return (
-    <div stv-editor-tabrow={""}>
-      { Array.from(files).map(([k, v])=>
-      <div key={k} stv-tabrow-tab={""} className={store.activeFile == v.meta.id ? "__active" : null} onMouseDown={e=>handleOnClick(e, v.meta)}>
-        { (!v.meta.file.from_file && <span>!</span>) || v.meta.file.modified && <span>*</span>}
-        <span>{v.meta.name}</span>
+    <div stv-tabrow-wrapper={""}>
+      <div stv-tabrow={""}>
+        { Array.from(files).map(([fid, file])=> {
+          const c= cache[fid]
+          return (
+            <div key={fid} stv-tabrow-tab={""} className={store.activeFile == fid ? "__active" : null} onMouseDown={e=>handleOnClick(e, fid, c)}>
+              { (!c.ondisk && <span>!</span>) || c.modified && <span>*</span>}
+              <span>{file.meta.name}</span>
+            </div>
+          )
+        }
+        )}
       </div>
-      )}
     </div>
   )
 }

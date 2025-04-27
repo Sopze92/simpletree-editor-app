@@ -37,6 +37,28 @@ export const Funcs= Object.freeze({
     return Object.assign(props, c)
   },
 
+  getTEData(e){
+    const element= e ? e.hasAttribute('te-head') ? e.parentElement :
+      e.hasAttribute('te-attr') ? e.parentElement.parentElement :
+      e : null
+
+    const
+      item= element.hasAttribute('te-item'),
+      eclass= element.getAttribute('te-item'),
+      eid= element.getAttribute('te-eid'),
+      open= element.hasAttribute('te-open')
+
+    return element ? { 
+      teobj: element,
+      data: {
+        class: eclass?? "generic",
+        item,
+        eid,
+        open
+      }
+    } : { teobj: null, data: {}}
+  },
+
   findTEHierarchyData(element){
     
     if(!element) return null

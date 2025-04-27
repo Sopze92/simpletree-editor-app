@@ -46,6 +46,8 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         //else console.log("no session file loaded", response.message)
 
         if(fileStore().files.size == 0) fileStore().actions.io.create(true)
+        
+        pywebview.api.initialize()
 
         funcs.setReady({ app: true })
       },
@@ -90,11 +92,16 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           pywebview.api.toggle_settings_window()
         },
 
+        setTitlebarFilename: (label)=>{
+          pywebview.api.set_titlebar_filename(label)
+        },
+
         openFileDialog: async(packageName, filetypes, trigger)=>{
           const response= await pywebview.api.dialog_open(".", packageName, filetypes, trigger)
           console.log(response)
 
-          if(response.status == 200 && 'body' in response){
+          if(response.status == 200 && response.body){
+            console.log(response)
             fileStore().actions.io.fromData(response.body, true)
           }
         },
@@ -191,9 +198,10 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         setFileReady: (state)=> { funcs.setReady({ file:state })},
 
         setActiveFile: (fid)=> { 
-          const files= fileStore().files
-          if(files.has(fid)) funcs.setStore({ activeFile: fid })
+          const any= fileStore().files.has(fid)
+          if(any) funcs.setStore({ activeFile: fid })
           else funcs.setReady({ file:false })
+          actions().backend.setTitlebarFilename(any ? fileStore().actions.getFilename(fid) : null)
         },
 
         closeFile: (fid)=> { 

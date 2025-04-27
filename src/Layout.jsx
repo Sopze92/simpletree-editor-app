@@ -10,7 +10,7 @@ import StatusBar from './module/Statusbar.jsx'
 import Editor from "./view/Editor.jsx"
 import Settings from "./view/Settings.jsx"
 
-import { GlobalListener } from "./app/Internal.jsx"
+import GlobalListener from "./app/GlobalListener.jsx"
 
 const Layout= ()=>{
 

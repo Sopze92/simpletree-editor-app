@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import { FileStoreDefaults, createDefaultfile, createDevFile } from './GlobalStores.jsx'
+import { FileStoreDefaults, createDefaultfile } from './GlobalStores.jsx'
 import { FileConst as FConst } from './Constants.jsx'
 
 import { BaseElement, BaseElementGroup, BaseElementBlock } from '../component/TreeElement.jsx'
@@ -23,6 +23,11 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
     actions: { // ---------------------------------------------------------------------------------------------------------------- GENERAL
 
       getFilesCount: ()=> self().files.size,
+
+      getFilename: (fid)=> {
+        const files= self().files
+        return files.has(fid) ? files.get(fid).meta.name : None
+      },
 
       isFileOnDisk: (fileid)=>{
         const files= self().files
@@ -167,6 +172,57 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         return self().files.get(fid)
       },
 
+      clearSelection: (fid)=>{
+        
+        const
+          cache= {...self().cache}, 
+          fcache= {...cache[fid]},
+          selection= {...self().selection}
+
+        for(let k of Object.keys(fcache.tree))
+          if(fcache.tree[k].select) fcache.tree[k]= { ...fcache.tree[k], select: false}
+
+        cache[fid]= fcache
+        selection[fid]= []
+
+        funcs.setCache(cache)
+        funcs.setSelection(selection)
+      },
+
+      setElementSelection: (fid, eid, modifiers)=>{
+
+        const
+          {ctrl, shift}= modifiers,
+          cache= {...self().cache}, 
+          fcache= {...cache[fid]},
+          selection= {...self().selection}, 
+          fselection= ctrl ? {...selection[fid]} : {}
+
+        if(!ctrl) {
+          for(let k of Object.keys(fcache.tree))
+            if(fcache.tree[k].select) fcache.tree[k]= { ...fcache.tree[k], select: false}
+        }
+
+        const 
+          oldstate= eid in fselection,
+          newstate= ctrl ? !oldstate : true
+
+        if(shift) console.warn("extended selection not implemented yet")
+
+        fcache.tree[eid]= { ...fcache.tree[eid], select: newstate}
+
+        if(newstate) fselection[eid]= Date.now()
+        else if(oldstate) delete fselection[eid]
+
+        cache[fid]= fcache
+        selection[fid]= fselection
+
+        funcs.setCache(cache)
+        funcs.setSelection(selection)
+
+        console.log(`selection action on element ${eid}:`, ctrl||shift ? [ctrl ? "toggle" : "", shift ? "follow" : ""].join(' ') : "single")
+      },
+
       util: {
 
         getDataFromHid: (hid)=>{
@@ -197,6 +253,14 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           actions().isFileOnDisk(globalStore().store.activeFile)
         },
 
+        clearSelection: ()=>{
+          actions().clearSelection(globalStore().store.activeFile)
+        },
+
+        setElementSelection: (eid, modifiers)=>{
+          actions().setElementSelection(globalStore().store.activeFile, eid, modifiers)
+        },
+
         setBlockState: (eid, state)=>{
           actions().setBlockState(globalStore().store.activeFile, eid, state)
         },
@@ -224,24 +288,6 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
       },
 
       cache: {
-
-        initialize: (fid)=>{
-
-          const 
-            file= self().files.get(fid),
-            cache= self().cache, 
-            fcache= cache[fid]
-
-          fcache.ready= true
-
-          for(let k of Object.keys(file.tree)){
-            fcache.tree[k]= { element: null, body: null }
-          }
-
-          fcache.next= Object.keys(fcache.tree).length -1
-
-          funcs.setCache(cache)
-        },
 
         update: (hid, eid)=> {
 
@@ -299,24 +345,46 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
       io: {
         
-        _addFile: (data, focus=true)=>{
+        addFile: (data, focus=true)=>{
           
           const 
             multiFile= globalStore().settings.app_multiFile_support,
             files= multiFile ? new Map(self().files.entries()) : new Map(),
             cache= multiFile ? {...self().cache} : {},
+            selection= multiFile ? {...self().selection} : {},
             settings= multiFile ? {...self().settings} : {}
       
           const fid= funcs.getNextFileID()
 
           data.meta.id= fid
 
+          const fcache= {
+            id: fid,
+            modified: true,
+            ondisk: false,
+            path: "",
+            filename: ("",""),
+            filetype: "",
+            next: 0, 
+            tree:{} 
+          }
+
+          let i=0
+          for(let k of Object.keys(data.tree)){
+            fcache.tree[k]= { element: null, body: null, select: false }
+            i++
+          }
+
+          fcache.next= i-1
+
           files.set(fid, data)
-          cache[fid]= { ready: false, next: 0, tree:{} }
+          cache[fid]= fcache
+          selection[fid]= {}
           settings[fid]= {}
 
           funcs.setFiles(files)
           funcs.setCache(cache)
+          funcs.setSelection(selection)
           funcs.setSettings(settings)
 
           globalStore().actions.store.setFileReady(true)
@@ -329,11 +397,11 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         },
 
         create: (focus)=>{
-          return actions().io._addFile(createDefaultfile(), focus)
+          return actions().io.addFile(createDefaultfile(), focus)
         },
 
         fromData: (data, focus)=>{
-          return actions().io._addFile(data, focus)
+          return actions().io.addFile(data, focus)
         },
 
         save: (fid, path, filename, format)=>{

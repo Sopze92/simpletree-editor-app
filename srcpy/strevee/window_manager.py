@@ -17,9 +17,13 @@ def destroy_splash():
 
 def create_window(file_url):
   stv_logger.log(f"creating main window: {file_url}")
-  stv_globals.win_main= wv.create_window("sTrevee Editor", hidden=stv_globals.show_splash, url=file_url, width= 1280, height= 720, min_size= (480,512), js_api=app_api(), background_color= "#000000", easy_drag= False)
+  stv_globals.win_main= wv.create_window("", hidden=stv_globals.show_splash, url=file_url, width= 1440, height= 960, min_size= (720,512), js_api=app_api(), background_color= "#000000", easy_drag= False)
   stv_globals.win_main.events.before_show += on_before_show_main
   stv_globals.win_main.events.closing += on_closing_main
+  stv_globals.win_main.expose(*(initialize,))
+
+def initialize():
+  update_titlebar()
 
 def on_before_show_main(window):
   from strevee import fileio
@@ -29,6 +33,16 @@ def on_before_show_main(window):
 def on_closing_main():
   window= stv_globals.win_main
   return True
+
+def update_titlebar():
+  window= stv_globals.win_main
+
+  label= f"{stv_const.APP_TITLE} {stv_const.APP_VERSTR}"
+
+  if stv_globals.titlebar_filename:
+    label= f"{label} | {stv_globals.titlebar_filename}"
+
+  window.set_title(label)
 
 def start():
 

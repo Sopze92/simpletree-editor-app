@@ -204,13 +204,6 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           actions().backend.setTitlebarFilename(any ? fileStore().actions.getFilename(fid) : null)
         },
 
-        closeFile: (fid)=> { 
-          const files= fileStore().files
-          if(files.has(fid)){
-            fileStore().actions.io.close(fid, self().store.activeFile == fid)
-          }
-        },
-
         set_hoverElementData: (type, data)=> { funcs.setStore({ hoverElementData: {type, data} }) },
 
         set_dragElement: (hid, eid)=> { funcs.setStore({ dragElement: hid != -1 ? fileStore().actions.current.getDragElement(hid, eid) : null }) },

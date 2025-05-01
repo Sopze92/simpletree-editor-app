@@ -37,10 +37,13 @@ export const Funcs= Object.freeze({
     return Object.assign(props, c)
   },
 
-  getTEData(e){
-    const element= e ? e.hasAttribute('te-head') ? e.parentElement :
+  getTEData: (e)=>{
+
+    if(!e) return { teobj: null, data: {} }
+
+    const element= e.hasAttribute('te-head') ? e.parentElement :
       e.hasAttribute('te-attr') ? e.parentElement.parentElement :
-      e : null
+      e
 
     const
       item= element.hasAttribute('te-item'),
@@ -48,18 +51,36 @@ export const Funcs= Object.freeze({
       eid= element.getAttribute('te-eid'),
       open= element.hasAttribute('te-open')
 
-    return element ? { 
-      teobj: element,
-      data: {
-        class: eclass?? "generic",
-        item,
-        eid,
-        open
+    if(item) {
+      return { 
+        teobj: element,
+        data: {
+          class: eclass?? "generic",
+          item,
+          eid,
+          open
+        }
       }
-    } : { teobj: null, data: {}}
+    }
+     
+    const doc= e.hasAttribute('stv-document') || e.matches('[stv-document] *')
+
+    return { teobj: element, data: doc ? {
+      document: true
+    } : {}}
   },
 
-  findTEHierarchyData(element){
+  waitUntil: (func, interval = 100)=>{
+    return new Promise((resolve) => {
+      function check() {
+        if (func()) resolve();
+        else setTimeout(check, interval);
+      }
+      check()
+    })
+  },
+
+  findTEHierarchyData: (element)=>{
     
     if(!element) return null
     

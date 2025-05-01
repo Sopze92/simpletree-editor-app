@@ -76,8 +76,14 @@
 
 /* -- selection */
 
-[stv-editor-mode='edit'] [te-base][te-select] > [te-head] {
-  outline: 1px dashed #f00;
+[stv-editor-mode='edit'] [stv-editor-main] [te-base][te-select] > [te-head] {
+  position: relative;
+  &:after {
+    content:""; position: absolute; inset: 0;
+    outline: 1px dashed var(--te-select-outline);
+    box-shadow: 0 0 4px var(--te-select-shadow);
+    background: var(--te-select-bg);
+  }
 }
 
 /* VIS MODES */

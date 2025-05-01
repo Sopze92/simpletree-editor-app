@@ -10,6 +10,8 @@ import { Funcs } from '../context/Functions.jsx'
 
 import { HierarchyDroppable } from "../app/Internal.jsx"
 
+import { useDocument } from "../hooks/UseDocument.jsx"
+
 import SVG_dragger from '../res/editor/dragger.svg'
 
 export const Attr= ({ type, children, ...rest })=> <div {...rest} te-attr={type}>{children}</div>
@@ -29,37 +31,22 @@ const DEFAULT_PARAMS= Object.freeze({
   body:{}
 })
 
-const useFileCache= (fid)=> {
-  const
-    { files, cache } = React.useContext(FileContext),
-    [ _file, _sf ]= React.useState(files.get(fid)),
-    [ _cache, _sc ]= React.useState(cache[fid])
-
-  React.useEffect(()=>{ 
-    //console.log("cache update")
-    _sf(files.get(fid))
-    _sc(cache[fid])
-  },[cache[fid]])
-
-  return [_file, _cache]
-}
-
 export const ElementWrapper= ({ hid, eid })=> {
 
   const
     { actions:fileactions } = React.useContext(FileContext),
-    [ file, cache ]= useFileCache(hid[0]),
+    { fdocument, fcache }= useDocument(hid[0]),
     [ current, set_current ]= React.useState(null)
 
   React.useEffect(()=>{
     if(current) console.log("element update:",eid)
-    fileactions.cache.update(hid, eid)
-  },[file.tree[eid]])
+    fileactions.cache.updateItem(hid, eid)
+  },[fdocument.tree[eid]])
 
   React.useEffect(()=>{
-    const ce= cache.tree[eid]
+    const ce= fcache.tree[eid]
     set_current(ce.element ? ce.element : null)
-  },[cache.tree[eid].element])
+  },[fcache.tree[eid].element])
 
   return ( <>{ current }</> )
 }
@@ -67,18 +54,18 @@ export const ElementWrapper= ({ hid, eid })=> {
 export const RootElement= ({ fid })=>{
 
   const
-    [ file, cache ]= useFileCache(fid),
+    { fdocument, fcache }= useDocument(fid),
     [ currentTree, set_currentTree ]= React.useState(null)
 
   React.useEffect(()=>{
     console.log("updated root for file", fid)
-    const obj= file.tree.root
+    const obj= fdocument.tree.root
     set_currentTree(obj ? obj.body.map((e,i)=> <ElementWrapper key={i} hid={[fid, i]} eid={e} />) : [])
-  },[file.tree.root])
+  },[fdocument.tree.root])
 
   return (
     <>
-    { currentTree &&
+    { fdocument && currentTree &&
       <>
       { currentTree.length > 0 ?
         <>
@@ -118,19 +105,19 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
     //{ attributes, listeners, setNodeRef, transform, transition }= useSortable({id: hid}),
     
   const 
-    [ file, cache ]= useFileCache(hid[0]),
+    { fdocument, fcache }= useDocument(hid[0]),
     [ headAttributes, set_headAttributes ]= React.useState(null),
     [ currentTree, set_currentTree ]= React.useState(null),
-    [ select, set_select ]= React.useState(false)
+    [ select, set_select ]= React.useState(fcache.tree[eid].select)
 
     React.useEffect(()=>{
-      const obj= file.tree[eid]
+      const obj= fdocument.tree[eid]
       set_currentTree(obj.body ? obj.body.map((e,i)=> <ElementWrapper key={i} hid={[...hid, i]} eid={e} />) : null)
-    },[file.tree[eid]])
+    },[fdocument.tree[eid]])
 
     React.useEffect(()=>{
-      set_select(cache.tree[eid].select)
-    },[cache.tree[eid].select])
+      set_select(fcache.tree[eid].select)
+    },[fcache.tree[eid].select])
 
     React.useEffect(()=>{
       set_headAttributes(
@@ -139,33 +126,35 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
         <AttrType text={params.type}/>
         { 
           attrs.map((e,i)=>{
+            console.log(e)
             try {
-              switch(e[1]){
+              switch(e[0]){
                 case FConst.ATTR_CLASS.default:
-                  return <Attr key={i} type={e[0]}/>
+                  return <Attr key={i} type={e[1]}/>
                 case FConst.ATTR_CLASS.simple:
-                  return <AttrSimple key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
+                  return <AttrSimple key={i} type={e[1]} rich={e[2]?"1":"0"} text={e[3]}/>
                 case FConst.ATTR_CLASS.paragraph:
-                  return <AttrParagraph key={i} type={e[0]} rich={e[2]?"1":"0"} text={e[3]}/>
+                  return <AttrParagraph key={i} type={e[1]} rich={e[2]?"1":"0"} text={e[3]}/>
                 case FConst.ATTR_CLASS.image:
-                  return <AttrImage key={i} type={e[0]} src={e[3]}/>
+                  return <AttrImage key={i} type={e[1]} src={e[3]}/>
                 default: throw e
               }
             }
-            catch(e) { 
-              console.error(e)
+            catch(ex) { 
+              console.error(ex)
+              console.log(e)
               return <AttrVoid key={i}/> 
             }
           })
         }
         </>
       )
-    },[cache.tree[eid].element])
+    },[fcache.tree[eid].element])
 
   return (
     <>
       <HierarchyDroppable hid={[...hid, "H"]} />
-      <div te-hid={hid_str} te-eid={eid} te-select={!isDragging && select?"":null} te-type={params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
+      <div te-hid={hid_str} te-eid={eid} te-select={select?"":null} te-type={params.type} te-base={""} {...(isDragging? {["te-dragging"]:""} : null)}
         {...rest} {...attributes} {...listeners}
         >
         { attrs.length > 0 &&

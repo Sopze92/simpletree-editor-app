@@ -5,28 +5,34 @@ import { FileContext, GlobalContext } from '../context/GlobalStores'
 export const useDocument= ( fid )=>{
 
   const
-    { files }= React.useContext(FileContext),
-    [ stvDoc, set_stvDoc ]= React.useState(files.get(fid))
+    { files, cache, selection }= React.useContext(FileContext),
+    [ fdocument, set_fdocument ]= React.useState(files.get(fid)),
+    [ fcache, set_fcache ]= React.useState(cache[fid]),
+    [ fselection, set_fselection ]= React.useState(selection[fid])
+  
+  React.useEffect(()=>{
+    set_fdocument(files.get(fid))
+    set_fcache(cache[fid])
+    set_fselection(selection[fid])
+  },[fid])
     
   React.useEffect(()=>{
-    set_stvDoc(files.get(fid))
-  },[files, fid])
+    set_fdocument(files.get(fid))
+  },[files])
+    
+  React.useEffect(()=>{
+    set_fcache(cache[fid])
+  },[cache[fid]])
+    
+  React.useEffect(()=>{
+    set_fselection(selection[fid])
+  },[selection[fid]])
 
-  return stvDoc
+  return { fdocument, fcache, fselection }
 }
 
 const useActiveDocument= ()=>{
-
-  const
-    { store }= React.useContext(GlobalContext),
-    { files }= React.useContext(FileContext),
-    [ stvDoc, set_stvDoc ]= React.useState(files.get(store.activeFile))
-    
-  React.useEffect(()=>{
-    set_stvDoc(files.get(store.activeFile))
-  },[files, store.activeFile])
-
-  return stvDoc
+  return useDocument(React.useContext(GlobalContext).store.activeFile)
 }
 
 export default useActiveDocument

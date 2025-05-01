@@ -4,6 +4,8 @@ import React from 'react'
 import { FileStoreDefaults, createDefaultfile } from './GlobalStores.jsx'
 import { FileConst as FConst } from './Constants.jsx'
 
+import { Funcs as _Funcs } from './Functions.jsx'
+
 import { BaseElement, BaseElementGroup, BaseElementBlock } from '../component/TreeElement.jsx'
 
 //#region -------------------------------------------------------- FILE STATE
@@ -34,14 +36,42 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         return files && files.has(fileid) && files.get(fileid).from_disk
       },
 
+      getNextTypeid: (fid)=>{
+
+        const 
+          cache= self().cache,
+          fcache= cache[fid],
+          value= fcache.next[type]
+
+        fcache.next[type]= value+1
+        cache[fid]= fcache
+        funcs().setCache(cache)
+
+        return value
+      },
+
+      getNextAttrid: (fid)=>{
+
+        const 
+          cache= self().cache,
+          fcache= cache[fid],
+          value= fcache.next[attr]
+
+        fcache.next[attr]= value+1
+        cache[fid]= fcache
+        funcs().setCache(cache)
+
+        return value
+      },
+
       getNextEid: (fid)=>{
 
         const 
           cache= self().cache,
           fcache= cache[fid],
-          value= fcache.next
+          value= fcache.next[item]
 
-        fcache.next= value+1
+        fcache.next[item]= value+1
         cache[fid]= fcache
         funcs().setCache(cache)
 
@@ -207,6 +237,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           oldstate= eid in fselection,
           newstate= ctrl ? !oldstate : true
 
+        // TODO: extended selection, linear selecton from hid to hid
         if(shift) console.warn("extended selection not implemented yet")
 
         fcache.tree[eid]= { ...fcache.tree[eid], select: newstate}
@@ -219,8 +250,6 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
         funcs.setCache(cache)
         funcs.setSelection(selection)
-
-        console.log(`selection action on element ${eid}:`, ctrl||shift ? [ctrl ? "toggle" : "", shift ? "follow" : ""].join(' ') : "single")
       },
 
       util: {
@@ -279,7 +308,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
         },
 
         getDragElement: (hid, eid)=>{
-          return actions().element.build(hid, eid, false)[0]
+          return actions().element.buildItem(hid, eid, false)[0]
         },
 
         getWritableFile: ()=>{
@@ -289,16 +318,44 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
       cache: {
 
-        update: (hid, eid)=> {
+        updateItem: (hid, eid)=> {
 
           const
             cache= {...self().cache}, 
             fcache= {...cache[hid[0]]},
-            [ element, body ]= actions().element.build(hid, eid)
+            [ element, body ]= actions().element.buildItem(hid, eid)
 
           fcache.tree[eid]= { element, body }
 
           cache[hid[0]]= fcache
+          funcs.setCache(cache)
+        },
+
+        updateType: (fid, id)=> {
+          console.log("update TYPE cache", fid, id)
+
+          const
+            cache= {...self().cache}, 
+            fcache= {...cache[fid]},
+            element= actions().element.buildType(fid, id)
+
+          fcache.types[id]= { element }
+
+          cache[fid]= fcache
+          funcs.setCache(cache)
+        },
+
+        updateAttr: (fid, id)=> {
+          console.log("update ATTR cache", fid, id)
+
+          const
+            cache= {...self().cache}, 
+            fcache= {...cache[fid]},
+            element= actions().element.buildAttr(fid, id)
+
+          fcache.attrs[id]= { element }
+
+          cache[fid]= fcache
           funcs.setCache(cache)
         }
 
@@ -306,38 +363,52 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
       element: {
 
-        build: (hid, eid, body=true)=>{
-
+        buildType: (fid, id)=>{
           try{
+            id= Number(id)
+  
+            const 
+              file= self().files.get(fid),
+              tyraw= file.types[id],
+              attrs= []
+  
+            for(let i in tyraw.attrs) { // fill required attrs for type
+              const _attr= file.attrs[tyraw.attrs[i]]
+              attrs.push([_attr.cid, _attr.name, _attr.rich, null])
+            }
+
+          }
+          catch(e) { console.log("couldn't build type", fid, id, e) }
+          return [ <span className="__stv_error">ERR</span>, null ]
+        },
+
+        buildItem: (hid, eid, body=true)=>{
+
+          //try{
             eid= Number(eid)
   
             const 
               file= self().files.get(hid[0]),
-              teraw= file.tree[eid]
-  
-            let 
-              type= file.types[teraw.type],
+              teraw= file.tree[eid],
+              tyraw= file.types[teraw.type],
               attrs= []
   
-            for(let j in type[2]) { // fill required attrs for type
-              attrs.push([...file.attrs[type[2][j]], teraw.head[j]])
+            for(let i in tyraw.attrs) { // fill required attrs for type
+              const _attr= file.attrs[tyraw.attrs[i]]
+              attrs.push([_attr.cid, _attr.name, _attr.rich, teraw.head[i]])
             }
   
             // create tree element
-            switch(type[1]) {
+            switch(tyraw.cid) {
               case FConst.TREOBJ_CLASS.item:
-                return [ <BaseElement eid={eid} hid={hid} attrs={attrs} params={{type:type[0]}}/>, null ]
+                return [ <BaseElement eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name}}/>, null ]
               case FConst.TREOBJ_CLASS.group:
-                return [ <BaseElementGroup eid={eid} hid={hid} attrs={attrs} params={{type:type[0], full: body && teraw.body}}/>, teraw.body ]
+                return [ <BaseElementGroup eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name, full: body && teraw.body}}/>, teraw.body ]
               case FConst.TREOBJ_CLASS.block:
-                return [ <BaseElementBlock eid={eid} hid={hid} attrs={attrs} params={{type:type[0], open: teraw.open, full: body && teraw.body}}/>, teraw.body ]
+                return [ <BaseElementBlock eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name, open: teraw.open, full: body && teraw.body}}/>, teraw.body ]
             }
-          }
-          catch(e) {
-            console.log("couldn't build element", e)
-            console.log(self().files.get(hid[0]))
-          }
-
+          //}
+          //catch(e){ console.log("couldn't build element", e) }
           return [ <span className="__stv_error">ERR</span>, null ]
         }
       
@@ -360,22 +431,32 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
 
           const fcache= {
             id: fid,
+            alive: true,
             modified: true,
             ondisk: false,
-            path: "",
-            filename: ("",""),
+            filename: ("","",""),
             filetype: "",
-            next: 0, 
-            tree:{} 
+            next: {type:0, attr:0, item:0}, 
+            types: {},
+            attrs: {},
+            tree:{}
           }
 
-          let i=0
+          let nt=0, na=0, ni=0
+          for(let k of Object.keys(data.types)){
+            fcache.types[k]= { element: null, hidden: false }
+            nt++
+          }
+          for(let k of Object.keys(data.attrs)){
+            fcache.attrs[k]= { element: null, hidden: false }
+            na++
+          }
           for(let k of Object.keys(data.tree)){
-            fcache.tree[k]= { element: null, body: null, select: false }
-            i++
+            fcache.tree[k]= { element: null, body: null, select: false, hidden: false }
+            ni++
           }
 
-          fcache.next= i-1
+          fcache.next= {type:nt, attr:na, item:ni}
 
           files.set(fid, data)
           cache[fid]= fcache
@@ -411,12 +492,23 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           //   write file bytes through the parser
         },
 
-        close: (fid, focused)=>{
+        close: async(fid)=>{
           
           const 
             multiFile= globalStore().settings.app_multiFile_support,
             singlefile= !multiFile && self().files.size == 1,
+            focused= globalStore().store.activeFile == fid,
             files= new Map(self().files.entries())
+
+          const 
+            cache= self().cache,
+            fcache= cache[fid]
+
+          fcache.alive= false
+          cache[fid]= fcache
+          funcs.setCache(cache)
+
+          await _Funcs.waitUntil(()=> { return !self().cache[fid].alive })
             
           if(multiFile && focused){
             const

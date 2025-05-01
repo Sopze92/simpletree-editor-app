@@ -58,11 +58,12 @@ const Component=()=>{
 
             if(editor.mode_view && data.class=='block') fileactions.current.setBlockState(data.eid, !data.open)
             else if(!editor.mode_view) fileactions.current.setElementSelection(data.eid, {ctrl: e.ctrlKey, alt:e.altKey, shift:e.shiftKey})
+            Funcs.cancelEvent(e)
           }
-          else{
+          else if(data.document){
             fileactions.current.clearSelection()
+            Funcs.cancelEvent(e)
           }
-          Funcs.cancelEvent(e)
         }
     }
     clickState= { ...clickState, down: false }

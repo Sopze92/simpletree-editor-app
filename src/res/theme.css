@@ -115,6 +115,10 @@
   --fv-bgcol: #1a1a1a;
 
   --fv-emptybgcol: #141414;
+  
+  --te-select-outline: #90d85a;
+  --te-select-shadwo: #000;
+  --te-select-bg: #fff1;
 
   /* document default theme */
 

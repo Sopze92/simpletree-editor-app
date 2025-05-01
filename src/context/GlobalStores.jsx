@@ -57,30 +57,28 @@ export const createDefaultfile= (author="")=> { return {
     comment: "",
     timestamp: Date.now(),
   },
-  types:{
-  //      name        class                          attrs
-    0:    ["obj",     FConst.TREOBJ_CLASS.block,     [10,0]     ],
-    1:    ["blk",     FConst.TREOBJ_CLASS.block,     [0,1,2]    ],
-    2:    ["grp",     FConst.TREOBJ_CLASS.group,     [0,1,2]    ],
-    3:    ["itm",     FConst.TREOBJ_CLASS.item,      [0,1,2]    ],
-    4:    ["txt",     FConst.TREOBJ_CLASS.item,      [5]        ],
-    5:    ["txt",     FConst.TREOBJ_CLASS.item,      [6]        ],
-    6:    ["val",     FConst.TREOBJ_CLASS.item,      [8,9]      ],
-    7:    ["var",     FConst.TREOBJ_CLASS.item,      [7,0,9,1]  ] 
+  types: {
+    0:    {name: "obj",       cid: FConst.TREOBJ_CLASS.block,       attrs: [10,0]     },
+    1:    {name: "blk",       cid: FConst.TREOBJ_CLASS.block,       attrs: [0,1,2]    },
+    2:    {name: "grp",       cid: FConst.TREOBJ_CLASS.group,       attrs: [0,1,2]    },
+    3:    {name: "itm",       cid: FConst.TREOBJ_CLASS.item,        attrs: [0,1,2]    },
+    4:    {name: "txt",       cid: FConst.TREOBJ_CLASS.item,        attrs: [5]        },
+    5:    {name: "txt",       cid: FConst.TREOBJ_CLASS.item,        attrs: [6]        },
+    6:    {name: "val",       cid: FConst.TREOBJ_CLASS.item,        attrs: [8,9]      },
+    7:    {name: "var",       cid: FConst.TREOBJ_CLASS.item,        attrs: [7,0,9,1]  } 
   },
   attrs: {
-  //      name        class                           rich
-    0:    ["name",    FConst.ATTR_CLASS.simple,       true      ], 
-    1:    ["desc",    FConst.ATTR_CLASS.simple,       true      ], 
-    2:    ["info",    FConst.ATTR_CLASS.simple,       true      ], 
-    3:    ["warn",    FConst.ATTR_CLASS.simple,       true      ], 
-    4:    ["error",   FConst.ATTR_CLASS.simple,       true      ], 
-    5:    ["text",    FConst.ATTR_CLASS.simple,       true      ], 
-    6:    ["text",    FConst.ATTR_CLASS.paragraph,    true      ], 
-    7:    ["class",   FConst.ATTR_CLASS.simple,       false     ],
-    8:    ["key",     FConst.ATTR_CLASS.simple,       false     ],
-    9:    ["value",   FConst.ATTR_CLASS.simple,       false     ],
-    10:   ["thumb",   FConst.ATTR_CLASS.image,        false     ] 
+    0:    {name: "name",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    1:    {name: "desc",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    2:    {name: "info",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    3:    {name: "warn",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    4:    {name: "error",     cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    5:    {name: "text",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
+    6:    {name: "text",      cid: FConst.ATTR_CLASS.paragraph,     rich: true      }, 
+    7:    {name: "class",     cid: FConst.ATTR_CLASS.simple,        rich: false     },
+    8:    {name: "key",       cid: FConst.ATTR_CLASS.simple,        rich: false     },
+    9:    {name: "value",     cid: FConst.ATTR_CLASS.simple,        rich: false     },
+    10:   {name: "thumb",     cid: FConst.ATTR_CLASS.image,         rich: false     } 
   },
   tree: {},
 }}

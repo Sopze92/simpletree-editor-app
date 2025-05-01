@@ -20,7 +20,7 @@ const Module= ()=>{
       case 1:
         if(!cache.ondisk) console.log("closing a ephimeral file!")
         if(cache.modified) console.log("closing a modified file!")
-        actions.store.closeFile(fid)
+        fileactions.io.close(fid)
         break 
     }
   }

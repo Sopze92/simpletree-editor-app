@@ -37,7 +37,7 @@ const View= ()=>{
         { store.activeFile != -1 && ready.file &&
         <div stv-editor-main={""} className={settings.editor_sidepanel_right ? "__stv-row-inv" : "__stv-row"}>
           { settings.editor_sidepanel &&
-            <SidePanel />
+            <SidePanel fid={store.activeFile}/>
           }
           <div stv-files={""}>
             { (settings.force_tabrow || (settings.app_multiFile_support && fileactions.getFilesCount() > 1)) && <Tabsrow />}

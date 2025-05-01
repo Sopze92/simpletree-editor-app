@@ -1,5 +1,11 @@
+from time import time
 from typing import Any
 import os
+
+# general
+
+def current_time_millis():
+  return round(time() * 1000)
 
 # http responses
 

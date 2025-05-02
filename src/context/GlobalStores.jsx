@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { FileConst as FConst, Const } from './Constants.jsx'
+import { TEConst, Const } from './Constants.jsx'
 
 import { globalState } from './GlobalContext.jsx'
 import { fileState } from './FileContext.jsx'
@@ -58,27 +58,27 @@ export const createDefaultfile= (author="")=> { return {
     timestamp: Date.now(),
   },
   types: {
-    0:    {name: "obj",       cid: FConst.TREOBJ_CLASS.block,       attrs: [10,0]     },
-    1:    {name: "blk",       cid: FConst.TREOBJ_CLASS.block,       attrs: [0,1,2]    },
-    2:    {name: "grp",       cid: FConst.TREOBJ_CLASS.group,       attrs: [0,1,2]    },
-    3:    {name: "itm",       cid: FConst.TREOBJ_CLASS.item,        attrs: [0,1,2]    },
-    4:    {name: "txt",       cid: FConst.TREOBJ_CLASS.item,        attrs: [5]        },
-    5:    {name: "txt",       cid: FConst.TREOBJ_CLASS.item,        attrs: [6]        },
-    6:    {name: "val",       cid: FConst.TREOBJ_CLASS.item,        attrs: [8,9]      },
-    7:    {name: "var",       cid: FConst.TREOBJ_CLASS.item,        attrs: [7,0,9,1]  } 
+    0:    {name: "obj",       cid: TEConst.TE_CLASS.block,       attrs: [10,0]     },
+    1:    {name: "blk",       cid: TEConst.TE_CLASS.block,       attrs: [0,1,2]    },
+    2:    {name: "grp",       cid: TEConst.TE_CLASS.group,       attrs: [0,1,2]    },
+    3:    {name: "itm",       cid: TEConst.TE_CLASS.item,        attrs: [0,1,2]    },
+    4:    {name: "txt",       cid: TEConst.TE_CLASS.item,        attrs: [5]        },
+    5:    {name: "txt",       cid: TEConst.TE_CLASS.item,        attrs: [6]        },
+    6:    {name: "val",       cid: TEConst.TE_CLASS.item,        attrs: [8,9]      },
+    7:    {name: "var",       cid: TEConst.TE_CLASS.item,        attrs: [7,0,9,1]  } 
   },
   attrs: {
-    0:    {name: "name",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    1:    {name: "desc",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    2:    {name: "info",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    3:    {name: "warn",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    4:    {name: "error",     cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    5:    {name: "text",      cid: FConst.ATTR_CLASS.simple,        rich: true      }, 
-    6:    {name: "text",      cid: FConst.ATTR_CLASS.paragraph,     rich: true      }, 
-    7:    {name: "class",     cid: FConst.ATTR_CLASS.simple,        rich: false     },
-    8:    {name: "key",       cid: FConst.ATTR_CLASS.simple,        rich: false     },
-    9:    {name: "value",     cid: FConst.ATTR_CLASS.simple,        rich: false     },
-    10:   {name: "thumb",     cid: FConst.ATTR_CLASS.image,         rich: false     } 
+    0:    {name: "name",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    1:    {name: "desc",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    2:    {name: "info",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    3:    {name: "warn",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    4:    {name: "error",     cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    5:    {name: "text",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
+    6:    {name: "text",      cid: TEConst.ATTR_CLASS.paragraph,     rich: true      }, 
+    7:    {name: "class",     cid: TEConst.ATTR_CLASS.simple,        rich: false     },
+    8:    {name: "key",       cid: TEConst.ATTR_CLASS.simple,        rich: false     },
+    9:    {name: "value",     cid: TEConst.ATTR_CLASS.simple,        rich: false     },
+    10:   {name: "thumb",     cid: TEConst.ATTR_CLASS.image,         rich: false     } 
   },
   tree: {},
 }}

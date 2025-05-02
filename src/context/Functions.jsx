@@ -1,3 +1,5 @@
+import { TEConst } from "./Constants.jsx";
+
 export const Funcs= Object.freeze({
   
   sleep: (ms)=> new Promise(r => setTimeout(r, ms)),
@@ -37,39 +39,6 @@ export const Funcs= Object.freeze({
     return Object.assign(props, c)
   },
 
-  getTEData: (e)=>{
-
-    if(!e) return { teobj: null, data: {} }
-
-    const element= e.hasAttribute('te-head') ? e.parentElement :
-      e.hasAttribute('te-attr') ? e.parentElement.parentElement :
-      e
-
-    const
-      item= element.hasAttribute('te-item'),
-      eclass= element.getAttribute('te-item'),
-      eid= element.getAttribute('te-eid'),
-      open= element.hasAttribute('te-open')
-
-    if(item) {
-      return { 
-        teobj: element,
-        data: {
-          class: eclass?? "generic",
-          item,
-          eid,
-          open
-        }
-      }
-    }
-     
-    const doc= e.hasAttribute('stv-document') || e.matches('[stv-document] *')
-
-    return { teobj: element, data: doc ? {
-      document: true
-    } : {}}
-  },
-
   waitUntil: (func, interval = 100)=>{
     return new Promise((resolve) => {
       function check() {
@@ -80,101 +49,116 @@ export const Funcs= Object.freeze({
     })
   },
 
-  findTEHierarchyData: (element)=>{
+  getTEClickData: (e)=>{
+
+    if(!e) return { teobj: null, data: {} }
+
+    const [cs, ce]= e.hasAttribute('te-head') ? [TEConst.TE_SECTION.head, e.parentElement] :
+      e.hasAttribute('te-attr') ? [TEConst.TE_SECTION.attr, e.parentElement.parentElement] :
+      e.hasAttribute('te-base') ? [TEConst.TE_SECTION.base, e] :
+      e.hasAttribute('te-body') ? [TEConst.TE_SECTION.base, e.parentElement] :
+      [TEConst.TE_SECTION.none, e]
+
+    const
+      item= ce.hasAttribute('te-item'),
+      eclass= ce.getAttribute('te-item'),
+      eid= ce.getAttribute('te-eid'),
+      open= ce.hasAttribute('te-open')
+
+    if(cs) {
+      return { 
+        teobj: ce,
+        data: {
+          class: eclass?? "generic",
+          section: cs,
+          item,
+          eid,
+          open
+        }
+      }
+    }
+     
+    const doc= e.hasAttribute('stv-document') || e.matches('[stv-document] *')
+
+    return { teobj: ce, data: doc ? {
+      document: true
+    } : {}}
+  },
+
+  getTEHoverData: (e)=>{
     
-    if(!element) return null
-    
+    if(!e || !e.matches('[te-head], [te-attr]')) return null
+
+    const 
+      ca= e.hasAttribute('te-attr') ? e : null,
+      ch= ca ? ca.parentElement : e.hasAttribute('te-head') ? e : null,
+      ci= ch ? ch.parentElement : null
+
     const 
       data= {},
       self= {},
+      item= {},
       tree= []
 
-    let 
-      _element= element,
-      i=0
+    let _indent=0
  
-    let attrname=_element.getAttribute("te-attr")
-    if(attrname) {
+    if(ca) {
 
-      const 
-        parent= _element.parentElement,
-        attr= {}
+      const attrn= ca.getAttribute('te-attr')
 
-      attr.name= attrname
-      if(parent) attr.index= Array.from(parent.children).indexOf(_element)
-
-      data.attr= attr
-
-      _element= parent // te-head from attr
-      i++
-    }
-
-    if(_element && _element.hasAttribute("te-head")){
-      const 
-        children= Array.from(_element.children),
-        attrtype= children.find(e=>e.matches("[te-attr='type']"))
-
-      if(attrtype) self.type= attrtype.innerText
-      self.attrcount= children.length
-
-      _element= _element.parentElement // te-base from head
-      i++
-    }
-
-    if(_element) {
-
-      self.id= _element.getAttribute("te-id")
-
-      if(_element.hasAttribute("te-container")){
-
-        const 
-          body= _element.children[1],
-          childrens= body? body.children.length : -1,
-          container= {}
-
-        if(childrens > -1) container.children= childrens
-
-        if(_element.hasAttribute("te-block")) {
-          container.type= "block"
-          container.open= !_element.classList.contains("__closed")
-        }
-        else container.type= "group"
-
-        data.container= container
+      if(!attrn.startsWith('_')) {
+        data.attr= attrn
+        _indent++
       }
     }
 
-    data.depth= i
-    self.element= _element
+    if(ch){
 
-    _element= _element.parentElement?? null // te-base parent
-    let j= 1
+      self.type= ch.children[1].innerText
+      self.size= ch.children.length-2
 
-    while(_element!=null && !_element.hasAttribute("stv-fileview")){
-      if (_element.hasAttribute("te-container")) {
+      _indent++
+    }
 
-        const 
-          children= Array.from(_element.children[0]?.children),
-          attrtype= children.find(e=>e.matches("[te-attr='type']")),
-          treeElement= { element: _element, id: _element.getAttribute("te-id") }
+    if(ci) {
 
-        if(attrtype) treeElement.type= attrtype.innerText
+      self.eid= ci.getAttribute("te-eid")
 
-        if(_element.hasAttribute("te-block")) {
-          treeElement.containerType= "block"
-          treeElement.open= !_element.classList.contains("__closed")
-        }
-        else treeElement.containerType= "group"
+      item.type= ci.getAttribute("te-item")
+      item.container= ci.hasAttribute("te-container")
 
-        tree.push(treeElement)
-        j++
+      if(item.container){
+
+        item.size= Array.from(ci.childNodes[2].children).filter(e=>e.hasAttribute('te-item')).length
+        item.open= ci.hasAttribute("te-open")
       }
-      _element= _element.parentElement 
+    }
+
+    data.depth= _indent
+    self.element= ci?? ch?? ca?? e
+
+    let cp= ci?.parentElement?.parentElement?? null
+
+    while(cp && cp.hasAttribute('te-container')){
+
+      const cpte= { element: cp, eid: cp.getAttribute("te-eid") }
+
+      cpte.eid= cp.getAttribute('te-eid')
+      cpte.type= cp.childNodes[1].childNodes[1].innerText
+      cpte.item= cp.getAttribute('te-item')
+
+      if(cp.hasAttribute("te-block")) {
+        cpte.open= cp.hasAttribute('te-open')
+      }
+
+      tree.push(cpte)
+      cp= cp.parentElement?.parentElement 
     }
 
     data.self= self
-    if(tree.length > 0) data.tree= tree
-    
+    data.item= item
+    data.tree= tree
+
     return data
-  },
+  }
 })

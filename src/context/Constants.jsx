@@ -42,22 +42,20 @@ export const Const= Object.freeze({
   }
 })
 
-export const FileConst= Object.freeze({
+export const TEConst= Object.freeze({
   
-  DOCUMENT_ACTION: {
-    expand_all: 0,
-    expand_sel: 1,
-    expand_sel_tree: 2,
-    collapse_all: 3,
-    collapse_sel: 4,
-    collapse_sel_tree: 5,
-    toggle_type: 6
-  },
-
-  TREOBJ_CLASS: {
+  TE_CLASS: {
     item: 0,
     group: 1,
     block: 2
+  },
+
+  TE_SECTION: {
+    none: 0,
+    base: 1,
+    head: 2,
+    body: 3,
+    attr: 4
   },
 
   ATTR_CLASS: {
@@ -65,5 +63,5 @@ export const FileConst= Object.freeze({
     simple: 1,
     paragraph: 2,
     image: 3
-  }
+  },
 })

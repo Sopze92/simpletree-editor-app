@@ -5,9 +5,9 @@ import { MouseSensorLMB } from '../app/Internal.jsx'
 import { GlobalContext, FileContext } from '../context/GlobalStores.jsx'
 import { Const } from '../context/Constants.jsx'
 
+import Tabsrow from '../module/Tabsrow.jsx'
 import SidePanel from '../module/editor/SidePanel.jsx'
 import Toolbar from '../module/editor/Toolbar.jsx'
-import Tabsrow from '../module/editor/Tabsrow.jsx'
 
 import TreeDocument from '../component/TreeDocument.jsx'
 

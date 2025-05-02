@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { GlobalContext, FileContext } from '../context/GlobalStores.jsx'
-import { Const, FileConst as FConst } from '../context/Constants.jsx'
+import { Const, TEConst } from '../context/Constants.jsx'
 import { Funcs } from '../context/Functions.jsx'
 
 import { Scrollable } from '../app/Internal.jsx'

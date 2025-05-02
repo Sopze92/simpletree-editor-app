@@ -5,7 +5,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 
 import { FileContext, GlobalContext } from '../context/GlobalStores.jsx'
-import { FileConst as FConst } from '../context/Constants.jsx'
+import { TEConst } from '../context/Constants.jsx'
 import { Funcs } from '../context/Functions.jsx'
 
 import { HierarchyDroppable } from "../app/Internal.jsx"
@@ -92,17 +92,16 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
       data: { 
         eid,
         hid,
-        type:"element"
+        type:"te-item"
       } 
     }),
-    { setNodeRef: dropRef, isOver } = useDroppable({ 
+    { setNodeRef: dropRef, isOver } = 'te-container' in rest ? useDroppable({ 
       id: hid_str,
       data: {
-        type: "head",
-        accepts: ["attribute", "template", ...('te-container' in rest ? ["element"] : [])]
+        type: "te-head",
+        accepts: ["te-item"]
       }
-    })
-    //{ attributes, listeners, setNodeRef, transform, transition }= useSortable({id: hid}),
+    }) : {setNodeRef:null, isOver:false}
     
   const 
     { fdocument, fcache }= useDocument(hid[0]),
@@ -126,16 +125,15 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
         <AttrType text={params.type}/>
         { 
           attrs.map((e,i)=>{
-            console.log(e)
             try {
               switch(e[0]){
-                case FConst.ATTR_CLASS.default:
+                case TEConst.ATTR_CLASS.default:
                   return <Attr key={i} type={e[1]}/>
-                case FConst.ATTR_CLASS.simple:
+                case TEConst.ATTR_CLASS.simple:
                   return <AttrSimple key={i} type={e[1]} rich={e[2]?"1":"0"} text={e[3]}/>
-                case FConst.ATTR_CLASS.paragraph:
+                case TEConst.ATTR_CLASS.paragraph:
                   return <AttrParagraph key={i} type={e[1]} rich={e[2]?"1":"0"} text={e[3]}/>
-                case FConst.ATTR_CLASS.image:
+                case TEConst.ATTR_CLASS.image:
                   return <AttrImage key={i} type={e[1]} src={e[3]}/>
                 default: throw e
               }
@@ -160,14 +158,13 @@ export const TreeElement= ({ eid, hid, attrs=[], params={}, children, ...rest })
         { attrs.length > 0 &&
           <>
             <div ref={dragRef} stv-drag-element={""}></div>
-            <div ref={dropRef} stv-drop-element={""} stv-drop-active={isOver?"":null} te-head={""} {...params.head}>
-              { headAttributes }
-            </div>
+              <div ref={dropRef} stv-drop-element={""} stv-drop-active={isOver?"":null} te-head={""} {...params.head}>
+                { headAttributes }
+              </div>
           </>
         }
         { currentTree && params.full &&
           <div te-body={""} {...params.body}>
-  {/*           <div data-editor data-editor-draggable><SVG_dragger/></div> */}
             { currentTree }
             <HierarchyDroppable hid={[...hid, currentTree.length, 'H']} />
           </div>

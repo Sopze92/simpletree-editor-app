@@ -2,7 +2,7 @@
 import React from 'react'
 
 import { FileStoreDefaults, createDefaultfile } from './GlobalStores.jsx'
-import { FileConst as FConst } from './Constants.jsx'
+import { TEConst } from './Constants.jsx'
 
 import { Funcs as _Funcs } from './Functions.jsx'
 
@@ -302,7 +302,7 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
           const file= self().current()
           if(file && file.container){
             console.log(`toggleElementVisibility: ${element}`)
-            const event= new CustomEvent("document-action", {detail:{action: FConst.DOCUMENT_ACTION.toggle_type, element: element}})
+            const event= new CustomEvent("document-action", {detail:{action: TEConst.DOCUMENT_ACTION.toggle_type, element: element}})
             file.container.dispatchEvent(event)
           }
         },
@@ -400,11 +400,11 @@ export const fileState= ({ globalStore, self, actions, funcs })=>{
   
             // create tree element
             switch(tyraw.cid) {
-              case FConst.TREOBJ_CLASS.item:
+              case TEConst.TE_CLASS.item:
                 return [ <BaseElement eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name}}/>, null ]
-              case FConst.TREOBJ_CLASS.group:
+              case TEConst.TE_CLASS.group:
                 return [ <BaseElementGroup eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name, full: body && teraw.body}}/>, teraw.body ]
-              case FConst.TREOBJ_CLASS.block:
+              case TEConst.TE_CLASS.block:
                 return [ <BaseElementBlock eid={eid} hid={hid} attrs={attrs} params={{type:tyraw.name, open: teraw.open, full: body && teraw.body}}/>, teraw.body ]
             }
           //}

@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { GlobalContext, FileContext } from '../../context/GlobalStores.jsx'
-import { Funcs } from '../../context/Functions.jsx'
+import { GlobalContext, FileContext } from '../context/GlobalStores.jsx'
+import { Funcs } from '../context/Functions.jsx'
 
 // TODO: tab row
 

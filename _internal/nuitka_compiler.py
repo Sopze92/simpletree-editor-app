@@ -3,7 +3,7 @@ APP_VERSION='undefined'
 
 with open('_internal/version.txt', "r+") as fstream:
   line= fstream.readline().strip().replace('\n',''.replace('\r',''))
-  APP_VERSION= f"v{line}"
+  APP_VERSION= f"{line}"
 
 MODE_STANDALONE= 0
 MODE_ONEFILE= 1
@@ -21,7 +21,7 @@ if mode == MODE_STANDALONE and os.path.exists("./output/nautki_standalone"):
   shutil.rmtree("output/nautki_standalone")
   root_to= "output/nautki_standalone/main.dist"
 
-if mode == MODE_ONEFILE in args[0] and os.path.exists("./output/nautki_onefile"): 
+if mode == MODE_ONEFILE and os.path.exists("./output/nautki_onefile"): 
   shutil.rmtree("output/nautki_onefile")
   root_to= "output/nautki_onefile"
   

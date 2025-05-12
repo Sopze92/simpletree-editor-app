@@ -93,6 +93,7 @@ class __PLUGIN__(FileHandlerPlugin):
 
       tree= {str(i):v for i,v in enumerate(jdata['tree']) }
       tree['root']= {**jdata['root']}
+      tree['recycle']= {**jdata['recycle']}
 
       meta= {
         **jdata['meta'],
@@ -131,6 +132,9 @@ class __PLUGIN__(FileHandlerPlugin):
 
       oroot, nroot= ({**filedata['tree']['root']}, {})
       del filedata['tree']['root']
+      orecycle, nrecycle= ({**filedata['tree']['recycle']}, {})
+      del filedata['tree']['recycle']
+
       otree, otree_k2i, ntree= (filedata['tree'], {}, [])
 
       for i, (k, v) in enumerate(otree.items()):
@@ -143,6 +147,12 @@ class __PLUGIN__(FileHandlerPlugin):
         for i in range(clen):
           nroot['body'][i]= otree_k2i[str(oroot['body'][i])]
 
+      clen= len(orecycle['body']) if 'body' in orecycle else 0
+      if clen > 0:
+        nrecycle['body']= [-1]*clen
+        for i in range(clen):
+          nrecycle['body'][i]= otree_k2i[str(orecycle['body'][i])]
+
       for e in ntree:
         e['type']= otype_k2i[str(e['type'])]
         clen= len(e['body']) if 'body' in e else 0
@@ -154,6 +164,7 @@ class __PLUGIN__(FileHandlerPlugin):
       filedata['types']= ntype
       filedata['tree']= ntree
       filedata['root']= nroot
+      filedata['recycle']= nrecycle
 
       m= filedata['meta']
       m['wtime']= util.current_time_millis()

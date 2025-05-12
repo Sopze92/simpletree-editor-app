@@ -1,4 +1,3 @@
-from copy import deepcopy
 from strevee import util
 from strevee.types import DictObject
 
@@ -337,7 +336,7 @@ def file_write(data, filetype_id:str, path:str, trigger:str, settings:dict, over
 # ----------------------------------------------------------------------------------------------------------------------- plugin registry
 
 def register_plugins():
-  from strevee.plugins import types as ptypes
+  from strevee.plugins import constants, types as ptypes
 
   plugin_summary= {}
 

@@ -37,7 +37,7 @@ def main():
   if args[0].endswith(".exe"):
     dev_environment= False
     path_web= ("data", "app")
-    path_plugins= os.path.join(stv_globals.root_pack, "plugins")
+    path_plugins= ("plugins",)
   
   else:
     dev_environment= True

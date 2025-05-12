@@ -31,5 +31,4 @@ output
 **/__pycache__/
 
 # not yet
-pack/plugins
 *.tre

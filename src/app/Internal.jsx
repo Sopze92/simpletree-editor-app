@@ -15,19 +15,21 @@ export const Scrollable=({ options={}, children, ...rest })=>{
   )
 }
 
-export const HierarchyDroppable=({ hid })=>{
+export const HierarchyDroppable=({ hid, className=null })=>{
   const { setNodeRef, isOver } = useDroppable({ 
     id:  hid.join(':'),
     data: {
       type: "hierarchy",
-      accepts: ["element", "layout", "template" ]
+      accepts: ["te-item", "te-layout", "te-type"]
     }
   });
 
   return (
     <div ref={setNodeRef} 
     stv-drop-hierarchy={""}
-    stv-drop-active={isOver?"":null}>
+    stv-drop-active={isOver?"":null}
+    className={className}
+    >
       <div></div>
     </div>
   )

@@ -10,12 +10,26 @@ let
   selectionState= { type:null, target: null },
   clickState= { down: false, target: null, button: -1, timeStamp: 0 }
 
+const disabledKeys= [
+  'F3', '__F5', 'F7', 'F12'
+]
+
 const Component=()=>{
 
   const 
     { actions, store, editor }= React.useContext(GlobalContext),
     { actions: fileactions }= React.useContext(FileContext),
     { fselection }= useActiveDocument()
+    
+  function handleKeyDown(e){
+    if (disabledKeys.includes(e.key)) e.preventDefault()
+    else actions.onKeyPressed(e, true)
+  }
+    
+  function handleKeyUp(e){
+    if (disabledKeys.includes(e.key)) e.preventDefault()
+    else actions.onKeyPressed(e, false)
+  }
 
   function handleMouseMove(e){
     if(e.target){
@@ -108,6 +122,8 @@ const Component=()=>{
 
   React.useEffect(()=>{
     const events= [
+      ['keydown', handleKeyDown],
+      ['keyup', handleKeyUp],
       ["mousedown", handleMouseDown],
       ["mouseup", handleMouseUp],
       ["dblclick", handleDoubleClick],

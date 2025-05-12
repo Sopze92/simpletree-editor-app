@@ -46,7 +46,7 @@
   pointer-events: none;
 }
 
-[te-attr] .__paragraph {
+[te-attr][ac-paragraph] {
   padding: var(--___-paragraph-padding);
   & p { 
     margin: 0; 
@@ -213,8 +213,6 @@
 
 [te-root] > [stv-drop-hierarchy]:last-child {
   flex: 1;
-  min-height: 80dvh;
-  max-height: 80dvh;
 
   & > div {
     margin-top: 0;

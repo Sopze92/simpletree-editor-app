@@ -197,7 +197,7 @@ def file_write_general(data, filetype_id:str, path:str, trigger:str, settings:di
     if stv_globals.dev_traceback:
       import traceback
       traceback.print_exc()
-    return 400, {'success':False, 'message':str(e)}
+    return 400, {'success':False, 'message':str(e), 'content':None}
   
 # -------------------------------------------------------- WRITER
 

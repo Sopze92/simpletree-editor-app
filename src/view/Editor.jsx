@@ -53,8 +53,19 @@ const View= ()=>{
   )
 
   function handleDragStart(e){
-    const data= e.active.data.current;
-    actions.store.set_dragElement(data.hid, data.eid)
+    const data= e.active.data.current
+    
+    switch(data.type){
+
+      case "te-item": {
+        actions.store.set_dragElement(data.hid, data.eid)
+        break
+      }
+      case "te-type": {
+        actions.store.set_dragType(data.tid)
+        break
+      }
+    }
   }
 
   function handleDragOver(e){
@@ -63,11 +74,29 @@ const View= ()=>{
   function handleDragEnd(e){
     if(e.collisions.length > 0){
       const 
-        collision= e.collisions[0],
-        origin_hid= e.active.id.split(':'),
-        target_hid= collision.id.split(':')
+        data= e.active.data.current,
+        collision= e.collisions[0]
 
-      fileactions.moveElement(origin_hid, target_hid)
+      switch(data.type){
+
+        case "te-item": {
+          const
+            origin_hid= e.active.id.split(':'),
+            target_hid= collision.id.split(':')
+
+          if(actions.isKeyPressed('control')) fileactions.copyElement(origin_hid, target_hid)
+          else fileactions.moveElement(origin_hid, target_hid)
+          break
+        }
+        case "te-type": {
+          const
+            tid= e.active.id.split(':')[1],
+            target_hid= collision.id.split(':')
+
+          fileactions.createElement(Number(tid), target_hid)
+          break
+        }
+      }
     }
 
     actions.store.set_dragElement(-1)

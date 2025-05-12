@@ -52,7 +52,7 @@ config=[
   "--product-name=\"sTrevee Editor\"",
   f"--product-version={APP_VERSION}",
   "--file-description=\"tree-view document editor\"",
-  "--copyright=\"Sergio 'sopze' del Pino @ 2025\""
+  "--copyright=\"Sergio 'sopze' del Pino Arroyo @ 2025\""
 ]
 
 os.system(f".\\_pyenv\\scripts\\python.exe -m nuitka {' '.join(config)}")

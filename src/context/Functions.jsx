@@ -2,18 +2,22 @@ import { TEConst } from "./Constants.jsx";
 
 export const Funcs= Object.freeze({
   
-  sleep: (ms)=> new Promise(r => setTimeout(r, ms)),
+  sleep: (ms)=> new Promise(r=> setTimeout(r, ms)),
 
   cancelEvent: (e)=> {
     e.preventDefault()
     e.stopPropagation()
   },
-
-  remove: (obj, keys)=>{ 
-    return Object.keys(obj)
-      .filter(key => !keys.includes(key))
-      .reduce((result, k) => { result[k] = obj[k]; return result }, {}
+  
+  trimKeys(obj, keys) {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([k])=> !keys.includes(k))
     )
+  },
+  
+  empty(obj) {
+    for (let k in obj) return false
+    return true
   },
 
   /* TreeElements helpers */

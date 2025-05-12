@@ -6,19 +6,19 @@ export const useDocument= ( fid )=>{
 
   const
     { files, cache, selection }= React.useContext(FileContext),
-    [ fdocument, set_fdocument ]= React.useState(files.get(fid)),
+    [ fdocument, set_fdocument ]= React.useState(files[fid]),
     [ fcache, set_fcache ]= React.useState(cache[fid]),
     [ fselection, set_fselection ]= React.useState(selection[fid])
   
   React.useEffect(()=>{
-    set_fdocument(files.get(fid))
+    set_fdocument(files[fid])
     set_fcache(cache[fid])
     set_fselection(selection[fid])
   },[fid])
     
   React.useEffect(()=>{
-    set_fdocument(files.get(fid))
-  },[files])
+    set_fdocument(files[fid])
+  },[files[fid]])
     
   React.useEffect(()=>{
     set_fcache(cache[fid])

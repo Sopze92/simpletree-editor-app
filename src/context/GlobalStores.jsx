@@ -37,61 +37,68 @@ export const GlobalStoreDefaults= Object.freeze({
   editor: { // snake case for ease of parsing
     vis_hover: false,
     vis_dev: false,
-    mode_view: true
+    mode_view: false
   }
 })
 
 export const FileStoreDefaults= Object.freeze({
   fileid: 0,
-  files: new Map(),
+  tabs: [],
+  files: {},
   cache: {},
   selection: {},
   settings: {},
 })
 
-export const createDefaultfile= (author="")=> { return {
-  meta: {
-    name: "new file",
-    author,
-    version: 0,
-    comment: "",
-    timestamp: Date.now(),
-  },
-  types: {
-    0:    {name: "obj",       cid: TEConst.TE_CLASS.block,       attrs: [10,0]     },
-    1:    {name: "blk",       cid: TEConst.TE_CLASS.block,       attrs: [0,1,2]    },
-    2:    {name: "grp",       cid: TEConst.TE_CLASS.group,       attrs: [0,1,2]    },
-    3:    {name: "itm",       cid: TEConst.TE_CLASS.item,        attrs: [0,1,2]    },
-    4:    {name: "txt",       cid: TEConst.TE_CLASS.item,        attrs: [5]        },
-    5:    {name: "txt",       cid: TEConst.TE_CLASS.item,        attrs: [6]        },
-    6:    {name: "val",       cid: TEConst.TE_CLASS.item,        attrs: [8,9]      },
-    7:    {name: "var",       cid: TEConst.TE_CLASS.item,        attrs: [7,0,9,1]  } 
-  },
-  attrs: {
-    0:    {name: "name",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    1:    {name: "desc",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    2:    {name: "info",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    3:    {name: "warn",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    4:    {name: "error",     cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    5:    {name: "text",      cid: TEConst.ATTR_CLASS.simple,        rich: true      }, 
-    6:    {name: "text",      cid: TEConst.ATTR_CLASS.paragraph,     rich: true      }, 
-    7:    {name: "class",     cid: TEConst.ATTR_CLASS.simple,        rich: false     },
-    8:    {name: "key",       cid: TEConst.ATTR_CLASS.simple,        rich: false     },
-    9:    {name: "value",     cid: TEConst.ATTR_CLASS.simple,        rich: false     },
-    10:   {name: "thumb",     cid: TEConst.ATTR_CLASS.image,         rich: false     } 
-  },
-  tree: {},
-}}
+export const createDefaultfile= (author="")=> { 
+  const tid= TEConst.TYPE_CLASS, aid= TEConst.ATTR_CLASS
+  return {
+    meta: {
+      name: "new file",
+      author,
+      version: 0,
+      comment: "",
+      timestamp: Date.now(),
+    },
+    types: {
+//      b:    {name: "|b|",     cid: tid.root,      config: [] },
+//      r:    {name: "|r|",     cid: tid.recycle,   config: [] },
+      0:    {name: "obj",     cid: tid.block,     config: [],     attrs: [10,0]     },
+      1:    {name: "blk",     cid: tid.block,     config: [],     attrs: [0,1,2]    },
+      2:    {name: "grp",     cid: tid.group,     config: [],     attrs: [0,1,2]    },
+      3:    {name: "itm",     cid: tid.item,      config: [],     attrs: [0,1,2]    },
+      4:    {name: "txt",     cid: tid.item,      config: [],     attrs: [5]        },
+      5:    {name: "txt",     cid: tid.item,      config: [],     attrs: [6]        },
+      6:    {name: "val",     cid: tid.item,      config: [],     attrs: [8,9]      },
+      7:    {name: "var",     cid: tid.item,      config: [],     attrs: [7,0,9,1]  },
+      8:    {name: "lnk",     cid: tid.item,      config: [],     attrs: [11]     },
+//      9:    {name: "doc",     cid: tid.item,      config: [],     attrs: [0,12]     }
+    },
+    attrs: {
+      0:    {name: "name",    cid: aid.simple,    config: [false] }, 
+      1:    {name: "desc",    cid: aid.simple,    config: [false] }, 
+      2:    {name: "info",    cid: aid.simple,    config: [false] }, 
+      3:    {name: "warn",    cid: aid.simple,    config: [false] }, 
+      4:    {name: "error",   cid: aid.simple,    config: [false] }, 
+      5:    {name: "text",    cid: aid.simple,    config: [true] }, 
+      6:    {name: "text",    cid: aid.text,      config: [true] }, 
+      7:    {name: "class",   cid: aid.simple,    config: [false] },
+      8:    {name: "key",     cid: aid.simple,    config: [false] },
+      9:    {name: "value",   cid: aid.simple,    config: [false] },
+      10:   {name: "image",   cid: aid.image,     config: [false] },
+      11:   {name: "link",    cid: aid.link,      config: [false, false] },
+      12:   {name: "file",    cid: aid.doclink,   config: [false, false] }
+    },
+    tree: { root: { type:'b' }, recycle: { type:'r' } }
+  }
+}
 
 // #endregion
 // #region -------------------------------------------------------- GLOBAL CONTEXT
 
-const disabledKeys= [
-  'F3', '__F5', 'F7', 'F12'
-]
 
-export const GlobalContext= React.createContext()
-export const FileContext= React.createContext()
+export const GlobalContext= React.createContext({})
+export const FileContext= React.createContext({})
 
 export const AppStoreProvider= WrappedComponent=>{
 
@@ -105,7 +112,8 @@ export const AppStoreProvider= WrappedComponent=>{
           funcs: {
             current:        ()=> globalStore.store.activeFile != -1 ? fileStore.files[globalStore.store.activeFile] : null,
             getNextFileID:  ()=> {const fid= fileStore.fileid; set_fileStore(Object.assign(fileStore, { fileid: fid+1 } )); return fid},
-            setFiles:       (data)=> set_fileStore( Object.assign(fileStore, { files: data } )),
+            setTabs:        (data)=> set_fileStore( Object.assign(fileStore, { tabs: data } )),
+            setFiles:       (data)=> setPartial_fileStore({ files: Object.assign(fileStore.files, data) }),
             setCache:       (data)=> setPartial_fileStore({ cache: Object.assign(fileStore.cache, data) }),
             setSelection:   (data)=> setPartial_fileStore({ selection: Object.assign(fileStore.selection, data) }),
             setSettings:    (data)=> setPartial_fileStore({ settings: Object.assign(fileStore.settings, data) })
@@ -151,18 +159,11 @@ export const AppStoreProvider= WrappedComponent=>{
       set_fileStore(new_fileStore)
     }
 
-    function _keyHandler(e){
-      if (disabledKeys.includes(e.key)) e.preventDefault()
-      else globalStore.actions._onKeyPressed(e)
-    }
-
     // app initialize
     React.useEffect(()=>{
       window.addEventListener('pywebviewready', ()=>{
         console.log("intializing sTrevee")
-        document.addEventListener('keydown', _keyHandler)
         globalStore.actions._initialize()
-        
         const strevee= ()=>{
           console.log(globalStore)
           console.log(fileStore)

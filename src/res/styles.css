@@ -77,10 +77,8 @@ body {
   & [stv-toolbar-section] {
     display: flex;
     height: 100%;
-
-    & > * {
-      margin: auto 0;
-    }
+    
+    align-items: center;
   }
 
   & [stv-toolbar-separator] {
@@ -189,9 +187,7 @@ body {
     flex-direction: column;
     width: 100%;
 
-    & > * {
-      margin: 0 auto;
-    }
+    align-items: center;
   }
 
   & [stv-toolbar-separator] {
@@ -476,6 +472,10 @@ body {
   flex-grow: 1;
   overflow: hidden;
 
+  [stv-clickable-children] > *{
+    pointer-events: all;
+  }
+
   & > div:nth-child(2) {
     flex: 1;
     height: 100%;
@@ -500,10 +500,6 @@ body {
   }
 }
 
-* {
-  ossutline: 1px dashed #f0f7 !important;
-}
-
 .__dragging {
   cursor: no-drop;
 
@@ -516,7 +512,7 @@ body {
   box-sizing: border-box;
   font-size: 11px;
   white-space_: nowrap;
-  height: fit-content;
+  height: 100%;
 }
 
 .__stv-drag-container {
@@ -527,6 +523,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 2em 4em 2em 3em;
+  height: 100%;
 }
 
 /* STATUSBAR */

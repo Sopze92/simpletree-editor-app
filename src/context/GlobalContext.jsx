@@ -6,14 +6,18 @@ import { Const } from './Constants.jsx'
 
 import { GlobalStoreDefaults } from './GlobalStores.jsx'
 
+const f=o=>Object.freeze(o)
+
 //#region -------------------------------------------------------- GLOBAL STATE
+
+const kbpress= {}
 
 export const globalState= ({ fileStore, self, actions, funcs })=>{
 
   return {
     ...GlobalStoreDefaults,
 
-    actions: { // ---------------------------------------------------------------------------------------------------------------- GENERAL
+    actions: f({ // ---------------------------------------------------------------------------------------------------------------- GENERAL
 
       _initialize: async()=>{
 
@@ -45,14 +49,17 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         //}
         //else console.log("no session file loaded", response.message)
 
-        if(fileStore().files.size == 0) fileStore().actions.io.create(true)
+        if(Object.keys(fileStore().files).length == 0) fileStore().actions.io.create(true)
         
         pywebview.api.initialize()
 
         funcs.setReady({ app: true })
       },
 
-      _onKeyPressed: (e)=>{
+      onKeyPressed: (e, state)=>{
+        const k= e.key.toLowerCase()
+        if(state) kbpress[k]= true
+        else if(k in kbpress) delete kbpress[k]
         return
         // TODO: make use of keystrokes
         let info= "key"
@@ -65,7 +72,9 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         console.log(info)
       },
 
-      backend: { // ---------------------------------------------------------------------------------------------------------------- BACKEND
+      isKeyPressed: (key)=>{ return key in kbpress},
+
+      backend: f({ // ---------------------------------------------------------------------------------------------------------------- BACKEND
 
         windowAction: (action)=> pywebview.api.window_action(action),
 
@@ -108,9 +117,12 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
 
         saveFile: async(trigger)=>{
 
-          const dataOut= fileStore().actions.getWritableFile(self().store.activeFile)
+          const dataOut= fileStore().actions.current.getWritableFile()
           
           const response= await pywebview.api.file_save(dataOut, trigger)
+          if(response.status == 200){
+            fileStore().actions.current.onFileWritten()
+          }
           console.log(response)
         },
 
@@ -118,14 +130,14 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
 
           // CHANGEME: get if user actually SAVED a file (not cancelled) before sending any file data to python then call some 'write file' func on api if so
 
-          const dataOut= fileStore().actions.getWritableFile(self().store.activeFile)
+          const dataOut= fileStore().actions.current.getWritableFile()
 
           const response= await pywebview.api.dialog_save(dataOut, ".", packageName, filetypes, trigger)
           console.log(response)
         }
-      },
+      }),
 
-      settings: { // ---------------------------------------------------------------------------------------------------------------- SETTINGS
+      settings: f({ // ---------------------------------------------------------------------------------------------------------------- SETTINGS
 
         getSetting: (property)=>{
           if(property) {
@@ -175,9 +187,9 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           }
           actions().settings.setSetting("active_theme", theme)
         }
-      },
+      }),
 
-      layout: { // ---------------------------------------------------------------------------------------------------------------- LAYOUT
+      layout: f({ // ---------------------------------------------------------------------------------------------------------------- LAYOUT
 
         toggleSettingsLayout: ()=>{
           const 
@@ -191,14 +203,14 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           actions().settings.setSetting("active_layout", mode)
         }
 
-      },
+      }),
 
-      store: { // ---------------------------------------------------------------------------------------------------------------- STORE
+      store: f({ // ---------------------------------------------------------------------------------------------------------------- STORE
 
         setFileReady: (state)=> { funcs.setReady({ file:state })},
 
         setActiveFile: (fid)=> { 
-          const any= fileStore().files.has(fid)
+          const any= fid in fileStore().files
           if(any) funcs.setStore({ activeFile: fid })
           else funcs.setReady({ file:false })
           actions().backend.setTitlebarFilename(any ? fileStore().actions.getFilename(fid) : null)
@@ -207,6 +219,7 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
         set_hoverElementData: (type, data)=> { funcs.setStore({ hoverElementData: {type, data} }) },
 
         set_dragElement: (hid, eid)=> { funcs.setStore({ dragElement: hid != -1 ? fileStore().actions.current.getDragElement(hid, eid) : null }) },
+        set_dragType: (tid)=> { funcs.setStore({ dragElement: tid != -1 ? fileStore().actions.current.getDragType(tid) : null }) },
 
         tree_findElementByHid: (tree, hid)=> {
 
@@ -254,9 +267,9 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
             elements: tree.elements, 
             length: tree.elements.length}
         }
-      },
+      }),
 
-      editor: { // ---------------------------------------------------------------------------------------------------------------- EDITOR
+      editor: f({ // ---------------------------------------------------------------------------------------------------------------- EDITOR
 
         getSetting: (property)=>{
           if(!property) console.error("no editor property given, unable to check setting")
@@ -292,8 +305,8 @@ export const globalState= ({ fileStore, self, actions, funcs })=>{
           return {ok:false}
         }
 
-      }
-    }
+      })
+    })
   }
 }
 

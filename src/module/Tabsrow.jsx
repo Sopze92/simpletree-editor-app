@@ -9,7 +9,7 @@ const Module= ()=>{
 
   const 
     { store, editor, actions }= React.useContext(GlobalContext),
-    { files, cache, actions:fileactions }= React.useContext(FileContext)
+    { tabs, files, cache, actions:fileactions }= React.useContext(FileContext)
 
   function handleOnClick(e, fid, cache){
     Funcs.cancelEvent(e)
@@ -28,12 +28,14 @@ const Module= ()=>{
   return (
     <div stv-tabrow-wrapper={""}>
       <div stv-tabrow={""}>
-        { Array.from(files).map(([fid, file])=> {
-          const c= cache[fid]
+        { tabs.map(fid=> {
+          const
+            f= files[fid],
+            c= cache[fid]
           return (
             <div key={fid} stv-tabrow-tab={""} className={store.activeFile == fid ? "__active" : null} onMouseDown={e=>handleOnClick(e, fid, c)}>
               { (!c.ondisk && <span>!</span>) || c.modified && <span>*</span>}
-              <span>{file.meta.name}</span>
+              <span>{f.meta.name}</span>
             </div>
           )
         }

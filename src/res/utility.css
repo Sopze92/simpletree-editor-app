@@ -82,3 +82,9 @@
 
 .__stv-w100 { width: 100%; }
 .__stv-h100 { height: 100%; }
+
+.__stv-panel-title { font-size: 1.25em; }
+
+.__stv-tal { text-align: left; }
+.__stv-tac { text-align: center; }
+.__stv-tar { text-align: right; }

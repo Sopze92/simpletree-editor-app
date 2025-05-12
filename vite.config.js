@@ -30,7 +30,7 @@ export default defineConfig(async () => ({
         }
       : undefined,
     watch: {
-      ignored: ["srcpy/**", "_pyenv/**"]
+      ignored: ["srcpy/**", "_pyenv/**", "_internal/**"]
     }
   },
   plugins: [

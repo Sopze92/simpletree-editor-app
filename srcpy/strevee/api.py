@@ -77,9 +77,9 @@ class app_api():
     filepath, filetype_id= window_manager.dialog_save_file(util.resolve_path(path), package, filetypes, False)
     if not filepath: return Response(200, "cancelled")
 
-    status, message= fileio.file_write_general(data, filetype_id, filepath, trigger, {}, True)
+    status, js_result= fileio.file_write_general(data, filetype_id, filepath, trigger, {}, True)
 
-    return Response(status, message)
+    return Response(status, js_result['message'], { 'output': js_result['content'], 'encoding': js_result['encoding'] } if status==200 else None)
   
   def file_save(self, data, trigger):
     ...
